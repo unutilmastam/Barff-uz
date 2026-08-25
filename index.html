@@ -1,1 +1,221 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>barff.uz — Tez Kunda</title>
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Playfair+Display:ital,wght@1,600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030611;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #ffffff;
+        }
+
+        #canvas3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        .badge {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-style: italic;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #f78ca0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 25px rgba(0, 242, 254, 0.8));
+            animation: floatBadge 3s ease-in-out infinite alternate;
+        }
+
+        .title-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: lowercase;
+            color: #ffffff;
+            text-shadow: 
+                0 0 15px rgba(0, 242, 254, 1),
+                0 0 35px rgba(0, 242, 254, 0.8),
+                0 0 70px rgba(0, 242, 254, 0.6),
+                0 0 120px rgba(247, 140, 160, 0.7);
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #b0c2de;
+            max-width: 550px;
+            line-height: 1.8;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+        }
+
+        @keyframes floatBadge {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 3.2rem; }
+            .badge { font-size: 1.6rem; }
+            .subtitle { font-size: 0.8rem; letter-spacing: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas3d"></canvas>
+
+    <div class="container">
+        <div class="badge">Tez Kunda</div>
+        <div class="title-wrapper">
+            <h1 class="title">barff.uz</h1>
+        </div>
+        <p class="subtitle">Saytimizni to'liq yasaganimizgacha bizni kuzatib turing</p>
+    </div>
+
+    <script>
+        // High-Contrast Canvas 3D Mesh Particle Wave
+        const canvas = document.getElementById('canvas3d');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x030611, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, -12, 35);
+        camera.lookAt(0, 5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Create Glowing Particle Texture
+        function createGlowTexture() {
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 64;
+            pCanvas.height = 64;
+            const pCtx = pCanvas.getContext('2d');
+            const grad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.3, 'rgba(0, 242, 254, 0.9)');
+            grad.addColorStop(0.6, 'rgba(247, 140, 160, 0.4)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            pCtx.fillStyle = grad;
+            pCtx.fillRect(0, 0, 64, 64);
+            const texture = new THREE.Texture(pCanvas);
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        // Particle Grid
+        const amountX = 140;
+        const amountY = 90;
+        const numParticles = amountX * amountY;
+
+        const positions = new Float32Array(numParticles * 3);
+        const colors = new Float32Array(numParticles * 3);
+
+        const col1 = new THREE.Color(0x00f2fe);
+        const col2 = new THREE.Color(0xf78ca0);
+
+        let i = 0;
+        for (let ix = 0; ix < amountX; ix++) {
+            for (let iy = 0; iy < amountY; iy++) {
+                positions[i * 3] = (ix - amountX / 2) * 1.1;
+                positions[i * 3 + 1] = (iy - amountY / 2) * 1.1;
+                positions[i * 3 + 2] = 0;
+
+                const mixedCol = col1.clone().lerp(col2, ix / amountX);
+                colors[i * 3] = mixedCol.r;
+                colors[i * 3 + 1] = mixedCol.g;
+                colors[i * 3 + 2] = mixedCol.b;
+                i++;
+            }
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 1.2,
+            vertexColors: true,
+            map: createGlowTexture(),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        particles.rotation.x = Math.PI / 3;
+        scene.add(particles);
+
+        // Animation Loop
+        let count = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            count += 0.04;
+
+            const pos = geometry.attributes.position.array;
+            let index = 0;
+            for (let ix = 0; ix < amountX; ix++) {
+                for (let iy = 0; iy < amountY; iy++) {
+                    pos[index * 3 + 2] = (Math.sin(ix * 0.2 + count) * 4) + (Math.sin(iy * 0.2 + count) * 4);
+                    index++;
+                }
+            }
+            geometry.attributes.position.needsUpdate = true;
+            particles.rotation.z = Math.sin(count * 0.1) * 0.08;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
