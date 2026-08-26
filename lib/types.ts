@@ -86,8 +86,8 @@ export interface NewsItem {
   slug: string;
   title: Localized;
   excerpt: Localized;
-  /** ISO sana: "2026-01-31". */
-  date: string;
+  /** ISO sana: "2026-01-31". Mijoz tasdiqlamaguncha `null`. */
+  date: string | null;
   image?: ImageAsset;
   /** Maqola tanasi — Phase 8 da formati aniqlanadi. */
   body?: Localized;
@@ -177,6 +177,18 @@ export interface ProcessStep {
   title: Localized;
   description: Localized;
   image?: ImageAsset;
+}
+
+/** Video (VIDEO va REELS bo'limlari). */
+export interface VideoAsset {
+  id: string;
+  src: string;
+  /** Video yuklanguncha ko'rinadigan rasm — `poster` atributi. */
+  poster: string;
+  /** Ekran o'quvchilar uchun tavsif. */
+  title: Localized;
+  width: number;
+  height: number;
 }
 
 /** Sotuv nuqtasi (Phase 7 — WHERE TO BUY). */

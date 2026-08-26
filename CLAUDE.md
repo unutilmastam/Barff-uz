@@ -141,6 +141,21 @@ Placeholder yozishning qoidalari o'zgarmadi:
 - rasmlar faqat shu loyiha uchun chiziladi, boshqa saytdan ko'chirilmaydi (9-qoida);
 - shisha yorlig'ida "PLACEHOLDER" yozuvi bor, ya'ni real foto bilan adashtirilmaydi.
 
+## Video va maxfiy kalitlar
+
+- Videolar `public/videos/` da (`placeholder-*.webm` — vaqtinchalik), posterlar
+  `public/images/` da. `<video>` har doim `muted` + `playsInline` + `poster` bilan.
+- **Avtoplay `autoPlay` atributi bilan boshlanmaydi.** U faqat element yuklanayotganda
+  o'qiladi, biz esa qiymatni hydration'dan keyin bilamiz — natijada video umuman
+  o'ynamay qoladi. `IntersectionObserver` + `video.play()` ishlatiladi, shu bilan birga
+  video faqat ekranda ko'rinib turganda o'ynaydi.
+- Mobilda va `prefers-reduced-motion` rejimida video avtomatik o'ynamaydi — poster qoladi.
+- **Maxfiy kalitlar kodga yozilmaydi.** Aloqa formasi manzili `NEXT_PUBLIC_CONTACT_ENDPOINT`
+  dan olinadi (`lib/contact.ts`, namuna `.env.example` da). `NEXT_PUBLIC_` brauzerga
+  chiqadi — u yerga faqat OCHIQ endpoint qo'yiladi; bot tokeni yoki API kalit server
+  tomonda, prefikssiz saqlanadi.
+- Endpoint sozlanmagan bo'lsa forma soxta "muvaffaqiyat" ko'rsatmaydi — aniq xabar beradi.
+
 ## Kontent chegarasi (eng muhim qoida)
 
 BARFF haqida hech narsa **o'ylab topilmaydi**: tarix, sertifikat, ta'rkib, kaloriya,

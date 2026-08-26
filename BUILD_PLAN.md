@@ -47,8 +47,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 4 | Hero | ✅ BAJARILDI (2026-08-26) |
 | 5 | Marquee / Categories / Showcase | ✅ BAJARILDI (2026-08-26) |
 | 6 | Philosophy / About / Story / Process | ✅ BAJARILDI (2026-08-26) |
-| 7 | Video / Reels / News / WhereToBuy / Contact | **IN PROGRESS** |
-| 8 | Ichki sahifalar | KUTMOQDA |
+| 7 | Video / Reels / News / WhereToBuy / Contact | ✅ BAJARILDI (2026-08-26) |
+| 8 | Ichki sahifalar | **IN PROGRESS** |
 | 9 | Responsive | KUTMOQDA |
 | 10 | SEO | KUTMOQDA |
 | 11 | Performance | KUTMOQDA |
@@ -170,22 +170,22 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 7 — VIDEO / REELS / NEWS / WHERE TO BUY / CONTACT
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `VideoSection.tsx` — full-width, muted, PLAY kursor, klikda fullscreen modal, mobil uchun poster
-- [ ] `ReelsSection.tsx` — 9:16 kartalar, desktop horizontal scroll, mobil swipe, hover'da muted playback
-- [ ] `NewsSection.tsx` — editorial kartalar, hover `scale(1.06)` + strelka rotate
-- [ ] `WhereToBuy.tsx` — "FIND YOUR BARFF" CTA + mijoz bergan sotuv nuqtalari
-- [ ] `ContactSection.tsx` — full-screen, forma (Name, Phone, Email, Message), validatsiya, `idle / loading / success / error`
-- [ ] API kalitlari kodda ochiq turmasin — `.env` ishlatilsin
-- [ ] Bosh sahifa tartibi spec'dagi 01–16 ketma-ketlikda yig'ilgan
-- [ ] `npm run lint && npm run build` — toza
+- [x] `VideoSection.tsx` — full-width, muted, PLAY kursor, klikda fullscreen modal, mobil uchun poster
+- [x] `ReelsSection.tsx` — 9:16 kartalar, desktop horizontal scroll, mobil swipe, hover'da muted playback
+- [x] `NewsSection.tsx` — editorial kartalar, hover `scale(1.06)` + strelka rotate
+- [x] `WhereToBuy.tsx` — "FIND YOUR BARFF" CTA + mijoz bergan sotuv nuqtalari
+- [x] `ContactSection.tsx` — full-screen, forma (Name, Phone, Email, Message), validatsiya, `idle / loading / success / error`
+- [x] API kalitlari kodda ochiq turmasin — `.env` ishlatilsin
+- [x] Bosh sahifa tartibi spec'dagi 01–16 ketma-ketlikda yig'ilgan
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 8 — ICHKI SAHIFALAR
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `/products` — grid + `ProductFilter.tsx`
 - [ ] `/products/[slug]` — hero, INGREDIENTS, NUTRITION, PACKAGING, RELATED PRODUCTS
@@ -260,6 +260,41 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 7: Video / Reels / News / Where to buy / Contact ✅
+
+- **Placeholder videolar generatsiya qilindi:** brauzerda animatsiyalangan 60 kadr chizilib,
+  ffmpeg bilan 5 ta 3-sekundlik WebM ga aylantirildi (brend 1280×720 / 344KB, 4 ta reel
+  540×960 / ~208KB) + JPEG posterlar. Kadrda "PLACEHOLDER VIDEO / REEL" yozuvi bor.
+  Boshqa saytdan hech narsa ko'chirilmagan (9-qoida).
+- `VideoSection.tsx` — full-width, ovozsiz, loop; `data-cursor="play"`; klikda modal ochilib
+  ovoz va boshqaruv bilan o'ynaydi; mobilda va `prefers-reduced-motion` da poster qoladi.
+- `ReelsSection.tsx` — 9:16 kartalar, desktopda hover'da ovozsiz playback (chiqilganda
+  to'xtab boshiga qaytadi), mobilda `scroll-snap` bilan swipe. `preload="none"` —
+  4 ta video bir vaqtda yuklanmaydi.
+- `NewsSection.tsx` — editorial kartalar, hover'da rasm `scale(1.06)` va strelka 45°.
+- `WhereToBuy.tsx` — "FIND YOUR BARFF" + magnit CTA. Sotuv nuqtalari BO'SH: do'kon nomi
+  yoki manzil o'ylab topilmaydi, o'rniga `[CLIENT CONTENT REQUIRED]` ko'rinadi.
+- `ContactSection.tsx` — to'liq ekran forma (Name / Phone / Email / Message), klient
+  validatsiyasi, `idle → loading → success | error`. Xatolar `aria-describedby` va
+  `aria-invalid` bilan e'lon qilinadi, fokus birinchi xato maydonga o'tadi, yozishni
+  boshlagach xato yo'qoladi. Muvaffaqiyatda forma tozalanadi, xatoda matn SAQLANADI.
+- **Kalitlar xavfsizligi:** `lib/contact.ts` yuborish manzilini `NEXT_PUBLIC_CONTACT_ENDPOINT`
+  dan oladi, `.env.example` qo'shildi. Maxfiy qiymatlar (bot tokeni, API kalit) hech qachon
+  `NEXT_PUBLIC_` bilan berilmasligi izohda yozilgan. Manzil sozlanmagan bo'lsa forma soxta
+  "muvaffaqiyat" KO'RSATMAYDI — aniq xabar beradi. Bundle tekshirildi: kalit/token yo'q.
+- **Tuzatilgan bug:** inline video umuman o'ynamasdi — `autoPlay` atributi hydration'dan
+  keyin qo'shilgani uchun ta'sir qilmaydi (u faqat yuklanish paytida o'qiladi).
+  `IntersectionObserver` + `play()` ga o'tkazildi: video faqat ekranda ko'rinib turganda
+  o'ynaydi, chiqib ketganda to'xtaydi.
+- Brauzerda tekshirildi: inline avtoplay (paused=false, currentTime 2.5s) va ekrandan
+  chiqqanda to'xtashi, modal (controls, ovoz, Escape), reels hover playback va boshiga
+  qaytishi, news hover `scale: 1.06` / `rotate: 45deg`, forma validatsiyasining 4 holati
+  (bo'sh / noto'g'ri / tuzatilganda / to'liq), `loading → success` va `loading → error`
+  yo'llari (test endpoint bilan qurib sinaldi, keyin toza qayta qurildi), Tab tartibi,
+  mobil 390×844 (video o'ynamaydi, reels snap, news 1 ustun, overflow yo'q),
+  `prefers-reduced-motion`. JS xatosi yo'q.
+- Bosh sahifa 15 ta bo'limdan yig'ildi, FRUIT → BOTTLE spec bo'yicha 08-o'rinda.
 
 ### 2026-08-26 — Phase 6: Philosophy / About / Story / Process ✅
 
@@ -468,7 +503,13 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] Mahsulot fotosuratlari (shaffof fon, yuqori sifat)
 - [ ] Real mahsulot nomlari va kategoriyalar
 - [ ] Brend ranglari (HEX)
-- [ ] Zavod / ishlab chiqarish videosi
+- [ ] Zavod / ishlab chiqarish videosi va reels lavhalari
+      (`public/videos/placeholder-*.webm` — vaqtinchalik, almashtiriladi)
+- [ ] Yangiliklar matni va sanalari (`data/news.ts` dagi `date` maydonlari hozir `null`)
+- [ ] Aloqa formasi qayerga yuborilsin? (Telegram bot / email / CRM). Maxfiy kalit server
+      tomonda saqlanadi, `NEXT_PUBLIC_CONTACT_ENDPOINT` esa ochiq endpoint yo'lini oladi
+- [ ] Bosh sahifaning spec'dagi 01–16 tartibi — to'liq spec hujjati repoda yo'q, hozirgi
+      tartib bo'lim mantig'iga qarab yig'ilgan
 - [ ] Kompaniya tarixi va sanalar (`data/story.ts` dagi `year` maydonlari hozir `null`)
 - [ ] Brend qiymatlari (4 ta) va ularning tavsiflari (`data/philosophy.ts`)
 - [ ] Ishlab chiqarish jarayoni tavsifi — har bosqichda nima qilinadi (`data/process.ts`)
