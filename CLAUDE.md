@@ -183,6 +183,17 @@ Placeholder yozishning qoidalari o'zgarmadi:
   `gsap.matchMedia` orqali qiladi, shuning uchun oyna o'lchami o'zgarganda o'zi moslashadi.
 - Tegish maydoni kamida 40–44px.
 
+## SEO
+
+- `lib/seo.ts` — `SITE_URL`, `pageMetadata()` (canonical + OG + Twitter). Har sahifa
+  o'z `metadata` sini shundan yasaydi; sarlavha shabloni `%s — BARFF`.
+- **Structured data'ga faqat TASDIQLANGAN ma'lumot yoziladi.** Narx, mavjudlik, reyting,
+  manzil, telefon — ma'lum emas, shuning uchun JSON-LD ga ham qo'shilmaydi. Noto'g'ri
+  structured data uchun qidiruv tizimlari sahifani jazolaydi.
+- **Indekslash standart holatda O'CHIQ** (`NEXT_PUBLIC_ALLOW_INDEXING`). Placeholder
+  kontent qidiruvga tushmasligi kerak. Ishga tushirish kuni `.env` da yoqiladi.
+- Til klientda saqlanadi, alohida URL yo'q → `hreflang` qo'yilmagan, metadata `uz` da.
+
 ## Kontent chegarasi (eng muhim qoida)
 
 BARFF haqida hech narsa **o'ylab topilmaydi**: tarix, sertifikat, ta'rkib, kaloriya,

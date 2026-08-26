@@ -1,9 +1,16 @@
 import type { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
+import { pageMetadata } from '@/lib/seo';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { AboutSection } from '@/components/sections/AboutSection';
 import { PhilosophySection } from '@/components/sections/PhilosophySection';
 
-export const metadata: Metadata = { title: 'BARFF — About' };
+export const metadata: Metadata = pageMetadata({
+  title: 'Brend haqida',
+  description:
+    "BARFF brendi haqida. Kontent vaqtinchalik — brend matni mijozdan kutilmoqda.",
+  path: '/about',
+});
 
 /**
  * `/about` — brend haqida.
@@ -12,10 +19,13 @@ export const metadata: Metadata = { title: 'BARFF — About' };
  */
 export default function Page() {
   return (
-    <main className="pt-24">
-      <PageTitle section="about" />
-      <AboutSection />
-      <PhilosophySection />
-    </main>
+    <>
+      <BreadcrumbJsonLd items={[{ name: 'BARFF', path: '/' }, { name: 'Brend haqida', path: '/about' }]} />
+      <main className="pt-24">
+        <PageTitle section="about" />
+        <AboutSection />
+        <PhilosophySection />
+      </main>
+    </>
   );
 }

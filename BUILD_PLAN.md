@@ -50,8 +50,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 7 | Video / Reels / News / WhereToBuy / Contact | ✅ BAJARILDI (2026-08-26) |
 | 8 | Ichki sahifalar | ✅ BAJARILDI (2026-08-26) |
 | 9 | Responsive | ✅ BAJARILDI (2026-08-26) |
-| 10 | SEO | **IN PROGRESS** |
-| 11 | Performance | KUTMOQDA |
+| 10 | SEO | ✅ BAJARILDI (2026-08-26) |
+| 11 | Performance | **IN PROGRESS** |
 | 12 | Final Polish | KUTMOQDA |
 
 ---
@@ -215,19 +215,19 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 10 — SEO
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `metadata` har sahifada, mahsulot va yangilik sahifalari unikal
-- [ ] OpenGraph + Twitter card
-- [ ] `sitemap.ts`, `robots.ts`, canonical
-- [ ] Structured data: Product, Organization, Article, Breadcrumb
-- [ ] `npm run lint && npm run build` — toza
+- [x] `metadata` har sahifada, mahsulot va yangilik sahifalari unikal
+- [x] OpenGraph + Twitter card
+- [x] `sitemap.ts`, `robots.ts`, canonical
+- [x] Structured data: Product, Organization, Article, Breadcrumb
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 11 — PERFORMANCE
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] Hamma rasmlar `next/image`, WebP/AVIF, responsive `sizes`
 - [ ] Hero rasm `priority`, qolganlari lazy
@@ -260,6 +260,37 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 10: SEO ✅
+
+- `lib/seo.ts` — `SITE_URL` (CNAME dagi `barff.uz`), `metadataBase`, `pageMetadata()`
+  yordamchisi (canonical + OpenGraph + Twitter bir joyda).
+- **Metadata har sahifada unikal** — brauzerda o'lchandi: 8 sahifada `title` 8/8,
+  `description` 8/8, `canonical` 8/8 unikal. Sarlavha shabloni `%s — BARFF`.
+- **OG rasmlari yaratildi** (1200×630 JPG): umumiy `og-default.jpg` va har mahsulot
+  uchun alohida `og-product-0N.jpg`. Twitter `summary_large_image`.
+- `app/sitemap.ts` — 13 ta URL (6 statik + 4 mahsulot + 3 yangilik). Yangilikning
+  haqiqiy sanasi yo'q bo'lgani uchun `lastModified` SOXTA sana bilan to'ldirilmaydi —
+  maydon umuman yozilmaydi.
+- `app/robots.ts` + `components/seo/JsonLd.tsx` — Organization (root layout'da bir marta),
+  Product, Article, BreadcrumbList. Brauzerda tasdiqlandi: mahsulot sahifasida
+  `Organization + Product + BreadcrumbList`, yangilikda `Organization + Article +
+  BreadcrumbList`.
+- **Structured data'da soxta ma'lumot YO'Q.** `price`, `offers`, `availability`,
+  `aggregateRating`, `address`, `telephone`, `review` — hech biri qo'shilmadi, chunki
+  ular ma'lum emas. Avtomatik tekshiruv o'tkazildi: taqiqlangan maydon topilmadi.
+  Yangilikda sana yo'q bo'lsa `datePublished` ham yozilmaydi.
+- **INDEKSLASH STANDART HOLATDA O'CHIQ.** Sayt hozircha placeholder kontent bilan
+  ("MAHSULOT 01", "[CLIENT CONTENT REQUIRED]") — bunday sahifalar qidiruvga tushsa
+  brendga zarar qiladi. `robots.txt` → `Disallow: /`, har sahifada
+  `<meta name="robots" content="noindex, nofollow, nocache">`.
+  Ishga tushirish kuni `.env` da bir qator bilan yoqiladi:
+  `NEXT_PUBLIC_ALLOW_INDEXING=true` → `Allow: /` + `Sitemap:` + `index, follow`.
+  Ikkala yo'l ham qurib sinaldi.
+- **Cheklov:** til holati klientda (`localStorage`) saqlanadi, ya'ni har til uchun
+  alohida URL yo'q — shuning uchun `hreflang` qo'yilmadi va metadata server tomonda
+  standart tilda (uz) render qilinadi. Ru/En sahifalari qidiruvda alohida chiqishi
+  kerak bo'lsa, marshrut darajasidagi i18n (`/ru/...`) kerak bo'ladi.
 
 ### 2026-08-26 — Phase 9: Responsive ✅
 
@@ -582,6 +613,10 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] Sotuv nuqtalari ro'yxati
 - [ ] To'liq mahsulot spetsifikatsiyasi (spec) — `Product` tipidagi maydonlarni tasdiqlash uchun
 - [ ] `index.html` ("tez orada") qachon Next.js sayti bilan almashtirilsin?
+- [ ] **Ishga tushirishda:** kontent to'ldirilgach `NEXT_PUBLIC_ALLOW_INDEXING=true` qilinsin
+      — hozir sayt qidiruv tizimlaridan yopiq (placeholder kontent indekslanmasligi uchun)
+- [ ] Ru/En sahifalari qidiruvda alohida chiqishi kerakmi? (Kerak bo'lsa marshrut
+      darajasidagi i18n — `/ru/...` — qo'shiladi)
 - [ ] Hero uchun: mahsulot fotosurati (shaffof fon) + sarlavha/subline matni + hero teglari
       — ularsiz hero "premium" his qilmaydi (`data/hero.ts` to'ldiriladi)
 - [ ] **Barcha placeholder assetlarni almashtirish:** `public/products/placeholder-bottle-0*.svg`
