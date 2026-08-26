@@ -106,7 +106,7 @@ export function HeroProduct() {
                 height={heroProduct.height ?? 900}
                 priority
                 sizes="(max-width: 768px) 70vw, 34vw"
-                className="h-auto w-[min(52vw,14rem)] object-contain drop-shadow-2xl md:w-[min(70vw,26rem)]"
+                className="h-auto w-[min(42vw,11rem)] object-contain drop-shadow-2xl md:w-[min(70vw,26rem)]"
               />
             ) : (
               <div

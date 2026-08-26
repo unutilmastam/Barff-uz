@@ -14,6 +14,11 @@ export const en: Dictionary = {
     cta: 'PRODUCTS',
     productPending: 'Product photo',
   },
+  sections: {
+    categories: 'Categories',
+    products: 'Products',
+    showcase: 'Collection',
+  },
   menu: {
     title: 'MENU',
     social: 'SOCIAL',

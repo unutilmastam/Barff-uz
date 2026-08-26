@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="Placeholder berries">
+  <defs>
+    <radialGradient id="p" cx="34%" cy="28%">
+      <stop offset="0%" stop-color="#9B6BE8"/>
+      <stop offset="100%" stop-color="#5B2FA8"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="160" cy="298" rx="80" ry="9" fill="#000" opacity=".10"/>
+  <circle cx="116" cy="190" r="62" fill="url(#p)"/>
+  <ellipse cx="96" cy="166" rx="19" ry="13" fill="#fff" opacity=".30" transform="rotate(-28 96 166)"/>
+  <circle cx="200" cy="168" r="54" fill="url(#p)"/>
+  <ellipse cx="183" cy="147" rx="16" ry="11" fill="#fff" opacity=".30" transform="rotate(-28 183 147)"/>
+  <circle cx="166" cy="236" r="46" fill="url(#p)"/>
+  <ellipse cx="151" cy="219" rx="14" ry="10" fill="#fff" opacity=".30" transform="rotate(-28 151 219)"/>
+  <path d="M198 116 C182 96 208 74 232 78 C226 104 216 116 198 116 Z" fill="#4F9A3A"/>
+</svg>

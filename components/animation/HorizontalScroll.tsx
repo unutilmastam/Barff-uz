@@ -33,17 +33,28 @@ export function HorizontalScroll({ children, className, trackClassName }: Horizo
     const track = trackRef.current;
     if (!section || !track) return;
 
+    // Element yashirin (display:none) yoki kontent ekranga sig'sa — pin keraksiz va
+    // zararli: yashirin elementning `scrollWidth` i 0 bo'lib, bo'sh pin-spacer qoladi.
+    if (track.offsetParent === null || track.scrollWidth <= window.innerWidth) return;
+
     const context = gsap.context(() => {
       horizontalScroll(section, track, { reduced: prefersReducedMotion });
     }, section);
 
-    // Rasm/shrift yuklanib bo'lgach kengliklar o'zgaradi — o'lchovlar yangilanadi.
+    // Bu bo'lim pin qilinganda sahifa balandligi o'zgaradi. U hydration'dan keyin
+    // (media query natijasiga qarab) mount bo'lishi mumkin — o'shanda BOSHQA
+    // ScrollTrigger'larning boshlanish nuqtalari eskirib qoladi, shuning uchun
+    // mount va unmount'da hammasi qayta o'lchanadi.
+    ScrollTrigger.refresh();
+
+    // Rasm/shrift yuklanib bo'lgach kengliklar yana o'zgaradi.
     const onLoad = () => ScrollTrigger.refresh();
     window.addEventListener('load', onLoad);
 
     return () => {
       window.removeEventListener('load', onLoad);
       context.revert();
+      ScrollTrigger.refresh();
     };
   }, [prefersReducedMotion]);
 

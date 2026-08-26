@@ -39,7 +39,9 @@ export default function RootLayout({
             <PageTransition>
               {/* Tepa bo'shliq global emas: Hero to'liq ekran, Header uning ustidan tushadi.
                   Ichki sahifalar o'z tepa bo'shlig'ini o'zi qo'yadi. */}
-              <div id="main-content" className="flex flex-1 flex-col">
+              {/* Blok (flex EMAS): ScrollTrigger `pin` flex farzandda pin-spacer'ga
+                  padding qo'sha olmaydi va pin hech qachon tugamaydi. */}
+              <div id="main-content" className="flex-1">
                 {children}
               </div>
             </PageTransition>

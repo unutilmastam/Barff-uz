@@ -14,6 +14,11 @@ export const ru: Dictionary = {
     cta: 'ПРОДУКЦИЯ',
     productPending: 'Фото продукта',
   },
+  sections: {
+    categories: 'Категории',
+    products: 'Продукция',
+    showcase: 'Коллекция',
+  },
   menu: {
     title: 'МЕНЮ',
     social: 'СОЦСЕТИ',

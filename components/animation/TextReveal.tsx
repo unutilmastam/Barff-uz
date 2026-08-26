@@ -10,6 +10,8 @@ interface TextRevealProps {
   children: ReactNode;
   as?: ElementType;
   className?: string;
+  /** `aria-labelledby` kabi havolalar uchun. */
+  id?: string;
   /** Qatorlar (sarlavhalar uchun), so'zlar yoki belgilar. */
   type?: SplitType;
   stagger?: number;
@@ -26,6 +28,7 @@ export function TextReveal({
   children,
   as,
   className,
+  id,
   type = 'lines',
   stagger = STAGGER.text,
   delay,
@@ -51,6 +54,7 @@ export function TextReveal({
   return (
     <SplitText
       as={as}
+      id={id}
       className={className}
       type={type}
       onSplit={handleSplit}

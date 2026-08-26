@@ -109,7 +109,14 @@ export function Hero() {
         </div>
         <div className="md:hidden">
           {mobileFruits.map((fruit, index) => (
-            <FloatingFruit key={fruit.id} {...fruit} alt="" delay={index * 0.08} />
+            <FloatingFruit
+              key={fruit.id}
+              {...fruit}
+              x={fruit.mobileX ?? fruit.x}
+              y={fruit.mobileY ?? fruit.y}
+              alt=""
+              delay={index * 0.08}
+            />
           ))}
         </div>
       </div>

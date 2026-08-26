@@ -18,6 +18,11 @@ export const uz = {
     cta: 'MAHSULOTLAR',
     productPending: 'Mahsulot fotosurati',
   },
+  sections: {
+    categories: 'Kategoriyalar',
+    products: 'Mahsulotlar',
+    showcase: 'Kolleksiya',
+  },
   menu: {
     title: 'MENYU',
     social: 'IJTIMOIY TARMOQLAR',

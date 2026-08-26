@@ -46,8 +46,8 @@ export interface Category {
   slug: string;
   /** Ro'yxatdagi katta raqam: "01". */
   index: string;
-  title: string;
-  description: string;
+  title: Localized;
+  description: Localized;
   image?: ImageAsset;
   /** Kategoriya bilan bog'liq dekorativ meva rasmi. */
   fruit?: ImageAsset;
@@ -58,10 +58,10 @@ export interface Category {
 export interface Product {
   id: string;
   slug: string;
-  name: string;
+  name: Localized;
   /** Qisqa tagline — karta va hero uchun. */
-  tagline?: string;
-  description: string;
+  tagline?: Localized;
+  description: Localized;
   /** `Category.id` ga havola. */
   categoryId: string;
   /** Shaffof fonli mahsulot fotosurati (asosiy vizual fokus). */
@@ -84,13 +84,13 @@ export interface Product {
 export interface NewsItem {
   id: string;
   slug: string;
-  title: string;
-  excerpt: string;
+  title: Localized;
+  excerpt: Localized;
   /** ISO sana: "2026-01-31". */
   date: string;
   image?: ImageAsset;
   /** Maqola tanasi — Phase 8 da formati aniqlanadi. */
-  body?: string;
+  body?: Localized;
   tags?: string[];
 }
 
@@ -136,6 +136,13 @@ export interface HeroFruit {
   parallax: number;
   /** Mobilda ko'rsatilsinmi. Mobil uchun kamroq meva qoldiriladi. */
   mobile?: boolean;
+  /**
+   * Mobil uchun alohida joylashuv (%). Mobilda layout vertikal ustunga aylanadi,
+   * shuning uchun desktop koordinatalari matn ustiga tushib qoladi.
+   * Berilmasa `x` / `y` ishlatiladi.
+   */
+  mobileX?: number;
+  mobileY?: number;
 }
 
 /** Sotuv nuqtasi (Phase 7 — WHERE TO BUY). */

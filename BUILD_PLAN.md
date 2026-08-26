@@ -45,8 +45,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 2 | Layout (Header / Menu / Footer) | ✅ BAJARILDI (2026-08-26) |
 | 3 | Motion System | ✅ BAJARILDI (2026-08-26) |
 | 4 | Hero | ✅ BAJARILDI (2026-08-26) |
-| 5 | Marquee / Categories / Showcase | **IN PROGRESS** |
-| 6 | Philosophy / About / Story / Process | KUTMOQDA |
+| 5 | Marquee / Categories / Showcase | ✅ BAJARILDI (2026-08-26) |
+| 6 | Philosophy / About / Story / Process | **IN PROGRESS** |
 | 7 | Video / Reels / News / WhereToBuy / Contact | KUTMOQDA |
 | 8 | Ichki sahifalar | KUTMOQDA |
 | 9 | Responsive | KUTMOQDA |
@@ -141,22 +141,22 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 5 — MARQUEE / CATEGORIES / PRODUCT SHOWCASE
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] Kinetic Marquee — ulkan typography, cheksiz loop
-- [ ] `components/sections/CategoriesSection.tsx` — `01 / 02 / 03 / 04` katta raqamlar, rasm, meva, sarlavha, qisqa matn, CTA
-- [ ] Desktop: horizontal scroll; Mobil: vertikal touch-friendly kartalar
-- [ ] `components/products/ProductShowcase.tsx` — scroll bo'ylab mahsulot, fon, meva, typography almashadi
-- [ ] Mahsulot o'tishi: GSAP timeline, crossfade + scale + slight rotation + clip-path (keskin kesish YO'Q)
-- [ ] `components/products/ProductCard.tsx`, `ProductGrid.tsx`
-- [ ] Barcha ma'lumot `data/products.ts` va `data/categories.ts` dan (komponent ichida hardcode YO'Q)
-- [ ] `npm run lint && npm run build` — toza
+- [x] Kinetic Marquee — ulkan typography, cheksiz loop
+- [x] `components/sections/CategoriesSection.tsx` — `01 / 02 / 03 / 04` katta raqamlar, rasm, meva, sarlavha, qisqa matn, CTA
+- [x] Desktop: horizontal scroll; Mobil: vertikal touch-friendly kartalar
+- [x] `components/products/ProductShowcase.tsx` — scroll bo'ylab mahsulot, fon, meva, typography almashadi
+- [x] Mahsulot o'tishi: GSAP timeline, crossfade + scale + slight rotation + clip-path (keskin kesish YO'Q)
+- [x] `components/products/ProductCard.tsx`, `ProductGrid.tsx`
+- [x] Barcha ma'lumot `data/products.ts` va `data/categories.ts` dan (komponent ichida hardcode YO'Q)
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 6 — PHILOSOPHY / ABOUT / STORY / PROCESS
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `PhilosophySection.tsx` — 4 ta qiymat, hover'da rasm reveal, matn siljishi, strelka aylanishi
 - [ ] **FRUIT → BOTTLE** bo'limi (bosh sahifa tartibida 08) — meva shishaga aylanadigan scroll-driven vizual o'tish
@@ -260,6 +260,46 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 5: Marquee / Categories / Product Showcase ✅
+
+- **Placeholder assetlar chizildi** (mijoz ko'rsatmasi bo'yicha, kutmasdan): `public/products/`
+  da 4 ta SVG shisha maketi va `public/fruits/` da 7 ta meva/barg. Hammasi shu loyiha uchun
+  generatsiya qilingan — boshqa saytdan HECH NARSA ko'chirilmagan (9-qoida). Shisha yorlig'ida
+  "PLACEHOLDER" yozuvi bor, ya'ni haqiqiy mahsulot fotosurati bilan adashtirib bo'lmaydi.
+- `KineticMarquee.tsx` — ulkan typography + meva ikonkalari, cheksiz loop (Phase 3 dagi
+  `Marquee` ustida), hover'da sekinlashadi.
+- `CategoriesSection.tsx` + `CategoryCard.tsx` — ulkan `01/02/03/04` raqamlari, shisha, meva,
+  sarlavha, qisqa matn, CTA. Desktop: pin + gorizontal scroll (920px masofa);
+  mobil: vertikal touch-friendly ro'yxat.
+- `ProductShowcase.tsx` — pin + scroll-driven o'tish: crossfade + scale + yengil burilish +
+  clip-path bir timeline'da, slaydlar orasida snap. Fon rangi, meva va typography
+  har mahsulot uchun `data/products.ts` dagi `color` bo'yicha almashadi.
+- `ProductCard.tsx`, `ProductGrid.tsx`, `ProductsSection.tsx`.
+- **Ma'lumot to'ldirildi (VAQTINCHALIK):** `data/products.ts` va `data/categories.ts` da 4 tadan
+  yozuv. Nomlar ataylab neytral ("MAHSULOT 01" / "KATEGORIYA 01") — ta'm nomlari o'ylab
+  topilmagan; `ingredients`, `nutrition`, `packaging` BO'SH qoldirildi, chunki ular mahsulot
+  da'volari. Hero ham shu assetlar bilan to'ldirildi.
+- **Tip yaxshilandi:** `Product`/`Category`/`NewsItem` dagi matn maydonlari endi `Localized` —
+  mahsulot nomi va tavsifi uch tilda. Ilgari `string` edi va tarjima qilinmasdi.
+- **Tuzatilgan uchta bug:**
+  1. ScrollTrigger `pin` FLEX konteynerning bevosita farzandida ishlamaydi — GSAP pin-spacer'ga
+     `padding-bottom` qo'shadi, lekin flex uni hisobga olmaydi (`padBottom: 0px`). Natijada
+     showcase pin'dan chiqmay, footer ustida yopishib qolardi. `#main-content` va `<main>`
+     blokka aylantirildi, pin esa ichki blokka biriktirildi.
+  2. Yashirin (`display:none`) gorizontal lenta ham ScrollTrigger yaratardi — mobilda keraksiz
+     pin-spacer. `HorizontalScroll` endi `offsetParent === null` yoki kontent sig'sa pin qurmaydi.
+  3. Grid item ichida foizli balandlik (`h-[78%]`) ishonchsiz — karta rasmi konteynerdan
+     kattaroq render bo'lib kesilardi (413px qutida 463px). Aniq o'lchamli absolyut o'ramga
+     o'tkazildi.
+- Brauzerda tekshirildi: marquee harakati va hover'da sekinlashishi, kategoriyalar pin masofasi,
+  showcase'ning g'ildirak bilan 01→02→03→04 va orqaga o'tishi, kartalar geometriyasi,
+  mobil (390×844): hero aynan 100vh, gorizontal ro'yxat yashirin, grid 2 ustun, 1 ta pin,
+  gorizontal overflow yo'q, `prefers-reduced-motion` da pin va marquee o'chadi. JS xatosi yo'q.
+- Dekor ierarxiyasi tekshirildi: hero mahsulot markazida `elementFromPoint` → MAHSULOT
+  (desktop ham, mobil ham). Mevalarga mobil uchun alohida koordinatalar qo'shildi
+  (`mobileX`/`mobileY`) — mobilda layout vertikal bo'lgani uchun desktop joylashuvi
+  sarlavha ustiga tushardi.
 
 ### 2026-08-26 — Phase 4: Hero ✅
 
@@ -401,3 +441,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] `index.html` ("tez orada") qachon Next.js sayti bilan almashtirilsin?
 - [ ] Hero uchun: mahsulot fotosurati (shaffof fon) + sarlavha/subline matni + hero teglari
       — ularsiz hero "premium" his qilmaydi (`data/hero.ts` to'ldiriladi)
+- [ ] **Barcha placeholder assetlarni almashtirish:** `public/products/placeholder-bottle-0*.svg`
+      va `public/fruits/placeholder-*.svg` — bular vaqtinchalik maketlar, haqiqiy mahsulot
+      fotosuratlari kelgach o'chiriladi
+- [ ] Real mahsulot va kategoriya nomlari, tavsiflari (`data/products.ts`, `data/categories.ts`
+      hozir "MAHSULOT 01" kabi neytral placeholder'lar bilan to'ldirilgan)

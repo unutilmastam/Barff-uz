@@ -9,6 +9,8 @@ interface SplitTextProps {
   children: ReactNode;
   as?: ElementType;
   className?: string;
+  /** `aria-labelledby` kabi havolalar uchun. */
+  id?: string;
   /** Nimaga bo'linsin. `lines` oyna kengligi o'zgarganda qayta hisoblanadi. */
   type?: SplitType;
   /**
@@ -27,7 +29,7 @@ interface SplitTextProps {
  *
  * Ajratish `gsap.context()` ichida — `revert()` da asl matn tiklanadi.
  */
-export function SplitText({ children, as: Tag = 'span', className, type = 'lines', onSplit }: SplitTextProps) {
+export function SplitText({ children, as: Tag = 'span', className, id, type = 'lines', onSplit }: SplitTextProps) {
   const rootRef = useRef<HTMLElement>(null);
 
   // `onSplit` chaqiruvchi tomonda `useCallback` bilan barqarorlashtirilgan bo'lishi kutiladi —
@@ -61,7 +63,7 @@ export function SplitText({ children, as: Tag = 'span', className, type = 'lines
   }, [type, onSplit]);
 
   return (
-    <Tag ref={rootRef} className={className}>
+    <Tag ref={rootRef} id={id} className={className}>
       {children}
     </Tag>
   );

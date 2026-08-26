@@ -125,6 +125,7 @@
 
 @utility text-hero {
   font-family: var(--font-display);
+  font-weight: 800;
   font-size: var(--text-hero);
   line-height: var(--text-hero--line-height);
   letter-spacing: var(--text-hero--letter-spacing);
@@ -132,6 +133,7 @@
 
 @utility text-section {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-section);
   line-height: var(--text-section--line-height);
   letter-spacing: var(--text-section--letter-spacing);

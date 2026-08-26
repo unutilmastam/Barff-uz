@@ -30,6 +30,7 @@ lib/         types.ts, motion.ts, animations.ts, gsap.ts, i18n.ts, locale-store.
 hooks/       qayta ishlatiladigan React hook'lar
 styles/      globals.css (design system tokenlari)
 public/      images/ products/ fruits/ videos/ textures/ icons/ fonts/
+             `placeholder-*.svg` — VAQTINCHALIK maketlar, mijoz assetlari kelgach o'chiriladi
 ```
 
 `index.html` va `CNAME` — hozirgi jonli "tez orada" sahifasi (GitHub Pages).
@@ -83,6 +84,24 @@ Har bosqich oxirida `npm run lint && npm run build` majburiy va toza bo'lishi sh
   (`[@media(hover:hover)and(pointer:fine)]` — bo'shliqlar yo'qolib CSS yaroqsiz bo'ladi).
   `globals.css` dagi `@custom-variant pointer-fine` ishlatiladi.
 
+## ScrollTrigger `pin` uchun uchta qoida
+
+Bular buzilsa pin jimgina ishlamay qo'yadi — build ham, lint ham xato bermaydi:
+
+1. **Pin qilinadigan element FLEX konteynerning bevosita farzandi bo'lmasin.** GSAP pin-spacer'ga
+   `padding-bottom` qo'shadi, flex uni hisobga olmaydi va sahifada joy ochilmaydi — pin hech
+   qachon tugamaydi, bo'lim footer ustida yopishib qoladi. Shu sababli `#main-content` va
+   `<main>` blok, pin esa bo'lim ichidagi alohida `<div>` ga biriktiriladi.
+2. **Yashirin elementda pin qurilmaydi.** `display:none` bo'lgan tarmoqning `scrollWidth` i 0 —
+   bo'sh pin-spacer qoladi. `HorizontalScroll` buni o'zi tekshiradi (`offsetParent === null`).
+3. **Layout hydration'dan keyin o'zgarmasin.** Desktop/mobil tarmoqlari CSS (`hidden md:block`)
+   bilan ajratiladi, media query hook bilan EMAS: hook ishlatilsa tarmoq kech mount bo'lib
+   sahifa balandligini o'zgartiradi va undan keyingi ScrollTrigger'larning boshlanish
+   nuqtalari eskirib qoladi.
+
+Grid item ichida **foizli balandlik** (`h-[78%]`) ham ishonchsiz — rasm konteynerdan kattaroq
+render bo'lib kesiladi. Aniq o'lchamli absolyut o'ram + `object-contain` ishlatiladi.
+
 ## Til tizimi (i18n)
 
 - Lug'atlar: `data/locales/{uz,ru,en}.ts`. `uz.ts` — manba nusxa, `Dictionary` tipi shundan
@@ -93,6 +112,18 @@ Har bosqich oxirida `npm run lint && npm run build` majburiy va toza bo'lishi sh
   brauzer `localStorage` dagi tanlovni — shu sababli sahifalar statik qolaveradi va
   hydration xatosi bo'lmaydi.
 - Navigatsiya `data/navigation.ts` da `labelKey` saqlaydi, matn emas.
+
+## Vaqtinchalik kontent holati
+
+Mijoz ko'rsatmasi bilan sayt hozircha PLACEHOLDER kontent bilan to'ldirilgan:
+`data/products.ts`, `data/categories.ts`, `data/hero.ts` va `public/{products,fruits}/`.
+Bular **almashtirilishi shart** — ro'yxat `BUILD_PLAN.md` → "3. OCHIQ SAVOLLAR" da.
+
+Placeholder yozishning qoidalari o'zgarmadi:
+- nomlar neytral ("MAHSULOT 01"), ta'm nomi yoki shior o'ylab topilmaydi;
+- `ingredients`, `nutrition`, `packaging` BO'SH qoladi — ular mahsulot da'volari;
+- rasmlar faqat shu loyiha uchun chiziladi, boshqa saytdan ko'chirilmaydi (9-qoida);
+- shisha yorlig'ida "PLACEHOLDER" yozuvi bor, ya'ni real foto bilan adashtirilmaydi.
 
 ## Kontent chegarasi (eng muhim qoida)
 
