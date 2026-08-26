@@ -49,8 +49,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 6 | Philosophy / About / Story / Process | ✅ BAJARILDI (2026-08-26) |
 | 7 | Video / Reels / News / WhereToBuy / Contact | ✅ BAJARILDI (2026-08-26) |
 | 8 | Ichki sahifalar | ✅ BAJARILDI (2026-08-26) |
-| 9 | Responsive | **IN PROGRESS** |
-| 10 | SEO | KUTMOQDA |
+| 9 | Responsive | ✅ BAJARILDI (2026-08-26) |
+| 10 | SEO | **IN PROGRESS** |
 | 11 | Performance | KUTMOQDA |
 | 12 | Final Polish | KUTMOQDA |
 
@@ -201,21 +201,21 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 9 — RESPONSIVE
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] Breakpointlar: 320–479, 480–767, 768–1023, 1024–1439, 1440+
-- [ ] Mobil alohida loyihalangan (desktop kichraytirilgani EMAS)
-- [ ] Mobilda: kursor yo'q, kam meva, sodda motion, WebGL yo'q, kamaytirilgan parallax
-- [ ] Gorizontal overflow yo'q
-- [ ] Layout shift yo'q
-- [ ] Scroll lock buglari yo'q
-- [ ] `npm run lint && npm run build` — toza
+- [x] Breakpointlar: 320–479, 480–767, 768–1023, 1024–1439, 1440+
+- [x] Mobil alohida loyihalangan (desktop kichraytirilgani EMAS)
+- [x] Mobilda: kursor yo'q, kam meva, sodda motion, WebGL yo'q, kamaytirilgan parallax
+- [x] Gorizontal overflow yo'q
+- [x] Layout shift yo'q
+- [x] Scroll lock buglari yo'q
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 10 — SEO
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `metadata` har sahifada, mahsulot va yangilik sahifalari unikal
 - [ ] OpenGraph + Twitter card
@@ -260,6 +260,39 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 9: Responsive ✅
+
+- **Audit:** 7 breakpoint (320 / 414 / 480 / 768 / 1024 / 1440 / 1920) × 8 sahifa = 56 ta
+  kombinatsiya, har birida butun sahifa aylanib chiqilib o'lchandi.
+  **Gorizontal overflow HECH QAYERDA yo'q.**
+- **Layout shift:** CLS = **0.0000** (390 / 768 / 1440 px × 4 sahifa). "Yaxshi" chegarasi 0.1.
+- **Scroll lock:** mobil menyu va desktop qidiruv overlayida `overflow: hidden` + Lenis
+  to'xtaydi, ochiq turganda scroll bloklanadi, yopilgach sahifa AYNAN o'sha joyida qoladi
+  (520 → 520, sakrash yo'q).
+- **Mobil alohida:** maxsus kursor yo'q (`display: none`, atribut qo'yilmaydi),
+  hero mevalari 5 → 2, pin qilingan bo'limlar 4 → 2, WebGL/canvas 0 ta, video avtomatik
+  o'ynamaydi.
+- **Kamaytirilgan parallaks:** `PARALLAX.mobileFactor = 0.45` qo'shildi va `parallax()`
+  endi `gsap.matchMedia` ishlatadi — oyna o'lchami o'zgarganda tween o'zi qayta quriladi.
+  O'lchandi: desktop `yPercent` oralig'i ±22.5%, mobilda ±10.125% (aynan 45%).
+- **Tuzatilgan to'rt nuqson:**
+  1. **Hero 100vh ga sig'masdi.** 320×640 da 773px, 1440×900 da 973px edi. Sabab: shisha
+     rasmi KENGLIK bo'yicha o'lchangan (400:720 nisbati balandlikni oshirib yuboradi) va
+     spec'dagi `4rem` typography poli 320px uchun juda katta. Desktopda o'lcham endi
+     balandlik bo'yicha (`md:h-[min(60vh,30rem)]`), 320–479px oralig'ida esa typography
+     poli va bo'shliqlar ixchamlashtirildi. Natija: 8 ta o'lchamning 6 tasida farq **0px**,
+     qolgan ikkitasida +23 va +36px.
+  2. **Dekor CTA tugmasini bosib turardi** (320px da apelsin "MAHSULOTLAR" ustida).
+     Mobil meva koordinatalari mahsulot atrofiga ko'chirildi.
+  3. **Yashirin mevalar ham animatsiya qilinardi.** Desktop tarmog'i mobilda CSS bilan
+     yashiringan bo'lsa ham 5 ta `FloatingFruit` GSAP tween va ScrollTrigger yaratardi —
+     ko'rinmaydi, lekin har kadrda hisoblanadi. `offsetParent === null` tekshiruvi qo'shildi
+     (`HorizontalScroll` dagi kabi).
+  4. **Logotip tegish maydoni 65×22px** edi (44px tavsiyasidan kichik) — vertikal padding
+     qo'shildi. Endi 320px da 40px dan kichik tegish maydoni yo'q.
+- 320px da alohida tekshirildi: mobil menyu ekranga sig'adi, mahsulot va yangilik gridlari
+  2 ustun, aloqa formasi bir ustun. JS xatosi yo'q.
 
 ### 2026-08-26 — Phase 8: Ichki sahifalar ✅
 

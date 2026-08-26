@@ -49,6 +49,10 @@ export function FloatingFruit({
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root || !introFinished) return;
+    // Desktop va mobil tarmoqlari CSS bilan ajratilgan — yashirin tarmoqdagi mevalar
+    // ham GSAP tween va ScrollTrigger yaratardi. Ular ko'rinmaydi, lekin har kadrda
+    // hisoblanadi: mobilda bu bekorga sarflangan ish.
+    if (root.offsetParent === null) return;
 
     const context = gsap.context(() => {
       gsap.fromTo(

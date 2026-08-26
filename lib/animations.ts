@@ -7,6 +7,7 @@ import {
   IMAGE_REVEAL,
   MAGNETIC_RETURN,
   MAGNETIC_STRENGTH,
+  MEDIA,
   PARALLAX,
   SCROLL_TRIGGER,
   STAGGER,
@@ -120,7 +121,12 @@ export function imageReveal(
 
 /**
  * Parallaks siljish.
+ *
  * `speed` — `lib/motion.ts` dagi `PARALLAX` qiymatlaridan (fon 0.1 / rasm 0.25 / meva 0.45).
+ *
+ * Mobilda kuch `PARALLAX.mobileFactor` ga kamaytiriladi. Buning uchun `gsap.matchMedia`
+ * ishlatiladi: u oyna o'lchami o'zgarganda tween'ni o'zi qayta quradi, oddiy `matchMedia`
+ * tekshiruvi esa bir marta o'lchab qotib qolardi.
  */
 export function parallax(
   target: Element,
@@ -130,21 +136,30 @@ export function parallax(
   if (reduced) return null;
 
   const scroller = trigger ?? target;
+  const media = gsap.matchMedia();
 
-  return gsap.fromTo(
-    target,
-    { yPercent: -speed * 50 },
-    {
-      yPercent: speed * 50,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: scroller,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
+  const build = (strength: number) => () => {
+    gsap.fromTo(
+      target,
+      { yPercent: -strength * 50 },
+      {
+        yPercent: strength * 50,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: scroller,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
       },
-    },
-  );
+    );
+  };
+
+  media.add(MEDIA.desktop, build(speed));
+  media.add(MEDIA.mobile, build(speed * PARALLAX.mobileFactor));
+
+  return media;
 }
 
 /**

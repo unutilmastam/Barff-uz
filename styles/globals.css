@@ -75,6 +75,23 @@
 }
 
 /* ==========================================================================
+   KICHIK EKRANLAR (320–479px) — Phase 9
+
+   Spec'dagi pol qiymatlar (`hero` 4rem, `section` 3rem) desktop uchun yozilgan.
+   320px da ular ekranga sig'maydi: hero 100vh dan oshib ketadi va sarlavha
+   butun ekranni egallaydi. Shu sababli faqat shu oraliqda pol pasaytiriladi —
+   480px dan boshlab spec qiymatlari qaytadi.
+   ========================================================================== */
+
+@media (max-width: 479px) {
+  :root {
+    --text-hero: clamp(2.5rem, 13vw, 4rem);
+    --text-section: clamp(2.25rem, 11vw, 3rem);
+    --text-title: clamp(1.5rem, 7vw, 2rem);
+  }
+}
+
+/* ==========================================================================
    BASE
    ========================================================================== */
 

@@ -79,7 +79,8 @@ export function Header() {
           <Link
             href="/"
             aria-label={t.a11y.home}
-            className="font-display text-[1.375rem] leading-none font-extrabold tracking-[-0.02em]"
+            // Tegish maydoni kamida 44px bo'lishi uchun vertikal padding (Phase 9).
+            className="font-display -my-3 py-3 text-[1.375rem] leading-none font-extrabold tracking-[-0.02em]"
           >
             BARFF
           </Link>

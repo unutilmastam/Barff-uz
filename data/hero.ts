@@ -54,9 +54,9 @@ export const heroProduct: ImageAsset | null = {
  */
 export const heroFruits: HeroFruit[] = [
   // Joylashuv mahsulotni ROMKALAYDI: matn ustuni (chap) ham, shisha ham bosilmaydi.
-  { id: 'orange', src: '/fruits/placeholder-citrus-orange.svg', x: 51, y: 8, scale: 0.85, rotation: -14, speed: 1, parallax: 0.45, mobile: true, mobileX: 62, mobileY: 46 },
+  { id: 'orange', src: '/fruits/placeholder-citrus-orange.svg', x: 51, y: 8, scale: 0.85, rotation: -14, speed: 1, parallax: 0.45, mobile: true, mobileX: 66, mobileY: 58 },
   { id: 'peach', src: '/fruits/placeholder-peach.svg', x: 90, y: 10, scale: 0.55, rotation: 24, speed: 1.1, parallax: 0.3, mobile: false },
-  { id: 'leaf', src: '/fruits/placeholder-leaf.svg', x: 89, y: 66, scale: 0.7, rotation: 18, speed: 0.8, parallax: 0.45, mobile: true, mobileX: 2, mobileY: 62 },
+  { id: 'leaf', src: '/fruits/placeholder-leaf.svg', x: 89, y: 66, scale: 0.7, rotation: 18, speed: 0.8, parallax: 0.45, mobile: true, mobileX: 1, mobileY: 70 },
   { id: 'berries', src: '/fruits/placeholder-berries.svg', x: 52, y: 72, scale: 0.6, rotation: -6, speed: 1.2, parallax: 0.25, mobile: false },
   { id: 'lime', src: '/fruits/placeholder-citrus-lime.svg', x: 57, y: 78, scale: 0.5, rotation: 10, speed: 1.4, parallax: 0.3, mobile: false },
 ];

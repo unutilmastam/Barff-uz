@@ -121,8 +121,8 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="container-barff relative flex flex-1 flex-col justify-center gap-6 pt-24 pb-20 md:grid md:grid-cols-[1.05fr_0.95fr] md:items-center md:gap-16 md:py-28">
-        <div className="flex flex-col gap-4 md:gap-6">
+      <div className="container-barff relative flex flex-1 flex-col justify-center gap-6 pt-24 pb-20 max-[479px]:gap-3 max-[479px]:pt-20 max-[479px]:pb-12 md:grid md:grid-cols-[1.05fr_0.95fr] md:items-center md:gap-16 md:py-28">
+        <div className="flex flex-col gap-4 max-[479px]:gap-2.5 md:gap-6">
           <p data-hero-logo className="text-label text-muted opacity-0">
             BARFF
           </p>
@@ -171,7 +171,7 @@ export function Hero() {
       <div
         data-hero-scroll
         aria-hidden="true"
-        className="text-label text-muted absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 opacity-0"
+        className="text-label text-muted absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 opacity-0 max-[479px]:bottom-4"
       >
         <span>{t.hero.scroll}</span>
         <span className="bg-line block h-10 w-px" data-scroll-line />

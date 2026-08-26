@@ -167,6 +167,22 @@ Placeholder yozishning qoidalari o'zgarmadi:
   ishlatadi (chunki `<h1>` Hero'da), shuning uchun ularni qayta ishlatuvchi sahifalarga
   `PageTitle` (`sr-only <h1>`) qo'shiladi.
 
+## Responsive qoidalari
+
+- Breakpointlar: 320–479 · 480–767 · 768–1023 · 1024–1439 · 1440+.
+- **320–479px uchun typography poli alohida.** `globals.css` da shu oraliqda
+  `--text-hero` / `--text-section` / `--text-title` pasaytiriladi: spec'dagi `4rem` pol
+  320px da hero'ni 100vh dan chiqarib yuboradi. 480px dan spec qiymatlari qaytadi.
+- **Balandligi cheklangan joyda rasmni KENGLIK bo'yicha o'lchamang.** Shisha 400:720
+  nisbatda — `w-[26rem]` balandlikni 749px qiladi va hero 100vh dan oshadi.
+  Desktopda `h-[min(60vh,30rem)] w-auto` ishlatiladi.
+- **CSS bilan yashirilgan tarmoq baribir mount bo'ladi.** `hidden md:block` ichidagi
+  GSAP komponentlari mobilda ham ishlaydi. Har bunday komponent `offsetParent === null`
+  bo'lsa o'zini o'chirishi kerak (`HorizontalScroll`, `FloatingFruit`).
+- Mobilda parallaks `PARALLAX.mobileFactor` ga kamaytiriladi; `parallax()` buni
+  `gsap.matchMedia` orqali qiladi, shuning uchun oyna o'lchami o'zgarganda o'zi moslashadi.
+- Tegish maydoni kamida 40–44px.
+
 ## Kontent chegarasi (eng muhim qoida)
 
 BARFF haqida hech narsa **o'ylab topilmaydi**: tarix, sertifikat, ta'rkib, kaloriya,

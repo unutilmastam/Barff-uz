@@ -106,13 +106,15 @@ export function HeroProduct() {
                 height={heroProduct.height ?? 900}
                 priority
                 sizes="(max-width: 768px) 70vw, 34vw"
-                className="h-auto w-[min(42vw,11rem)] object-contain drop-shadow-2xl md:w-[min(70vw,26rem)]"
+                // Desktopda o'lcham BALANDLIK bo'yicha cheklanadi: kenglik bo'yicha berilsa
+              // shishaning 400:720 nisbati hero'ni 100vh dan oshirib yuboradi.
+              className="h-auto w-[min(42vw,11rem)] object-contain drop-shadow-2xl max-[479px]:w-[min(34vw,7.5rem)] md:h-[min(60vh,30rem)] md:w-auto"
               />
             ) : (
               <div
                 role="img"
                 aria-label={`${t.hero.productPending} — ${CONTENT_PENDING}`}
-                className="border-line bg-secondary/60 grid h-[min(34vh,15rem)] w-[min(44vw,11rem)] place-items-center rounded-[2rem] border border-dashed md:h-[min(62vh,34rem)] md:w-[min(52vw,17rem)] md:rounded-[3rem]"
+                className="border-line bg-secondary/60 grid h-[min(34vh,15rem)] w-[min(44vw,11rem)] place-items-center rounded-[2rem] border border-dashed max-[479px]:h-[min(26vh,11rem)] max-[479px]:w-[min(36vw,8rem)] md:h-[min(62vh,34rem)] md:w-[min(52vw,17rem)] md:rounded-[3rem]"
               >
                 <span className="text-label text-muted max-w-[12ch] px-4 text-center">
                   {t.hero.productPending}

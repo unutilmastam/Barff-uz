@@ -65,6 +65,19 @@ export const PARALLAX = {
   background: 0.1,
   image: 0.25,
   fruit: 0.45,
+  /**
+   * Mobilda parallaks kuchi shu koeffitsientga ko'paytiriladi.
+   * Tor ekranda katta siljish elementlarni bir-birining ustiga chiqarib yuboradi
+   * va scroll "og'ir" his qilinadi (BUILD_PLAN Phase 9: "kamaytirilgan parallax").
+   */
+  mobileFactor: 0.45,
+} as const;
+
+/** Mobil/desktop chegarasi — `gsap.matchMedia` shartlarida ishlatiladi. */
+export const MEDIA = {
+  desktop: '(min-width: 768px)',
+  mobile: '(max-width: 767px)',
+  pointerFine: '(hover: hover) and (pointer: fine)',
 } as const;
 
 /**
