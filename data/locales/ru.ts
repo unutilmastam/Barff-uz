@@ -9,6 +9,11 @@ export const ru: Dictionary = {
     news: 'НОВОСТИ',
     contact: 'КОНТАКТЫ',
   },
+  hero: {
+    scroll: 'ВНИЗ',
+    cta: 'ПРОДУКЦИЯ',
+    productPending: 'Фото продукта',
+  },
   menu: {
     title: 'МЕНЮ',
     social: 'СОЦСЕТИ',

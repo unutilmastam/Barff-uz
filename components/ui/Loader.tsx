@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useLocale } from '@/components/providers/LocaleProvider';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import { introStore } from '@/lib/intro-store';
 import { DURATION, EASE } from '@/lib/motion';
 
 /** Sessiyada loader ko'rsatilganini belgilash — takroriy kirishda qisqaroq bo'ladi. */
@@ -47,7 +48,13 @@ export function Loader() {
       const progress = { value: 0 };
 
       gsap
-        .timeline({ onComplete: () => setDone(true) })
+        .timeline({
+          onComplete: () => {
+            // Hero shu signalni kutadi — aks holda uning timeline'i loader ortida o'tib ketadi.
+            introStore.complete();
+            setDone(true);
+          },
+        })
         .to(progress, {
           value: 100,
           duration,

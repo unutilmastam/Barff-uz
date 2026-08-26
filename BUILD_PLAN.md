@@ -44,8 +44,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 1 | Setup & Design System | ✅ BAJARILDI (2026-08-26) |
 | 2 | Layout (Header / Menu / Footer) | ✅ BAJARILDI (2026-08-26) |
 | 3 | Motion System | ✅ BAJARILDI (2026-08-26) |
-| 4 | Hero | **IN PROGRESS** |
-| 5 | Marquee / Categories / Showcase | KUTMOQDA |
+| 4 | Hero | ✅ BAJARILDI (2026-08-26) |
+| 5 | Marquee / Categories / Showcase | **IN PROGRESS** |
 | 6 | Philosophy / About / Story / Process | KUTMOQDA |
 | 7 | Video / Reels / News / WhereToBuy / Contact | KUTMOQDA |
 | 8 | Ichki sahifalar | KUTMOQDA |
@@ -122,18 +122,18 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 4 — HERO
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `components/hero/Hero.tsx` — ~100vh
-- [ ] Tuzilma: BARFF → sarlavha → mahsulot → tag'lar → scroll indikatori
-- [ ] `components/hero/HeroProduct.tsx` — float, subtle rotate, kursorga reaksiya (`mouseX → rotateY`, `mouseY → rotateX`, smoothing bilan)
-- [ ] `components/hero/FloatingFruit.tsx` — props: `src, x, y, scale, rotation, speed, parallax`
-- [ ] `components/hero/HeroParticles.tsx` (ixtiyoriy, ortiqcha shovqin bo'lmasin)
-- [ ] Timeline: 0.0s fon → 0.2s logo → 0.4s sarlavha → 0.6s stagger → 0.8s mahsulot (`scale 0.65→1`, `rotate -8°→0`) → 1.0s meva → 1.2s CTA → 1.5s float boshlanadi
-- [ ] Mahsulot har doim asosiy vizual fokus — dekor uni bosib ketmasin
-- [ ] Matnlar `data/` dan keladi va oson almashtiriladi
-- [ ] Mobil versiyasi alohida sozlangan (kam meva, sodda motion)
-- [ ] `npm run lint && npm run build` — toza
+- [x] `components/hero/Hero.tsx` — ~100vh
+- [x] Tuzilma: BARFF → sarlavha → mahsulot → tag'lar → scroll indikatori
+- [x] `components/hero/HeroProduct.tsx` — float, subtle rotate, kursorga reaksiya (`mouseX → rotateY`, `mouseY → rotateX`, smoothing bilan)
+- [x] `components/hero/FloatingFruit.tsx` — props: `src, x, y, scale, rotation, speed, parallax`
+- [x] `components/hero/HeroParticles.tsx` (ixtiyoriy, ortiqcha shovqin bo'lmasin)
+- [x] Timeline: 0.0s fon → 0.2s logo → 0.4s sarlavha → 0.6s stagger → 0.8s mahsulot (`scale 0.65→1`, `rotate -8°→0`) → 1.0s meva → 1.2s CTA → 1.5s float boshlanadi
+- [x] Mahsulot har doim asosiy vizual fokus — dekor uni bosib ketmasin
+- [x] Matnlar `data/` dan keladi va oson almashtiriladi
+- [x] Mobil versiyasi alohida sozlangan (kam meva, sodda motion)
+- [x] `npm run lint && npm run build` — toza
 
 > **Hero "premium" his qilmaguncha keyingi bosqichga o'tilmaydi.**
 
@@ -141,7 +141,7 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 5 — MARQUEE / CATEGORIES / PRODUCT SHOWCASE
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] Kinetic Marquee — ulkan typography, cheksiz loop
 - [ ] `components/sections/CategoriesSection.tsx` — `01 / 02 / 03 / 04` katta raqamlar, rasm, meva, sarlavha, qisqa matn, CTA
@@ -261,6 +261,41 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 <!-- LOG START -->
 
+### 2026-08-26 — Phase 4: Hero ✅
+
+- `Hero.tsx` (~100vh) — tuzilma: BARFF → sarlavha → subline/teglar → mahsulot → CTA →
+  scroll indikatori. `HeroProduct.tsx` (kirish + float + kursor tilt uch alohida qatlamda,
+  bir-birining transform'ini bosmaydi), `FloatingFruit.tsx` (`src,x,y,scale,rotation,speed,
+  parallax` + `mobile`), `HeroParticles.tsx` (ixtiyoriy, standart holatda O'CHIQ).
+- **Timeline brauzerda o'lchandi** (loader tugagandan keyin, spec bilan taqqoslab):
+  fon 113ms · logo 218 · sarlavha 429 · stagger 639 · mahsulot 850 · CTA 1269 · scroll 1269 —
+  hammasi spec qiymatidan <100ms chetlanishda, tartib to'g'ri. Mahsulot `scale 0.65→1`,
+  `rotate -8°→0`; float 1.5s da boshlanadi (0 → −14px → 0, davr 3.5s, uzluksiz).
+- Kursorga reaksiya o'lchandi: sichqoncha o'ngda/chapda `rotateY` ±9.4°,
+  tepada/pastda `rotateX` ∓9.1° (maks 10°), `quickTo` bilan yumshatilgan, faqat
+  `hover: hover and pointer: fine` da (`gsap.matchMedia`).
+- Vizual ierarxiya tekshirildi: mahsulot markazida `elementFromPoint` → MAHSULOT,
+  dekor `-z-10` da orqada, zarrachalar maks opacity 0.25.
+- Mobil alohida sozlandi: hero aynan 844px = 100vh (390×844), mevalar 4 → 2,
+  kursor tilt o'chiq, gorizontal overflow yo'q. `prefers-reduced-motion` da butun
+  timeline bir zumda tugaydi, float va zarrachalar o'chadi.
+- **Loader bilan integratsiya:** `lib/intro-store.ts` + `useIntroFinished()` qo'shildi.
+  Ilgari hero timeline'i loader ORTIDA o'ynab tugardi va foydalanuvchi uni ko'rmasdi —
+  endi Loader tugagach boshlanadi.
+- Kontent: `data/hero.ts` — sarlavha, subline, mahsulot rasmi, mevalar va teglar
+  BO'SH/`null`, hammasi `[CLIENT CONTENT REQUIRED]` bilan belgilangan. Rasm yo'qligida
+  soxta 3D yoki soxta dekor QURILMADI (14-qoida) — neytral placeholder ko'rinadi va
+  harakat mantiqi bir xil qoladi. Mevalar/zarrachalar vaqtinchalik sinov ma'lumoti bilan
+  tekshirilib, keyin ma'lumot qaytarib olindi.
+- Tuzatilgan ikki nuqson: zarrachalar o'zining 6–12s suzish davri bo'yicha fade bo'lib
+  amalda ko'rinmasdi (ko'rinish va suzish ajratildi); mobilda hero 1182px bo'lib
+  100vh dan oshib ketardi (mahsulot placeholder'i va bo'shliqlar mobil uchun kichraytirildi).
+- `/dev-motion` sinov sahifasi rejaga muvofiq O'CHIRILDI (git tarixida qoladi).
+- Global `pt-24` layout'dan olib tashlandi — Header shaffof holda hero ustidan tushadi.
+- **Bloklovchi:** hero "premium" his qilishi uchun mahsulot fotosurati, sarlavha matni va
+  brend ranglari kerak. Motion va tuzilma tayyor — assetlar kelgach faqat `data/hero.ts`
+  va `@theme` bloki to'ldiriladi.
+
 ### 2026-08-26 — Phase 3: Motion System ✅
 
 - **Lenis + GSAP ticker + ScrollTrigger** (`SmoothScrollProvider.tsx`): Lenis `autoRaf: false`
@@ -364,3 +399,5 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] Sotuv nuqtalari ro'yxati
 - [ ] To'liq mahsulot spetsifikatsiyasi (spec) — `Product` tipidagi maydonlarni tasdiqlash uchun
 - [ ] `index.html` ("tez orada") qachon Next.js sayti bilan almashtirilsin?
+- [ ] Hero uchun: mahsulot fotosurati (shaffof fon) + sarlavha/subline matni + hero teglari
+      — ularsiz hero "premium" his qilmaydi (`data/hero.ts` to'ldiriladi)

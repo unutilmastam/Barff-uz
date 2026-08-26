@@ -9,6 +9,11 @@ export const en: Dictionary = {
     news: 'NEWS',
     contact: 'CONTACT',
   },
+  hero: {
+    scroll: 'SCROLL',
+    cta: 'PRODUCTS',
+    productPending: 'Product photo',
+  },
   menu: {
     title: 'MENU',
     social: 'SOCIAL',

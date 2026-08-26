@@ -37,7 +37,9 @@ export default function RootLayout({
             <Cursor />
             <Header />
             <PageTransition>
-              <div id="main-content" className="flex flex-1 flex-col pt-24">
+              {/* Tepa bo'shliq global emas: Hero to'liq ekran, Header uning ustidan tushadi.
+                  Ichki sahifalar o'z tepa bo'shlig'ini o'zi qo'yadi. */}
+              <div id="main-content" className="flex flex-1 flex-col">
                 {children}
               </div>
             </PageTransition>

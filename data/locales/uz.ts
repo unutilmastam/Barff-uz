@@ -13,6 +13,11 @@ export const uz = {
     news: 'YANGILIKLAR',
     contact: 'ALOQA',
   },
+  hero: {
+    scroll: 'PASTGA',
+    cta: 'MAHSULOTLAR',
+    productPending: 'Mahsulot fotosurati',
+  },
   menu: {
     title: 'MENYU',
     social: 'IJTIMOIY TARMOQLAR',

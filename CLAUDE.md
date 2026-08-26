@@ -26,7 +26,7 @@ app/         Next.js App Router (sahifalar, layout, fonts.ts)
 components/  layout/ ui/ sections/ animation/ products/ hero/ providers/
 data/        kontent va tarjimalar (locales/) — komponentda hardcode YO'Q
 lib/         types.ts, motion.ts, animations.ts, gsap.ts, i18n.ts, locale-store.ts,
-             smooth-scroll.ts, utils.ts
+             intro-store.ts, smooth-scroll.ts, content.ts, utils.ts
 hooks/       qayta ishlatiladigan React hook'lar
 styles/      globals.css (design system tokenlari)
 public/      images/ products/ fruits/ videos/ textures/ icons/ fonts/
@@ -76,7 +76,9 @@ Har bosqich oxirida `npm run lint && npm run build` majburiy va toza bo'lishi sh
   `globals.css` dagi `html.lenis` qoidalari ham majburiy.
 - Overlay ochilganda `useLockBodyScroll` Lenis'ni to'xtatadi — `overflow: hidden` yolg'iz
   o'zi yetarli emas.
-- Sinov sahifasi: `/dev-motion` (noindex). Phase 4 tugagach o'chiriladi.
+- Sinov sahifasi `/dev-motion` Phase 4 tugagach o'chirildi (kerak bo'lsa git tarixidan olinadi).
+- Kirish animatsiyalari Loader tugashini kutadi: `useIntroFinished()` / `lib/intro-store.ts`.
+  Aks holda ular loader ortida o'ynab tugaydi.
 - Tailwind'da media-query variantini **arbitrary** ko'rinishda yozmang
   (`[@media(hover:hover)and(pointer:fine)]` — bo'shliqlar yo'qolib CSS yaroqsiz bo'ladi).
   `globals.css` dagi `@custom-variant pointer-fine` ishlatiladi.

@@ -115,6 +115,29 @@ export interface SocialLink {
   icon?: string;
 }
 
+/**
+ * Hero'dagi suzuvchi meva.
+ * Joylashuv foizda beriladi — ekran o'lchamiga qarab moslashadi.
+ */
+export interface HeroFruit {
+  id: string;
+  /** `public/fruits/` dagi shaffof fonli rasm. */
+  src: string;
+  /** Konteynerga nisbatan gorizontal joylashuv (%). */
+  x: number;
+  /** Konteynerga nisbatan vertikal joylashuv (%). */
+  y: number;
+  scale: number;
+  /** Boshlang'ich burilish (deg). */
+  rotation: number;
+  /** Suzish tezligi — kattaroq = tezroq tebranadi. */
+  speed: number;
+  /** Scroll parallaks tezligi (`PARALLAX` qiymatlaridan). */
+  parallax: number;
+  /** Mobilda ko'rsatilsinmi. Mobil uchun kamroq meva qoldiriladi. */
+  mobile?: boolean;
+}
+
 /** Sotuv nuqtasi (Phase 7 — WHERE TO BUY). */
 export interface StoreLocation {
   id: string;

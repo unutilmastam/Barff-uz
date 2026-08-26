@@ -82,6 +82,45 @@ export const HERO_TIMELINE = {
   float: 1.5,
 } as const;
 
+/**
+ * Hero mahsuloti.
+ * Kirish: `scale 0.65 → 1`, `rotate -8° → 0`. Keyin uzluksiz float va kursorga reaksiya.
+ */
+export const HERO_PRODUCT = {
+  fromScale: 0.65,
+  toScale: 1,
+  fromRotation: -8,
+  toRotation: 0,
+  /** Uzluksiz suzish — amplituda (px) va bir tebranish davri (s). */
+  floatDistance: 14,
+  floatDuration: 3.5,
+  /** Suzish paytidagi juda yengil burilish (deg). */
+  floatRotation: 1.5,
+  /** Kursorga reaksiya — maksimal burilish (deg) va yumshatish vaqti (s). */
+  tiltMax: 10,
+  tiltSmoothing: 0.6,
+} as const;
+
+/** Hero'dagi suzuvchi mevalar. */
+export const HERO_FRUIT = {
+  floatDistance: 18,
+  /** Har meva o'z tezligiga ega — bir vaqtda tebranmasligi uchun oraliq. */
+  floatDurationMin: 4,
+  floatDurationMax: 7,
+  /** Mobilda ko'rsatiladigan maksimal meva soni. */
+  mobileMaxCount: 2,
+} as const;
+
+/** Hero zarrachalari — ixtiyoriy, standart holatda O'CHIQ (ortiqcha shovqin bo'lmasin). */
+export const HERO_PARTICLES = {
+  count: 14,
+  minSize: 2,
+  maxSize: 5,
+  minDuration: 6,
+  maxDuration: 12,
+  opacity: 0.25,
+} as const;
+
 /** Magnit tugma — maksimal siljish (px). Spec chegarasi: 8–15px. */
 export const MAGNETIC_STRENGTH = 12;
 
