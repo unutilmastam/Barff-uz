@@ -9,6 +9,8 @@
  * Mijoz spec'ni bergach maydonlar aniqlashtiriladi.
  */
 
+import type { Dictionary } from '@/data/locales';
+
 /** Ko'p tilli matn. Har til uchun alohida komponent QILINMAYDI (Phase 2). */
 export type Locale = 'uz' | 'ru' | 'en';
 export type Localized<T = string> = Record<Locale, T>;
@@ -92,10 +94,14 @@ export interface NewsItem {
   tags?: string[];
 }
 
-/** Navigatsiya elementi (menyu `data/navigation.ts` dan o'qiladi). */
+/**
+ * Navigatsiya elementi (menyu `data/navigation.ts` dan o'qiladi).
+ * Matn o'zi emas, tarjima kaliti saqlanadi — bitta menyu uch tilda ishlaydi.
+ */
 export interface NavItem {
   id: string;
-  label: string;
+  /** `data/locales/*.ts` dagi `nav` ob'ekti kaliti. */
+  labelKey: keyof Dictionary['nav'];
   href: string;
   children?: NavItem[];
 }

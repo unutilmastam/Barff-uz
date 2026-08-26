@@ -42,8 +42,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | Bosqich | Nomi | Holat |
 |---------|------|-------|
 | 1 | Setup & Design System | ✅ BAJARILDI (2026-08-26) |
-| 2 | Layout (Header / Menu / Footer) | **IN PROGRESS** |
-| 3 | Motion System | KUTMOQDA |
+| 2 | Layout (Header / Menu / Footer) | ✅ BAJARILDI (2026-08-26) |
+| 3 | Motion System | **IN PROGRESS** |
 | 4 | Hero | KUTMOQDA |
 | 5 | Marquee / Categories / Showcase | KUTMOQDA |
 | 6 | Philosophy / About / Story / Process | KUTMOQDA |
@@ -80,27 +80,27 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 2 — LAYOUT
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `components/layout/Header.tsx` — shaffof boshlanadi, scroll'dan keyin blur + kichrayadi
-- [ ] Header scroll xatti-harakati: pastga → yashirin, tepaga → ko'rinadi (GSAP)
-- [ ] `components/layout/MobileMenu.tsx` — to'liq ekran overlay, clip-path, stagger, katta typography (side drawer EMAS)
-- [ ] `components/layout/Footer.tsx` — ulkan BARFF logotipi, navigatsiya, ijtimoiy havolalar (faqat mavjudlari)
-- [ ] `components/layout/PageTransition.tsx` — brend rangli overlay, 500–900ms
-- [ ] `components/ui/Loader.tsx` — `BARFF 0% → 100%`, maks 1–1.5s, takroriy navigatsiyada qisqaroq
-- [ ] `components/ui/LanguageSwitcher.tsx` — UZ / RU / EN
-- [ ] `lib/i18n.ts` + `data/locales/{uz,ru,en}.ts` — tarjima arxitekturasi. Har til uchun alohida komponent nusxasi QILINMAYDI
-- [ ] `components/ui/Button.tsx` — variantlar bilan
-- [ ] `components/ui/Modal.tsx` — qayta ishlatiladigan, focus trap bilan
-- [ ] `data/navigation.ts` dan menyu o'qiladi (hardcode EMAS)
-- [ ] `prefers-reduced-motion` hurmat qilinadi
-- [ ] `npm run lint && npm run build` — toza
+- [x] `components/layout/Header.tsx` — shaffof boshlanadi, scroll'dan keyin blur + kichrayadi
+- [x] Header scroll xatti-harakati: pastga → yashirin, tepaga → ko'rinadi (GSAP)
+- [x] `components/layout/MobileMenu.tsx` — to'liq ekran overlay, clip-path, stagger, katta typography (side drawer EMAS)
+- [x] `components/layout/Footer.tsx` — ulkan BARFF logotipi, navigatsiya, ijtimoiy havolalar (faqat mavjudlari)
+- [x] `components/layout/PageTransition.tsx` — brend rangli overlay, 500–900ms
+- [x] `components/ui/Loader.tsx` — `BARFF 0% → 100%`, maks 1–1.5s, takroriy navigatsiyada qisqaroq
+- [x] `components/ui/LanguageSwitcher.tsx` — UZ / RU / EN
+- [x] `lib/i18n.ts` + `data/locales/{uz,ru,en}.ts` — tarjima arxitekturasi. Har til uchun alohida komponent nusxasi QILINMAYDI
+- [x] `components/ui/Button.tsx` — variantlar bilan
+- [x] `components/ui/Modal.tsx` — qayta ishlatiladigan, focus trap bilan
+- [x] `data/navigation.ts` dan menyu o'qiladi (hardcode EMAS)
+- [x] `prefers-reduced-motion` hurmat qilinadi
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 3 — MOTION SYSTEM
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] Lenis + GSAP ticker + `ScrollTrigger.update()` to'g'ri sinxronlangan (double-scroll bug yo'q)
 - [ ] `components/animation/Reveal.tsx`
@@ -260,6 +260,35 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 2: Layout ✅
+
+- `Header.tsx` — tepada shaffof, scroll'dan keyin `data-scrolled` orqali blur + kichrayadi;
+  pastga scroll → yashirinadi, tepaga → qaytadi. Menyu ochiq bo'lsa yashirinmaydi.
+  Animatsiya bir marta `gsap.context()` da quriladi, `gsap.quickTo()` bilan boshqariladi.
+- `MobileMenu.tsx` — to'liq ekran overlay (side drawer emas): clip-path pastdan yuqoriga,
+  havolalar stagger bilan, katta typography, focus trap + scroll lock, yopilish
+  animatsiyasi tugagach unmount.
+- `Footer.tsx` — ulkan BARFF logotipi (`clamp(4rem,19vw,20rem)`), navigatsiya, faqat mavjud
+  ijtimoiy havolalar, til almashtirgich. `footerNavigation` bo'sh bo'lgani uchun huquqiy
+  havolalar o'rnida `[CLIENT CONTENT REQUIRED]`.
+- `PageTransition.tsx` — brend rangli overlay yopib-ochadi (~700ms, 500–900ms oralig'ida),
+  birinchi yuklashda ishlamaydi (u yerda Loader bor).
+- `Loader.tsx` — `BARFF` + 0% → 100%: birinchi kirishda 1.4s, sessiyada takroriy kirishda 0.6s.
+- `LanguageSwitcher.tsx` (UZ/RU/EN), `Button.tsx` (4 variant × 3 o'lcham, `href` bo'lsa
+  havola sifatida render qiladi), `Modal.tsx` (portal + focus trap + Escape + backdrop),
+  qo'shimcha `SkipLink.tsx`.
+- i18n arxitekturasi: `lib/i18n.ts` + `data/locales/{uz,ru,en}.ts`. `uz` — manba nusxa,
+  `Dictionary` tipi orqali qolgan tillar majburan bir xil tuzilmada. Komponentda `t.nav.products`
+  ko'rinishida — alohida til nusxalari yo'q. `data/navigation.ts` endi matn emas, `labelKey` saqlaydi.
+- Yangi hook'lar: `useScrollDirection`, `usePrefersReducedMotion`, `useFocusTrap`,
+  `useLockBodyScroll` (bir nechta overlay uchun hisoblagichli), `useAnimatedPresence`, `useIsClient`.
+- Brauzerda tekshirildi (Chromium 1440×900 va 390×844): Header yashirinishi/qaytishi,
+  menyu ochilish-yopilishi va fokus tsikli, til almashishi + reload'dan keyin saqlanishi
+  (`html lang` ham yangilanadi), Modal'ning Escape/backdrop/focus-trap'i,
+  `prefers-reduced-motion` rejimi. Hydration xatosi va JS xatosi yo'q.
+- **Qoldi:** konsolda `/products`, `/about`, `/story`, `/news`, `/contact` uchun `next/link`
+  prefetch 404'lari — bu sahifalar Phase 8 da quriladi, o'shanda yo'qoladi.
 
 ### 2026-08-26 — Phase 1: Setup & Design System ✅
 

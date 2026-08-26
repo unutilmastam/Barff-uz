@@ -23,9 +23,9 @@ Sayt bosqichma-bosqich quriladi; joriy bosqich `BUILD_PLAN.md` dagi `IN PROGRESS
 
 ```
 app/         Next.js App Router (sahifalar, layout, fonts.ts)
-components/  layout/ ui/ sections/ animation/ products/ hero/
+components/  layout/ ui/ sections/ animation/ products/ hero/ providers/
 data/        kontent va tarjimalar (locales/) — komponentda hardcode YO'Q
-lib/         types.ts, motion.ts, animations.ts, i18n.ts
+lib/         types.ts, motion.ts, i18n.ts, locale-store.ts, utils.ts
 hooks/       qayta ishlatiladigan React hook'lar
 styles/      globals.css (design system tokenlari)
 public/      images/ products/ fruits/ videos/ textures/ icons/ fonts/
@@ -53,7 +53,25 @@ Har bosqich oxirida `npm run lint && npm run build` majburiy va toza bo'lishi sh
 - **GSAP:** har animatsiya `gsap.context()` ichida, `useEffect` cleanup'da `ctx.revert()`.
 - **Kontent:** matn, sana, raqam — `data/` dan. Ma'lumot yo'q joyda `[CLIENT CONTENT REQUIRED]`.
 - **Fayl hajmi:** bitta komponent = bitta vazifa. 1000 qatorlik fayl yo'q.
-- `prefers-reduced-motion` hurmat qilinadi.
+- `prefers-reduced-motion` hurmat qilinadi — `usePrefersReducedMotion()` orqali.
+- **Effekt ichida `setState` yozilmaydi** (`react-hooks/set-state-in-effect` xato beradi).
+  Tashqi holat uchun `useSyncExternalStore` (`useIsClient`, `usePrefersReducedMotion`,
+  `localeStore`), prop'dan kelib chiqadigan holat uchun render paytida moslashtirish
+  (`useAnimatedPresence`) ishlatiladi.
+- Uzluksiz yangilanadigan animatsiyada (masalan Header scroll) `gsap.context()` har holat
+  o'zgarishida qayta yaratilmaydi — bir marta quriladi, keyin `gsap.quickTo()` setter'i
+  chaqiriladi. Aks holda ishlayotgan tween uzilib, element yarim yo'lda qotib qoladi.
+
+## Til tizimi (i18n)
+
+- Lug'atlar: `data/locales/{uz,ru,en}.ts`. `uz.ts` — manba nusxa, `Dictionary` tipi shundan
+  chiqadi; `ru`/`en` tuzilmani buzsa kompilyator xato beradi.
+- Komponentda: `const { t } = useLocale()` → `t.nav.products`. String kalit ham,
+  har til uchun alohida komponent ham YO'Q.
+- Til holati `lib/locale-store.ts` da (`useSyncExternalStore`): server har doim `uz` beradi,
+  brauzer `localStorage` dagi tanlovni — shu sababli sahifalar statik qolaveradi va
+  hydration xatosi bo'lmaydi.
+- Navigatsiya `data/navigation.ts` da `labelKey` saqlaydi, matn emas.
 
 ## Kontent chegarasi (eng muhim qoida)
 
