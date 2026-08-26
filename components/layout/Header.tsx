@@ -8,6 +8,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { MobileMenu } from '@/components/layout/MobileMenu';
 import { useLocale } from '@/components/providers/LocaleProvider';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { Search } from '@/components/ui/Search';
 import { mainNavigation } from '@/data/navigation';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -103,6 +104,8 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Qidiruv faqat sichqonchali qurilmalarda (spec: "desktop'da ikonka"). */}
+            <Search />
             <LanguageSwitcher className="hidden md:flex" />
 
             <button

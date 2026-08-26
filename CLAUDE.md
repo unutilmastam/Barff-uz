@@ -22,7 +22,8 @@ Sayt bosqichma-bosqich quriladi; joriy bosqich `BUILD_PLAN.md` dagi `IN PROGRESS
 ## Papka tartibi
 
 ```
-app/         Next.js App Router (sahifalar, layout, fonts.ts)
+app/         Next.js App Router. Marshrutlar: / · /products · /products/[slug] ·
+             /news · /news/[slug] · /about · /story · /contact (+ not-found holatlari)
 components/  layout/ ui/ sections/ animation/ products/ hero/ providers/
 data/        kontent va tarjimalar (locales/) — komponentda hardcode YO'Q
 lib/         types.ts, motion.ts, animations.ts, gsap.ts, i18n.ts, locale-store.ts,
@@ -155,6 +156,16 @@ Placeholder yozishning qoidalari o'zgarmadi:
   chiqadi — u yerga faqat OCHIQ endpoint qo'yiladi; bot tokeni yoki API kalit server
   tomonda, prefikssiz saqlanadi.
 - Endpoint sozlanmagan bo'lsa forma soxta "muvaffaqiyat" ko'rsatmaydi — aniq xabar beradi.
+
+## Ichki sahifalar
+
+- `[slug]` marshrutlari `generateStaticParams` bilan build paytida generatsiya qilinadi;
+  topilmagan slug `notFound()` ga boradi va segmentdagi `not-found.tsx` ko'rsatiladi.
+- `/about`, `/story`, `/contact` bosh sahifadagi bo'limlarni QAYTA ISHLATADI — matn ikki
+  nusxada saqlanmaydi.
+- **Har sahifada aynan bitta `<h1>` bo'lishi shart.** Bo'limlar bosh sahifada `<h2>`
+  ishlatadi (chunki `<h1>` Hero'da), shuning uchun ularni qayta ishlatuvchi sahifalarga
+  `PageTitle` (`sr-only <h1>`) qo'shiladi.
 
 ## Kontent chegarasi (eng muhim qoida)
 

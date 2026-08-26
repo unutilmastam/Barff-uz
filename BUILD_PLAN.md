@@ -48,8 +48,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 5 | Marquee / Categories / Showcase | ✅ BAJARILDI (2026-08-26) |
 | 6 | Philosophy / About / Story / Process | ✅ BAJARILDI (2026-08-26) |
 | 7 | Video / Reels / News / WhereToBuy / Contact | ✅ BAJARILDI (2026-08-26) |
-| 8 | Ichki sahifalar | **IN PROGRESS** |
-| 9 | Responsive | KUTMOQDA |
+| 8 | Ichki sahifalar | ✅ BAJARILDI (2026-08-26) |
+| 9 | Responsive | **IN PROGRESS** |
 | 10 | SEO | KUTMOQDA |
 | 11 | Performance | KUTMOQDA |
 | 12 | Final Polish | KUTMOQDA |
@@ -185,23 +185,23 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 8 — ICHKI SAHIFALAR
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `/products` — grid + `ProductFilter.tsx`
-- [ ] `/products/[slug]` — hero, INGREDIENTS, NUTRITION, PACKAGING, RELATED PRODUCTS
-- [ ] `components/products/ProductDetails.tsx`
-- [ ] Qidiruv (mahsulot soni ko'p bo'lsa): desktop'da ikonka → to'liq ekran overlay, `SEARCH BARFF` input, natijada mahsulot + yangilik, Escape yopadi
-- [ ] Mahsulot sahifasida kursorga reaksiya, ingredientlar mahsulot atrofida (ekran to'lib ketmasin)
-- [ ] `/news` va `/news/[slug]` — sarlavha, sana, hero rasm, matn, o'xshash yangiliklar, orqaga tugmasi
-- [ ] `/about`, `/story`, `/contact`
-- [ ] `PRODUCT NOT FOUND` / `ARTICLE NOT FOUND` holatlari
-- [ ] `npm run lint && npm run build` — toza
+- [x] `/products` — grid + `ProductFilter.tsx`
+- [x] `/products/[slug]` — hero, INGREDIENTS, NUTRITION, PACKAGING, RELATED PRODUCTS
+- [x] `components/products/ProductDetails.tsx`
+- [x] Qidiruv (mahsulot soni ko'p bo'lsa): desktop'da ikonka → to'liq ekran overlay, `SEARCH BARFF` input, natijada mahsulot + yangilik, Escape yopadi
+- [x] Mahsulot sahifasida kursorga reaksiya, ingredientlar mahsulot atrofida (ekran to'lib ketmasin)
+- [x] `/news` va `/news/[slug]` — sarlavha, sana, hero rasm, matn, o'xshash yangiliklar, orqaga tugmasi
+- [x] `/about`, `/story`, `/contact`
+- [x] `PRODUCT NOT FOUND` / `ARTICLE NOT FOUND` holatlari
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 9 — RESPONSIVE
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] Breakpointlar: 320–479, 480–767, 768–1023, 1024–1439, 1440+
 - [ ] Mobil alohida loyihalangan (desktop kichraytirilgani EMAS)
@@ -260,6 +260,36 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 8: Ichki sahifalar ✅
+
+- **10 ta marshrut, hammasi statik generatsiya:** `/`, `/products`, `/products/[slug]` (4 ta),
+  `/news`, `/news/[slug]` (3 ta), `/about`, `/story`, `/contact` + ikkita `not-found`.
+- `/products` — `ProductFilter.tsx` bilan. Filtr `aria-pressed` ishlatadi, har tugmada
+  mahsulotlar soni ko'rsatiladi, BO'SH kategoriya umuman chiqmaydi (bosib bo'sh natija
+  olish yomon UX). Brauzerda o'lchandi: 4 → 1 → 4.
+- `/products/[slug]` — `ProductDetails.tsx`: hero → TARKIBI → OZUQAVIY QIYMATI → QADOQ →
+  O'XSHASH MAHSULOTLAR. Mahsulot kursorga reaksiya qiladi (`rotateY` o'ng/chapda ishorasi
+  almashadi, `rotateX` tepa/pastda). Ingredientlar mahsulot ATROFIDA, qat'iy **6 ta bilan
+  cheklangan** va markaz bo'sh qoladi — "ekran to'lib ketmasin" talabi.
+- `/news` va `/news/[slug]` — orqaga tugmasi, sana, sarlavha, hero rasm, matn, o'xshash
+  yangiliklar. `NewsCard.tsx` uchala joyda qayta ishlatiladi.
+- **Qidiruv** (`components/ui/Search.tsx`) — Header'da ikonka (faqat `pointer-fine`),
+  to'liq ekran clip-path overlay, `SEARCH BARFF` input, natijada MAHSULOT va YANGILIK
+  birga, joriy tildagi nom/tavsif bo'yicha qidiradi, natijalar 5 tadan ko'p emas.
+  Escape yopadi, fokus ushlanadi, scroll bloklanadi va tiklanadi.
+- `PRODUCT NOT FOUND` / `ARTICLE NOT FOUND` — `NotFoundState.tsx`, qaytish havolasi bilan.
+- `/about`, `/story`, `/contact` — bosh sahifadagi bo'limlarni QAYTA ISHLATADI, matn bitta
+  joyda turadi.
+- **Tuzatilgan nuqson:** `/about`, `/story`, `/contact` da `<h1>` umuman yo'q edi — ular
+  bosh sahifa bo'limlarini qayta ishlatadi, ulardagi sarlavhalar esa `<h2>` (chunki bosh
+  sahifada `<h1>` Hero'da). Hujjat tuzilmasi buzilib, ekran o'quvchi sahifa nomini
+  e'lon qilmasdi. `PageTitle` / `PageHeading` (`sr-only`) qo'shildi — endi 10 ta
+  sahifaning HAR BIRIDA aynan bitta `<h1>` bor (tekshirildi).
+- Brauzerda tekshirildi: filtr, mahsulot sahifasidagi kursor reaksiyasi, qidiruvning
+  ochilishi/natijalari/bo'sh holati/havolaga o'tishi/Escape, ikkala "topilmadi" holati,
+  mobil 390×844 da barcha sahifalarda gorizontal overflow yo'q va qidiruv ikonkasi
+  yashirin (spec: "desktop'da ikonka"). JS xatosi yo'q.
 
 ### 2026-08-26 — Phase 7: Video / Reels / News / Where to buy / Contact ✅
 

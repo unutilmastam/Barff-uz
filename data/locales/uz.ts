@@ -60,6 +60,33 @@ export const uz = {
     cta: 'FIND YOUR BARFF',
     pending: 'Sotuv nuqtalari ro\u2019yxati mijozdan kutilmoqda.',
   },
+  product: {
+    ingredients: 'TARKIBI',
+    nutrition: 'OZUQAVIY QIYMATI',
+    packaging: 'QADOQ',
+    related: 'O\u2019XSHASH MAHSULOTLAR',
+    notFound: 'MAHSULOT TOPILMADI',
+    backToProducts: 'Mahsulotlarga qaytish',
+  },
+  article: {
+    back: 'Yangiliklarga qaytish',
+    related: 'O\u2019XSHASH YANGILIKLAR',
+    notFound: 'MAQOLA TOPILMADI',
+  },
+  filter: {
+    all: 'HAMMASI',
+    label: 'Kategoriya bo\u2019yicha saralash',
+    empty: 'Bu kategoriyada mahsulot yo\u2019q.',
+  },
+  search: {
+    open: 'Qidiruvni ochish',
+    close: 'Qidiruvni yopish',
+    placeholder: 'SEARCH BARFF',
+    products: 'Mahsulotlar',
+    news: 'Yangiliklar',
+    empty: 'Hech narsa topilmadi.',
+    hint: 'Qidirish uchun yozing',
+  },
   menu: {
     title: 'MENYU',
     social: 'IJTIMOIY TARMOQLAR',

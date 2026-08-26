@@ -56,6 +56,33 @@ export const en: Dictionary = {
     cta: 'FIND YOUR BARFF',
     pending: 'The list of stores is pending from the client.',
   },
+  product: {
+    ingredients: 'INGREDIENTS',
+    nutrition: 'NUTRITION',
+    packaging: 'PACKAGING',
+    related: 'RELATED PRODUCTS',
+    notFound: 'PRODUCT NOT FOUND',
+    backToProducts: 'Back to products',
+  },
+  article: {
+    back: 'Back to news',
+    related: 'RELATED NEWS',
+    notFound: 'ARTICLE NOT FOUND',
+  },
+  filter: {
+    all: 'ALL',
+    label: 'Filter by category',
+    empty: 'No products in this category.',
+  },
+  search: {
+    open: 'Open search',
+    close: 'Close search',
+    placeholder: 'SEARCH BARFF',
+    products: 'Products',
+    news: 'News',
+    empty: 'Nothing found.',
+    hint: 'Type to search',
+  },
   menu: {
     title: 'MENU',
     social: 'SOCIAL',

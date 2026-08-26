@@ -56,6 +56,33 @@ export const ru: Dictionary = {
     cta: 'FIND YOUR BARFF',
     pending: 'Список точек продаж ожидается от клиента.',
   },
+  product: {
+    ingredients: 'СОСТАВ',
+    nutrition: 'ПИЩЕВАЯ ЦЕННОСТЬ',
+    packaging: 'УПАКОВКА',
+    related: 'ПОХОЖИЕ ПРОДУКТЫ',
+    notFound: 'ПРОДУКТ НЕ НАЙДЕН',
+    backToProducts: 'Вернуться к продукции',
+  },
+  article: {
+    back: 'Вернуться к новостям',
+    related: 'ПОХОЖИЕ НОВОСТИ',
+    notFound: 'СТАТЬЯ НЕ НАЙДЕНА',
+  },
+  filter: {
+    all: 'ВСЕ',
+    label: 'Фильтр по категории',
+    empty: 'В этой категории нет продуктов.',
+  },
+  search: {
+    open: 'Открыть поиск',
+    close: 'Закрыть поиск',
+    placeholder: 'SEARCH BARFF',
+    products: 'Продукция',
+    news: 'Новости',
+    empty: 'Ничего не найдено.',
+    hint: 'Введите запрос',
+  },
   menu: {
     title: 'МЕНЮ',
     social: 'СОЦСЕТИ',
