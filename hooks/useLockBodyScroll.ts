@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import { smoothScroll } from '@/lib/smooth-scroll';
 
 /**
  * Overlay ochilganda sahifa scroll'ini bloklaydi.
+ *
+ * `body { overflow: hidden }` yolg'iz o'zi yetarli emas: Lenis o'z scroll qiymatini
+ * yuritishda davom etadi va overlay yopilgach sahifa sakrab ketadi — shu sababli
+ * Lenis ham to'xtatiladi.
  *
  * Scrollbar kengligi `padding-right` bilan qoplanadi — layout shift bo'lmaydi.
  * Bir vaqtning o'zida bir nechta overlay bo'lsa hisoblagich ishlaydi
@@ -24,10 +29,12 @@ export function useLockBodyScroll(locked: boolean): void {
 
       body.style.overflow = 'hidden';
       if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`;
+      smoothScroll.stop();
 
       restore = () => {
         body.style.overflow = previousOverflow;
         body.style.paddingRight = previousPadding;
+        smoothScroll.start();
       };
     }
 

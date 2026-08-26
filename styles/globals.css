@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+/* Faqat sichqonchali qurilmalar uchun variant: `pointer-fine:flex`.
+   Diqqat: arbitrary variant sifatida yozilsa (`[@media(hover:hover)and(pointer:fine)]`)
+   bo'shliqlar yo'qoladi va CSS yaroqsiz bo'lib qoladi — shu sababli nomlangan variant. */
+@custom-variant pointer-fine (@media (hover: hover) and (pointer: fine));
+
 /* ==========================================================================
    BARFF — DESIGN SYSTEM TOKENS
    Ranglar vaqtinchalik (neytral placeholder).
@@ -130,6 +135,43 @@
   font-size: var(--text-section);
   line-height: var(--text-section--line-height);
   letter-spacing: var(--text-section--letter-spacing);
+}
+
+/* ==========================================================================
+   LENIS (smooth scroll)
+
+   Bu qoidalar Lenis hujjatlaridan — ular bo'lmasa native "smooth scroll" bilan
+   Lenis birga ishlab, double-scroll (sahifa ikki marta suriladi) bug'i chiqadi.
+   ========================================================================== */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Tizim kursori faqat maxsus kursor HAQIQATDA ishga tushganda yashiriladi.
+   Atributni `Cursor.tsx` qo'yadi — touch qurilmada va `prefers-reduced-motion`
+   rejimida u qo'yilmaydi, shuning uchun oddiy kursor joyida qoladi. */
+html[data-custom-cursor='on'] body,
+html[data-custom-cursor='on'] a,
+html[data-custom-cursor='on'] button {
+  cursor: none;
 }
 
 /* ==========================================================================

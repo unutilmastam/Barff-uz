@@ -3,6 +3,8 @@ import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { LocaleProvider } from '@/components/providers/LocaleProvider';
+import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
+import { Cursor } from '@/components/ui/Cursor';
 import { Loader } from '@/components/ui/Loader';
 import { SkipLink } from '@/components/ui/SkipLink';
 import { DEFAULT_LOCALE, LOCALE_HTML_LANG } from '@/lib/i18n';
@@ -29,15 +31,18 @@ export default function RootLayout({
     <html lang={LOCALE_HTML_LANG[DEFAULT_LOCALE]} className={`${display.variable} ${body.variable}`}>
       <body className="flex min-h-screen flex-col">
         <LocaleProvider>
-          <Loader />
-          <SkipLink />
-          <Header />
-          <PageTransition>
-            <div id="main-content" className="flex flex-1 flex-col pt-24">
-              {children}
-            </div>
-          </PageTransition>
-          <Footer />
+          <SmoothScrollProvider>
+            <Loader />
+            <SkipLink />
+            <Cursor />
+            <Header />
+            <PageTransition>
+              <div id="main-content" className="flex flex-1 flex-col pt-24">
+                {children}
+              </div>
+            </PageTransition>
+            <Footer />
+          </SmoothScrollProvider>
         </LocaleProvider>
       </body>
     </html>

@@ -1,10 +1,10 @@
 'use client';
 
-import { gsap } from 'gsap';
 import { usePathname } from 'next/navigation';
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import { DURATION, EASE } from '@/lib/motion';
+import { pageTransition } from '@/lib/animations';
+import { gsap } from '@/lib/gsap';
 
 /**
  * Sahifalar orasidagi o'tish: brend rangli overlay pastdan yopadi, keyin tepaga chiqib ketadi.
@@ -26,21 +26,11 @@ export function PageTransition({ children }: { children: ReactNode }) {
     }
     if (prefersReducedMotion) return;
 
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+
     const context = gsap.context(() => {
-      gsap
-        .timeline()
-        .set(overlayRef.current, { yPercent: 100, opacity: 1 })
-        .to(overlayRef.current, {
-          yPercent: 0,
-          duration: DURATION.ui * 0.6,
-          ease: EASE.out4,
-        })
-        .to(overlayRef.current, {
-          yPercent: -100,
-          duration: DURATION.ui * 0.7,
-          ease: EASE.expo,
-        })
-        .set(overlayRef.current, { opacity: 0 });
+      pageTransition(overlay, { reduced: prefersReducedMotion });
     }, overlayRef);
 
     return () => context.revert();

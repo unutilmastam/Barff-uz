@@ -43,8 +43,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 |---------|------|-------|
 | 1 | Setup & Design System | ✅ BAJARILDI (2026-08-26) |
 | 2 | Layout (Header / Menu / Footer) | ✅ BAJARILDI (2026-08-26) |
-| 3 | Motion System | **IN PROGRESS** |
-| 4 | Hero | KUTMOQDA |
+| 3 | Motion System | ✅ BAJARILDI (2026-08-26) |
+| 4 | Hero | **IN PROGRESS** |
 | 5 | Marquee / Categories / Showcase | KUTMOQDA |
 | 6 | Philosophy / About / Story / Process | KUTMOQDA |
 | 7 | Video / Reels / News / WhereToBuy / Contact | KUTMOQDA |
@@ -100,21 +100,21 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 3 — MOTION SYSTEM
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] Lenis + GSAP ticker + `ScrollTrigger.update()` to'g'ri sinxronlangan (double-scroll bug yo'q)
-- [ ] `components/animation/Reveal.tsx`
-- [ ] `components/animation/TextReveal.tsx` + `SplitText.tsx`
-- [ ] `components/animation/ImageReveal.tsx` — `scale 1.15` → clip-path reveal → `scale 1`
-- [ ] `components/animation/Parallax.tsx` — turli tezliklar (bg 0.1 / image 0.25 / fruit 0.45)
-- [ ] `components/animation/MagneticButton.tsx` — maks 8–15px siljish, spring qaytish
-- [ ] `components/sections/Marquee.tsx` — cheksiz loop, hover'da sekinlashadi (to'xtamaydi)
-- [ ] `components/animation/HorizontalScroll.tsx` — pin + dinamik kenglik hisobi
-- [ ] `components/ui/Cursor.tsx` — faqat desktop; OPEN → / VIEW / PLAY / DRAG ↔ holatlari
-- [ ] `lib/animations.ts` — `fadeUp()`, `revealText()`, `imageReveal()`, `parallax()`, `magnetic()`, `horizontalScroll()`, `pageTransition()`
-- [ ] Har bir animatsiya `gsap.context()` ichida, unmount'da `revert()`
-- [ ] Sinov sahifasi (`/dev-motion`) yaratilib, hammasi tekshirilgan
-- [ ] `npm run lint && npm run build` — toza
+- [x] Lenis + GSAP ticker + `ScrollTrigger.update()` to'g'ri sinxronlangan (double-scroll bug yo'q)
+- [x] `components/animation/Reveal.tsx`
+- [x] `components/animation/TextReveal.tsx` + `SplitText.tsx`
+- [x] `components/animation/ImageReveal.tsx` — `scale 1.15` → clip-path reveal → `scale 1`
+- [x] `components/animation/Parallax.tsx` — turli tezliklar (bg 0.1 / image 0.25 / fruit 0.45)
+- [x] `components/animation/MagneticButton.tsx` — maks 8–15px siljish, spring qaytish
+- [x] `components/sections/Marquee.tsx` — cheksiz loop, hover'da sekinlashadi (to'xtamaydi)
+- [x] `components/animation/HorizontalScroll.tsx` — pin + dinamik kenglik hisobi
+- [x] `components/ui/Cursor.tsx` — faqat desktop; OPEN → / VIEW / PLAY / DRAG ↔ holatlari
+- [x] `lib/animations.ts` — `fadeUp()`, `revealText()`, `imageReveal()`, `parallax()`, `magnetic()`, `horizontalScroll()`, `pageTransition()`
+- [x] Har bir animatsiya `gsap.context()` ichida, unmount'da `revert()`
+- [x] Sinov sahifasi (`/dev-motion`) yaratilib, hammasi tekshirilgan
+- [x] `npm run lint && npm run build` — toza
 
 > Bu bosqich tugamaguncha Phase 4 ga o'tilmaydi. Motion tizimi butun saytning poydevori.
 
@@ -122,7 +122,7 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 4 — HERO
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `components/hero/Hero.tsx` — ~100vh
 - [ ] Tuzilma: BARFF → sarlavha → mahsulot → tag'lar → scroll indikatori
@@ -260,6 +260,38 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 3: Motion System ✅
+
+- **Lenis + GSAP ticker + ScrollTrigger** (`SmoothScrollProvider.tsx`): Lenis `autoRaf: false`
+  bilan ishga tushadi va faqat `gsap.ticker` tomonidan yuritiladi, `lenis.on('scroll',
+  ScrollTrigger.update)` ulanadi, `lagSmoothing(0)` qo'yiladi. `globals.css` ga Lenis'ning
+  majburiy CSS qoidalari qo'shildi (ularsiz native smooth scroll bilan to'qnashadi).
+  `useLockBodyScroll` endi Lenis'ni ham to'xtatadi — overlay yopilganda sahifa sakramaydi.
+- `lib/gsap.ts` — plaginlar (ScrollTrigger, SplitText) bir joyda ro'yxatdan o'tadi.
+- `lib/animations.ts` — `fadeUp()`, `revealText()`, `imageReveal()`, `parallax()`,
+  `magnetic()`, `horizontalScroll()`, `pageTransition()`. Barcha davomiylik/easing
+  `lib/motion.ts` dan; `MAGNETIC_RETURN`, `LENIS`, `MARQUEE`, `CURSOR`, `IMAGE_REVEAL`
+  konstantalari qo'shildi. Phase 2 dagi `PageTransition.tsx` shu `pageTransition()` ga o'tkazildi.
+- Komponentlar: `Reveal`, `TextReveal`, `SplitText` (GSAP SplitText ustida — `aria-label`
+  saqlanadi, bo'laklar `aria-hidden`), `ImageReveal`, `Parallax`, `MagneticButton`,
+  `HorizontalScroll`, `Marquee`, `Cursor` (OPEN → / VIEW / PLAY / DRAG ↔).
+- `/dev-motion` sinov sahifasi (noindex). **Phase 4 tugagunicha saqlanadi**, keyin o'chiriladi.
+- Brauzerda amalda tekshirildi (build emas): SplitText 4 qator + mask, Reveal stagger,
+  ImageReveal `inset(0%)` + scale 1, parallaks tezliklari ierarxiyasi (bg 11.6 < image 28.7 <
+  fruit 50.9 px), Marquee hover'da 30.7 → 7.5 px/700ms (sekinlashdi, to'xtamadi),
+  magnit 11.5px tortdi va 0 ga qaytdi, kursor 4 holati 64px gacha kengaydi,
+  HorizontalScroll 0 → −1632px (aynan `scrollWidth − innerWidth`),
+  `prefers-reduced-motion` da Lenis/kursor/marquee/pin o'chadi, modal ochilib-yopilganda
+  scroll sakramaydi, sahifadan chiqilganda `pin-spacer` qoldig'i qolmaydi. JS xatosi yo'q.
+- **Double-scroll tasdiqlandi:** bitta `wheel` (delta 300) → yakuniy `scrollY` 299 (600 emas),
+  12 kadr monotonik interpolyatsiya. Lenis glide paytida pin qilingan lenta `dx/dy = −1.0000`,
+  maksimal chetlanish `0.0000` (39 kadr) — ScrollTrigger Lenis bilan bir kadrda yangilanadi.
+- **Tuzatilgan bug:** kursorning Tailwind arbitrary variant'i (`[@media(hover:hover)and(pointer:fine)]`)
+  bo'shliqsiz yaroqsiz CSS chiqargan — element `display:none` da qolib, ayni paytda
+  `cursor: none` ishlagan, ya'ni desktopda umuman kursor yo'q edi. Nomlangan
+  `@custom-variant pointer-fine` ga o'tkazildi va `cursor: none` endi `Cursor` haqiqatda
+  ishga tushganda qo'yiladigan `data-custom-cursor` atributiga bog'landi.
 
 ### 2026-08-26 — Phase 2: Layout ✅
 

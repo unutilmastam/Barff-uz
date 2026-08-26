@@ -82,8 +82,48 @@ export const HERO_TIMELINE = {
   float: 1.5,
 } as const;
 
-/** Magnit tugma — maksimal siljish (px). */
+/** Magnit tugma — maksimal siljish (px). Spec chegarasi: 8–15px. */
 export const MAGNETIC_STRENGTH = 12;
+
+/** Magnit tugma qaytishi — spring (elastic) parametrlari. */
+export const MAGNETIC_RETURN = {
+  duration: 0.7,
+  ease: 'elastic.out(1, 0.4)',
+} as const;
+
+/** Lenis smooth scroll sozlamalari. */
+export const LENIS = {
+  /** Interpolyatsiya koeffitsienti — kichikroq = uzoqroq "sirpanish". */
+  lerp: 0.1,
+  wheelMultiplier: 1,
+  touchMultiplier: 1.5,
+  /** Mobilda native scroll qoldiriladi — barmoq bilan sun'iy inertsiya yomon his qilinadi. */
+  syncTouch: false,
+} as const;
+
+/** Marquee — cheksiz lenta. */
+export const MARQUEE = {
+  /** Bir nusxaning to'liq o'tish vaqti (s). Katta qiymat = sekinroq. */
+  duration: 24,
+  /** Hover'da tezlik shu koeffitsientga tushadi (0 EMAS — lenta to'xtamaydi). */
+  hoverTimeScale: 0.25,
+  /** Tezlik o'zgarishining yumshoqligi (s). */
+  tweenDuration: 0.6,
+} as const;
+
+/** Kursor (faqat desktop). */
+export const CURSOR = {
+  /** Kursorning sichqonchaga yetib olish tezligi (s). */
+  followDuration: 0.35,
+  size: 12,
+  activeSize: 64,
+} as const;
+
+/** Rasm reveal: `scale 1.15` → clip-path ochiladi → `scale 1`. */
+export const IMAGE_REVEAL = {
+  fromScale: 1.15,
+  toScale: 1,
+} as const;
 
 /** ScrollTrigger uchun standart boshlanish/tugash nuqtalari. */
 export const SCROLL_TRIGGER = {

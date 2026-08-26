@@ -25,7 +25,8 @@ Sayt bosqichma-bosqich quriladi; joriy bosqich `BUILD_PLAN.md` dagi `IN PROGRESS
 app/         Next.js App Router (sahifalar, layout, fonts.ts)
 components/  layout/ ui/ sections/ animation/ products/ hero/ providers/
 data/        kontent va tarjimalar (locales/) — komponentda hardcode YO'Q
-lib/         types.ts, motion.ts, i18n.ts, locale-store.ts, utils.ts
+lib/         types.ts, motion.ts, animations.ts, gsap.ts, i18n.ts, locale-store.ts,
+             smooth-scroll.ts, utils.ts
 hooks/       qayta ishlatiladigan React hook'lar
 styles/      globals.css (design system tokenlari)
 public/      images/ products/ fruits/ videos/ textures/ icons/ fonts/
@@ -61,6 +62,24 @@ Har bosqich oxirida `npm run lint && npm run build` majburiy va toza bo'lishi sh
 - Uzluksiz yangilanadigan animatsiyada (masalan Header scroll) `gsap.context()` har holat
   o'zgarishida qayta yaratilmaydi — bir marta quriladi, keyin `gsap.quickTo()` setter'i
   chaqiriladi. Aks holda ishlayotgan tween uzilib, element yarim yo'lda qotib qoladi.
+
+## Motion tizimi
+
+- GSAP va plaginlar **faqat `@/lib/gsap`** dan import qilinadi (`import { gsap, ScrollTrigger }`).
+  To'g'ridan-to'g'ri `from 'gsap'` yozilmaydi — plagin ro'yxatdan o'tmay qoladi.
+- Animatsiya retseptlari `lib/animations.ts` da: `fadeUp`, `revealText`, `imageReveal`,
+  `parallax`, `magnetic`, `horizontalScroll`, `pageTransition`. Yangi bo'lim uchun avval
+  shu yerga qaraladi, komponent ichida yangi timeline yozilmaydi.
+- **Lenis sinxronizatsiyasi** (`SmoothScrollProvider.tsx`) uchta shartga tayanadi va ular
+  buzilsa double-scroll bug qaytadi: Lenis `autoRaf: false` (rAF ni faqat `gsap.ticker`
+  yuritadi), `lenis.on('scroll', ScrollTrigger.update)`, `gsap.ticker.lagSmoothing(0)`.
+  `globals.css` dagi `html.lenis` qoidalari ham majburiy.
+- Overlay ochilganda `useLockBodyScroll` Lenis'ni to'xtatadi — `overflow: hidden` yolg'iz
+  o'zi yetarli emas.
+- Sinov sahifasi: `/dev-motion` (noindex). Phase 4 tugagach o'chiriladi.
+- Tailwind'da media-query variantini **arbitrary** ko'rinishda yozmang
+  (`[@media(hover:hover)and(pointer:fine)]` — bo'shliqlar yo'qolib CSS yaroqsiz bo'ladi).
+  `globals.css` dagi `@custom-variant pointer-fine` ishlatiladi.
 
 ## Til tizimi (i18n)
 
