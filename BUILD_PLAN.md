@@ -41,8 +41,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 | Bosqich | Nomi | Holat |
 |---------|------|-------|
-| 1 | Setup & Design System | **IN PROGRESS** |
-| 2 | Layout (Header / Menu / Footer) | KUTMOQDA |
+| 1 | Setup & Design System | ✅ BAJARILDI (2026-08-26) |
+| 2 | Layout (Header / Menu / Footer) | **IN PROGRESS** |
 | 3 | Motion System | KUTMOQDA |
 | 4 | Hero | KUTMOQDA |
 | 5 | Marquee / Categories / Showcase | KUTMOQDA |
@@ -58,21 +58,21 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 1 — SETUP & DESIGN SYSTEM
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] Next.js (latest stable) + TypeScript + Tailwind CSS loyihasi
-- [ ] Dependencies: `gsap`, `lenis`, `framer-motion`, `lucide-react`
-- [ ] Papka strukturasi: `app/`, `components/`, `data/`, `lib/`, `hooks/`, `styles/`, `public/`
-- [ ] `public/` ichida: `images/`, `products/`, `fruits/`, `videos/`, `textures/`, `icons/`, `fonts/`
-- [ ] `globals.css` — CSS o'zgaruvchilar (`--background`, `--foreground`, `--primary`, `--secondary`, `--accent`, `--radius-*`, `--container`)
-- [ ] Typography: display shrift (Satoshi / Geist / Manrope) + body shrift (Inter / Geist Sans), `next/font` orqali
-- [ ] Typography scale: hero `clamp(4rem, 10vw, 12rem)`, section `clamp(3rem, 7vw, 9rem)`, body 16–22px
-- [ ] Responsive container utility: `width: min(100% - 40px, 1600px); margin-inline: auto;`
-- [ ] `lib/motion.ts` — global motion konstantalari (micro 250–400ms, ui 400–700ms, section 800–1200ms, hero 1000–2000ms; easing: power2/3/4.out, expo.out)
-- [ ] Bo'sh tiplangan data fayllari: `data/products.ts`, `categories.ts`, `news.ts`, `navigation.ts`, `social.ts`
-- [ ] `Product` tipi spec'dagidek yozilgan
-- [ ] `package.json` da `lint` va `build` scriptlari mavjud
-- [ ] `npm run lint && npm run build` — toza
+- [x] Next.js (latest stable) + TypeScript + Tailwind CSS loyihasi
+- [x] Dependencies: `gsap`, `lenis`, `framer-motion`, `lucide-react`
+- [x] Papka strukturasi: `app/`, `components/`, `data/`, `lib/`, `hooks/`, `styles/`, `public/`
+- [x] `public/` ichida: `images/`, `products/`, `fruits/`, `videos/`, `textures/`, `icons/`, `fonts/`
+- [x] `globals.css` — CSS o'zgaruvchilar (`--background`, `--foreground`, `--primary`, `--secondary`, `--accent`, `--radius-*`, `--container`)
+- [x] Typography: display shrift (Satoshi / Geist / Manrope) + body shrift (Inter / Geist Sans), `next/font` orqali
+- [x] Typography scale: hero `clamp(4rem, 10vw, 12rem)`, section `clamp(3rem, 7vw, 9rem)`, body 16–22px
+- [x] Responsive container utility: `width: min(100% - 40px, 1600px); margin-inline: auto;`
+- [x] `lib/motion.ts` — global motion konstantalari (micro 250–400ms, ui 400–700ms, section 800–1200ms, hero 1000–2000ms; easing: power2/3/4.out, expo.out)
+- [x] Bo'sh tiplangan data fayllari: `data/products.ts`, `categories.ts`, `news.ts`, `navigation.ts`, `social.ts`
+- [x] `Product` tipi spec'dagidek yozilgan
+- [x] `package.json` da `lint` va `build` scriptlari mavjud
+- [x] `npm run lint && npm run build` — toza
 
 **MUHIM:** bu bosqichda Header, Hero yoki boshqa vizual komponentlar qurilmaydi.
 
@@ -80,7 +80,7 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 2 — LAYOUT
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `components/layout/Header.tsx` — shaffof boshlanadi, scroll'dan keyin blur + kichrayadi
 - [ ] Header scroll xatti-harakati: pastga → yashirin, tepaga → ko'rinadi (GSAP)
@@ -261,6 +261,29 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 <!-- LOG START -->
 
+### 2026-08-26 — Phase 1: Setup & Design System ✅
+
+- Next.js 16 (App Router) + TypeScript (strict) + Tailwind CSS v4 skeleti ildizda qurildi
+  (`create-next-app` emas — papka bo'sh emas edi). Deps: `gsap`, `lenis`, `framer-motion`,
+  `lucide-react`. Konfiglar: `tsconfig.json` (`@/*` alias), `next.config.ts` (AVIF/WebP),
+  `postcss.config.mjs`, `eslint.config.mjs` (Next 16 native flat config), `.gitignore`.
+- Design system: `styles/globals.css` — `@theme` ichida rang/radius/container/typography/motion
+  tokenlari, `container-barff`, `text-hero`, `text-section` utility'lari, `prefers-reduced-motion`
+  bazasi. Shriftlar `next/font/google` orqali: Manrope (display) + Inter (body), self-hosted.
+- `lib/motion.ts` (DURATION / EASE / STAGGER / PARALLAX / HERO_TIMELINE), `lib/types.ts`
+  (`Product`, `Category`, `NewsItem`, `NavItem`, `SocialLink`, `Localized` …), bo'sh tiplangan
+  `data/{products,categories,news,navigation,social}.ts` selector funksiyalari bilan.
+- Fayl tartibi: `BUILD PLAN.md` → `BUILD_PLAN.md` (0-bo'lim shu nomni talab qiladi), bayt-ma-bayt
+  bir xil dublikat `BUILD PLAN-1.md` o'chirildi, `CLAUDE.md` yaratildi (1-qoida uchun majburiy).
+  `index.html` + `CNAME` (jonli "tez orada" sahifasi) tegilmadi.
+- Kontent o'ylab topilmadi: mahsulot/kategoriya/yangilik massivlari bo'sh, ranglar neytral
+  placeholder, hamma joyda `[CLIENT CONTENT REQUIRED]`. Yagona real ma'lumot — mavjud
+  `index.html` dan olingan Instagram va Telegram havolalari.
+- `npm run lint` va `npm run build` — toza. Vizual komponentlar qurilmadi (Phase 1 chegarasi).
+- **Qoldi / bloklovchi:** to'liq mahsulot spetsifikatsiyasi (spec) repoda yo'q — `Product` tipi
+  Phase 5/8 talablariga qarab yozildi, spec kelgach aniqlashtiriladi.
+
+
 <!-- LOG END -->
 
 ---
@@ -278,3 +301,5 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] Aloqa ma'lumotlari (telefon, email, manzil)
 - [ ] Ijtimoiy tarmoq havolalari
 - [ ] Sotuv nuqtalari ro'yxati
+- [ ] To'liq mahsulot spetsifikatsiyasi (spec) — `Product` tipidagi maydonlarni tasdiqlash uchun
+- [ ] `index.html` ("tez orada") qachon Next.js sayti bilan almashtirilsin?

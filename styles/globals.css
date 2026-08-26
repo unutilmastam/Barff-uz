@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   BARFF — DESIGN SYSTEM TOKENS
+   Ranglar vaqtinchalik (neytral placeholder).
+   Brend HEX ranglari kelgach faqat shu blok almashtiriladi.
+   [CLIENT CONTENT REQUIRED] — brand colors (HEX)
+   ========================================================================== */
+
+@theme {
+  /* --- Surface / text ------------------------------------------------- */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-muted: #6b6b6b;
+  --color-line: #e4e4e4;
+
+  /* --- Brand (placeholder) -------------------------------------------- */
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f4f4f4;
+  --color-secondary-foreground: #0a0a0a;
+  --color-accent: #7a7a7a;
+  --color-accent-foreground: #ffffff;
+
+  /* --- Radius ---------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 40px;
+  --radius-full: 9999px;
+
+  /* --- Layout ---------------------------------------------------------- */
+  --container: 1600px;
+  --container-gutter: 20px;
+
+  /* --- Typography ------------------------------------------------------ */
+  --font-display: var(--font-display-family), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-family), ui-sans-serif, system-ui, sans-serif;
+
+  --text-hero: clamp(4rem, 10vw, 12rem);
+  --text-hero--line-height: 0.88;
+  --text-hero--letter-spacing: -0.03em;
+
+  --text-section: clamp(3rem, 7vw, 9rem);
+  --text-section--line-height: 0.92;
+  --text-section--letter-spacing: -0.025em;
+
+  --text-title: clamp(2rem, 4vw, 3.5rem);
+  --text-title--line-height: 1.05;
+  --text-title--letter-spacing: -0.02em;
+
+  --text-body: clamp(1rem, 1.15vw, 1.375rem);
+  --text-body--line-height: 1.55;
+
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.08em;
+
+  /* --- Motion (lib/motion.ts bilan bir xil qiymatlar) ------------------ */
+  --duration-micro: 300ms;
+  --duration-ui: 550ms;
+  --duration-section: 1000ms;
+  --duration-hero: 1500ms;
+
+  --ease-out-power2: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-power3: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-out-power4: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 3px;
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@utility container-barff {
+  width: min(100% - calc(var(--container-gutter) * 2), var(--container));
+  margin-inline: auto;
+}
+
+@utility text-hero {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  line-height: var(--text-hero--line-height);
+  letter-spacing: var(--text-hero--letter-spacing);
+}
+
+@utility text-section {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  line-height: var(--text-section--line-height);
+  letter-spacing: var(--text-section--letter-spacing);
+}
+
+/* ==========================================================================
+   REDUCED MOTION — Phase 12 da to'liq kengaytiriladi
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
