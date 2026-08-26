@@ -22,6 +22,15 @@ export const uz = {
     categories: 'Kategoriyalar',
     products: 'Mahsulotlar',
     showcase: 'Kolleksiya',
+    philosophy: 'Falsafa',
+    about: 'Brend haqida',
+    story: 'Tarix',
+    process: 'Jarayon',
+    fruitToBottle: 'Mevadan shishagacha',
+  },
+  process: {
+    fruit: 'MEVA',
+    bottle: 'SHISHA',
   },
   menu: {
     title: 'MENYU',

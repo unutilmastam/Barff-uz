@@ -46,8 +46,8 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 | 3 | Motion System | ✅ BAJARILDI (2026-08-26) |
 | 4 | Hero | ✅ BAJARILDI (2026-08-26) |
 | 5 | Marquee / Categories / Showcase | ✅ BAJARILDI (2026-08-26) |
-| 6 | Philosophy / About / Story / Process | **IN PROGRESS** |
-| 7 | Video / Reels / News / WhereToBuy / Contact | KUTMOQDA |
+| 6 | Philosophy / About / Story / Process | ✅ BAJARILDI (2026-08-26) |
+| 7 | Video / Reels / News / WhereToBuy / Contact | **IN PROGRESS** |
 | 8 | Ichki sahifalar | KUTMOQDA |
 | 9 | Responsive | KUTMOQDA |
 | 10 | SEO | KUTMOQDA |
@@ -156,21 +156,21 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 
 ## PHASE 6 — PHILOSOPHY / ABOUT / STORY / PROCESS
 
-**Status:** IN PROGRESS
+**Status:** ✅ BAJARILDI (2026-08-26)
 
-- [ ] `PhilosophySection.tsx` — 4 ta qiymat, hover'da rasm reveal, matn siljishi, strelka aylanishi
-- [ ] **FRUIT → BOTTLE** bo'limi (bosh sahifa tartibida 08) — meva shishaga aylanadigan scroll-driven vizual o'tish
-- [ ] `AboutSection.tsx` — katta editorial matn, har qator pastdan chiqadi (clip-path + transform, faqat opacity EMAS)
-- [ ] `StorySection.tsx` — desktop horizontal timeline, mobil vertikal
-- [ ] `ProcessSection.tsx` — FRUIT → SELECTION → PROCESS → QUALITY → BOTTLE, scroll-driven
-- [ ] Sana, faktlar, ishlab chiqarish da'volari — `[CLIENT CONTENT REQUIRED]`
-- [ ] `npm run lint && npm run build` — toza
+- [x] `PhilosophySection.tsx` — 4 ta qiymat, hover'da rasm reveal, matn siljishi, strelka aylanishi
+- [x] **FRUIT → BOTTLE** bo'limi (bosh sahifa tartibida 08) — meva shishaga aylanadigan scroll-driven vizual o'tish
+- [x] `AboutSection.tsx` — katta editorial matn, har qator pastdan chiqadi (clip-path + transform, faqat opacity EMAS)
+- [x] `StorySection.tsx` — desktop horizontal timeline, mobil vertikal
+- [x] `ProcessSection.tsx` — FRUIT → SELECTION → PROCESS → QUALITY → BOTTLE, scroll-driven
+- [x] Sana, faktlar, ishlab chiqarish da'volari — `[CLIENT CONTENT REQUIRED]`
+- [x] `npm run lint && npm run build` — toza
 
 ---
 
 ## PHASE 7 — VIDEO / REELS / NEWS / WHERE TO BUY / CONTACT
 
-**Status:** KUTMOQDA
+**Status:** IN PROGRESS
 
 - [ ] `VideoSection.tsx` — full-width, muted, PLAY kursor, klikda fullscreen modal, mobil uchun poster
 - [ ] `ReelsSection.tsx` — 9:16 kartalar, desktop horizontal scroll, mobil swipe, hover'da muted playback
@@ -260,6 +260,42 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 > Claude Code har bosqich oxirida shu yerga 1–3 qator qo'shadi: sana, bosqich, nima qilindi, nima qoldi.
 
 <!-- LOG START -->
+
+### 2026-08-26 — Phase 6: Philosophy / About / Story / Process ✅
+
+- `PhilosophySection.tsx` — 4 ta qiymat. Hover'da uchtasi birga: rasm ochiladi (kursor
+  ortidan VERTIKAL yuradi), matn 16px o'ngga siljiydi, strelka 45° aylanadi va qorayadi.
+  Rasm bo'limning bo'sh o'ng tomoniga bog'langan — kursor markazida tursa qiymat matnini
+  bekitib qo'yardi. Faqat `hover: hover and pointer: fine` da (`gsap.matchMedia`).
+- **FRUIT → BOTTLE** (`FruitToBottle.tsx`, bosh sahifada 08) — pin + scrub: meva kichrayadi
+  va buriladi, rang dog'i meva rangidan mahsulot rangiga o'tadi, shisha pastdan clip-path
+  bilan to'ladi, yozuv MEVA → SHISHA ga almashadi. Soxta 3D emas (14-qoida): shaffof fonli
+  rasm + GSAP transform.
+- `AboutSection.tsx` — katta editorial matn; har qator `SplitText` maskasidan (`overflow: clip`)
+  transform bilan ko'tariladi. Faqat `opacity` bilan ochish ishlatilmadi (spec talabi) —
+  brauzerda tasdiqlandi: `overflow: clip` + ichki `transform`.
+- `StorySection.tsx` — desktop gorizontal vaqt o'qi (pin + scroll, nuqta va bog'lovchi chiziq),
+  mobil vertikal ro'yxat. **SANALAR O'YLAB TOPILMADI**: `year: null` → interfeysda
+  `[CLIENT CONTENT REQUIRED]` ko'rinadi.
+- `ProcessSection.tsx` — FRUIT → SELECTION → PROCESS → QUALITY → BOTTLE zanjiri, scroll bilan
+  to'ladigan progres chizig'i, har bosqich o'z navbatida faollashadi.
+- Kontent: `data/{philosophy,about,story,process}.ts`. Qiymat nomlari neytral ("QIYMAT 01"),
+  bosqich nomlari spec'dan olingan tuzilma, tavsiflar esa aniq vaqtinchalik matn.
+  Ishlab chiqarish da'volari yozilmadi. Sahifada 9 ta `[CLIENT CONTENT REQUIRED]` belgisi.
+- **Tuzatilgan ikki nuqson:**
+  1. FRUIT → BOTTLE o'tishining o'rtasida "o'lik zona" bor edi — meva so'nib bo'lgan, shisha
+     hali ochilmagan (o'lchandi: max ko'rinuvchi qiymat 0.17). Sabab: `inOut` easing o'rtada
+     tez o'zgargani uchun ikkala element past nuqtada kesishardi. So'nish/ochilish uchun
+     `ease: none` ga o'tkazildi va vaqtlar ustma-ust qilindi — endi o'lik zona yo'q.
+  2. Tailwind v4 da `pointer-fine:` variant boshqa variant bilan stack qilinsa media-query
+     TUSHIB QOLADI (`pointer-fine:group-hover:...` uchun `@media` yaratilmagan). Chalg'ituvchi
+     prefiks olib tashlandi — `group-hover` allaqachon hover'ga bog'liq.
+- Brauzerda tekshirildi: philosophy hover'ning uchala effekti (`translate: 16px`, `rotate: 45deg`),
+  about maskasi, FRUIT→BOTTLE 9 nuqtada o'lik zonasiz o'tishi, story gorizontal masofasi
+  (328px → 848px ga kengaytirildi), mobil (390×844): 2 pin, story vertikal, hover rasm yashirin,
+  overflow yo'q; `prefers-reduced-motion` da pin yo'q, hamma kontent to'liq ko'rinadi. JS xatosi yo'q.
+- **DIQQAT:** Tailwind v4 `transform` emas, alohida `translate`/`rotate` CSS xossalarini yozadi —
+  test yozganda `getComputedStyle(el).transform` ni o'qish noto'g'ri natija beradi.
 
 ### 2026-08-26 — Phase 5: Marquee / Categories / Product Showcase ✅
 
@@ -433,7 +469,10 @@ Bu qoidalar barcha bosqichlarda amal qiladi. Hech qachon buzilmaydi.
 - [ ] Real mahsulot nomlari va kategoriyalar
 - [ ] Brend ranglari (HEX)
 - [ ] Zavod / ishlab chiqarish videosi
-- [ ] Kompaniya tarixi va sanalar
+- [ ] Kompaniya tarixi va sanalar (`data/story.ts` dagi `year` maydonlari hozir `null`)
+- [ ] Brend qiymatlari (4 ta) va ularning tavsiflari (`data/philosophy.ts`)
+- [ ] Ishlab chiqarish jarayoni tavsifi — har bosqichda nima qilinadi (`data/process.ts`)
+- [ ] ABOUT bo'limi uchun editorial matn (`data/about.ts`)
 - [ ] Aloqa ma'lumotlari (telefon, email, manzil)
 - [ ] Ijtimoiy tarmoq havolalari
 - [ ] Sotuv nuqtalari ro'yxati

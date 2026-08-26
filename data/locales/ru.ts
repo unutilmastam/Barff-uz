@@ -18,6 +18,15 @@ export const ru: Dictionary = {
     categories: 'Категории',
     products: 'Продукция',
     showcase: 'Коллекция',
+    philosophy: 'Философия',
+    about: 'О бренде',
+    story: 'История',
+    process: 'Процесс',
+    fruitToBottle: 'От фрукта к бутылке',
+  },
+  process: {
+    fruit: 'ФРУКТ',
+    bottle: 'БУТЫЛКА',
   },
   menu: {
     title: 'МЕНЮ',

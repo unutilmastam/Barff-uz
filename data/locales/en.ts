@@ -18,6 +18,15 @@ export const en: Dictionary = {
     categories: 'Categories',
     products: 'Products',
     showcase: 'Collection',
+    philosophy: 'Philosophy',
+    about: 'About',
+    story: 'Story',
+    process: 'Process',
+    fruitToBottle: 'From fruit to bottle',
+  },
+  process: {
+    fruit: 'FRUIT',
+    bottle: 'BOTTLE',
   },
   menu: {
     title: 'MENU',

@@ -145,6 +145,40 @@ export interface HeroFruit {
   mobileY?: number;
 }
 
+/** Brend qiymati (PHILOSOPHY bo'limi). */
+export interface Value {
+  id: string;
+  /** Ro'yxatdagi katta raqam: "01". */
+  index: string;
+  title: Localized;
+  description: Localized;
+  /** Hover'da ochiladigan rasm. */
+  image?: ImageAsset;
+}
+
+/**
+ * Tarixdagi bosqich (STORY bo'limi).
+ * `year` — sana. Mijoz tasdiqlamaguncha `null`, interfeysda `[CLIENT CONTENT REQUIRED]`.
+ */
+export interface Milestone {
+  id: string;
+  year: string | null;
+  title: Localized;
+  description: Localized;
+  image?: ImageAsset;
+}
+
+/** Ishlab chiqarish bosqichi (PROCESS bo'limi). */
+export interface ProcessStep {
+  id: string;
+  index: string;
+  /** Bosqich nomi — spec belgilagan: FRUIT / SELECTION / PROCESS / QUALITY / BOTTLE. */
+  label: string;
+  title: Localized;
+  description: Localized;
+  image?: ImageAsset;
+}
+
 /** Sotuv nuqtasi (Phase 7 — WHERE TO BUY). */
 export interface StoreLocation {
   id: string;

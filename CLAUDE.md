@@ -102,6 +102,22 @@ Bular buzilsa pin jimgina ishlamay qo'yadi — build ham, lint ham xato bermaydi
 Grid item ichida **foizli balandlik** (`h-[78%]`) ham ishonchsiz — rasm konteynerdan kattaroq
 render bo'lib kesiladi. Aniq o'lchamli absolyut o'ram + `object-contain` ishlatiladi.
 
+## Tailwind v4 — ikkita tuzoq
+
+- **`transform` emas, `translate` / `rotate` / `scale`.** Tailwind v4 alohida CSS xossalarini
+  yozadi. Test yoki debug paytida `getComputedStyle(el).transform` ni o'qish `none` qaytaradi,
+  garchi element siljigan bo'lsa ham — `getComputedStyle(el).translate` o'qiladi.
+- **Maxsus variantni boshqa variant bilan stack qilmang.** `pointer-fine:group-hover:...` da
+  media-query jimgina tushib qoladi (`@media` generatsiya qilinmaydi). Bitta variant sifatida
+  ishlatilsa (`pointer-fine:flex`) to'g'ri ishlaydi.
+
+## Krossfeyd o'tishlari
+
+Ikkita element bir-birini almashtirganda (FRUIT → BOTTLE, ProductShowcase) so'nish va ochilish
+uchun **`ease: none`** ishlatiladi va vaqtlar ustma-ust qo'yiladi. `inOut` egri chizig'i
+o'rtada tez o'zgargani uchun ikkala element past opacity nuqtasida kesishadi va ekranda
+"o'lik zona" — bo'shliq paydo bo'ladi.
+
 ## Til tizimi (i18n)
 
 - Lug'atlar: `data/locales/{uz,ru,en}.ts`. `uz.ts` — manba nusxa, `Dictionary` tipi shundan
