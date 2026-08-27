@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="Placeholder leaf">
-  <ellipse cx="160" cy="298" rx="80" ry="9" fill="#000" opacity=".10"/>
-  <path d="M60 240 C60 130 150 56 262 56 C262 168 172 244 60 240 Z" fill="#5CA83F"/>
-  <path d="M60 240 C60 130 150 56 262 56 C218 92 150 150 60 240 Z" fill="#7CC45C" opacity=".75"/>
-  <path d="M60 242 C130 178 200 118 262 58" fill="none" stroke="#3C7A28" stroke-width="5" stroke-linecap="round"/>
-</svg>
