@@ -1,0 +1,21 @@
+{
+  "name": "@barff/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ilovalar va API o'rtasidagi umumiy TypeScript tiplari va enum'lari",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@barff/config": "workspace:*",
+    "vitest": "^3.2.4"
+  }
+}

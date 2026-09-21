@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // CommonJS: Next.js (bundler) ham, NestJS (native CJS) ham muammosiz o'qiydi.
+    // ESM-only qilinsa NestJS tomonda qo'shimcha sozlash kerak bo'lardi.
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false
+  }
+
+  // DIQQAT: `include`, `exclude`, `outDir` va `rootDir` bu yerda berilmaydi.
+  // TypeScript ularni presetni EMAS, balki presetni e'lon qilgan fayl joylashgan
+  // papkaga nisbatan hisoblaydi — shuning uchun har bir paket o'zi ko'rsatadi.
+}

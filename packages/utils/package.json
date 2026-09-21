@@ -1,0 +1,24 @@
+{
+  "name": "@barff/utils",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Umumiy yordamchi funksiyalar: pul, sana, slug, formatlash",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@barff/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@barff/config": "workspace:*",
+    "vitest": "^3.2.4"
+  }
+}

@@ -2,3 +2,8 @@ packages:
   - 'apps/*'
   - 'services/*'
   - 'packages/*'
+
+# esbuild o'z binarini o'rnatish uchun postinstall skriptini ishga tushiradi.
+# pnpm 10 da skriptlar sukut bo'yicha bloklangani uchun aniq ruxsat beramiz.
+onlyBuiltDependencies:
+  - esbuild

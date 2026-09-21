@@ -1,0 +1,17 @@
+{
+  "name": "@barff/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Umumiy tsconfig, ESLint va Tailwind presetlari",
+  "files": [
+    "tsconfig",
+    "eslint",
+    "tailwind"
+  ],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/library.json": "./tsconfig/library.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./tailwind/theme.css": "./tailwind/theme.css"
+  }
+}
