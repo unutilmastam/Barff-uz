@@ -1,0 +1,71 @@
+/*
+ * BARFF dizayn tizimi — Tailwind v4 (CSS-first) uchun umumiy tokenlar.
+ * CLAUDE.md §16: chuqur qora/ko'mir fon qatlamlari, BARFF yashil akssenti,
+ * ingichka chegaralar, shisha (glass) yuzalar, katta tipografika.
+ *
+ * Ishlatish (S06 dan boshlab, har bir ilovaning global CSS faylida):
+ *   @import 'tailwindcss';
+ *   @import '@barff/config/tailwind/theme.css';
+ *
+ * DIQQAT: aksent yashilning aniq qiymati BARFF brendbukidan olinishi kerak.
+ * Hozirgi qiymat — REPLACE_WITH_REAL_DATA (docs/OPEN-QUESTIONS.md, Q2).
+ */
+
+@theme {
+  /* Fon qatlamlari: 900 eng chuqur, 600 eng ochiq sirt. */
+  --color-ink-900: #050607;
+  --color-ink-800: #0a0c0e;
+  --color-ink-700: #111417;
+  --color-ink-600: #191d21;
+
+  /* Matn */
+  --color-fg: #f4f6f5;
+  --color-fg-muted: #9aa3a0;
+  --color-fg-subtle: #626a68;
+
+  /* BARFF yashil — REPLACE_WITH_REAL_DATA */
+  --color-brand-50: #eafaf0;
+  --color-brand-200: #a8e8c2;
+  --color-brand-400: #3fcc7c;
+  --color-brand-500: #16b45f;
+  --color-brand-600: #0e8f4a;
+  --color-brand-700: #0a6c38;
+
+  /* Holat ranglari (order/delivery/lead statuslari uchun) */
+  --color-success: #16b45f;
+  --color-warning: #d9a21b;
+  --color-danger: #d94b3f;
+  --color-info: #3b8fd9;
+
+  /* Ingichka chegaralar va shisha yuzalar */
+  --color-line: #ffffff14;
+  --color-line-strong: #ffffff29;
+  --color-glass: #ffffff0a;
+
+  /* Tipografika: aniq shriftlar S06 da ilovaga ulanadi (next/font). */
+  --font-sans:
+    var(--font-barff-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-barff-display), var(--font-barff-sans), ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* Harakat — CLAUDE.md §17 */
+  --ease-barff: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 720ms;
+}
+
+/*
+ * CLAUDE.md §17: animatsiya hech qachon kontentni tushunishning yagona yo'li
+ * bo'lmasligi kerak. Foydalanuvchi harakatni kamaytirishni so'rasa — o'chiramiz.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

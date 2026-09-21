@@ -1,0 +1,26 @@
+{
+  "name": "@barff/validation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Web, dealer va admin ilovalari hamda API uchun umumiy Zod sxemalari",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@barff/types": "workspace:*",
+    "@barff/utils": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@barff/config": "workspace:*",
+    "vitest": "^3.2.4"
+  }
+}
