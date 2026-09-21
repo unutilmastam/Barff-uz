@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnp.*
+.yarn/
+
+# builds
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# env — HECH QACHON commit qilinmaydi (CLAUDE.md §12)
+.env
+.env.*
+!.env.example
+
+# test / coverage
+coverage/
+.nyc_output/
+
+# prisma
+prisma/*.db
+prisma/*.db-journal
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# local docker volumes
+.docker-data/

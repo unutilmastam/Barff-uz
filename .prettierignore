@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+pnpm-lock.yaml
+
+# Jonli "tez orada" sahifasi — qo'lda yozilgan, formatlanmaydi.
+index.html
+
+# Loyiha hujjatlari mijoz tomonidan yuritiladi.
+CLAUDE.md
+ROADMAP.md
