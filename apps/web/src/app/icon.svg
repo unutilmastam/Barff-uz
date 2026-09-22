@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!--
+    VAQTINCHALIK belgi. BARFF ning haqiqiy logotipi olinganda almashtiriladi
+    (docs/OPEN-QUESTIONS.md, Q2). Hozircha favicon 404 bermasligi uchun.
+  -->
+  <title>BARFF</title>
+  <rect width="32" height="32" rx="7" fill="#050607" />
+  <text x="16" y="22" font-family="system-ui, sans-serif" font-size="17" font-weight="700" text-anchor="middle" fill="#16b45f">B</text>
+</svg>

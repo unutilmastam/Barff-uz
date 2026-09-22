@@ -54,7 +54,7 @@ pnpm dev                 # barcha app'lar (turbo)
 | ---------------- | ---- | --------------------------------- |
 | API (NestJS)     | 3000 | http://localhost:3000/api/v1      |
 | Swagger          | 3000 | http://localhost:3000/api/v1/docs |
-| Web (`barff.uz`) | 3001 | http://localhost:3001             |
+| Web (`barff.uz`) | 3001 | http://localhost:3001/uz          |
 | Dealer           | 3002 | http://localhost:3002             |
 | Admin            | 3003 | http://localhost:3003             |
 | Delivery PWA     | 3004 | http://localhost:3004             |
@@ -63,7 +63,7 @@ pnpm dev                 # barcha app'lar (turbo)
 | MinIO (S3)       | 9000 | http://localhost:9000             |
 | MinIO konsoli    | 9001 | http://localhost:9001             |
 
-> Web/dealer/admin/delivery portlari S06 va keyingi qadamlarda app'lar qo'shilgach biriktiriladi.
+> Dealer/admin/delivery portlari o'sha app'lar qo'shilgach biriktiriladi (S24, S18, S33).
 
 ## Struktura
 
@@ -226,6 +226,27 @@ o'zgarishi audit jurnaliga yoziladi (CLAUDE.md §23). Parol va token'lar
 jurnalga ham, loglarga ham **hech qachon** tushmaydi — buni testlar chiqish
 oqimlarini ushlab turib tekshiradi.
 
+## Web ilovasi (`apps/web`)
+
+```bash
+pnpm --filter @barff/web dev     # http://localhost:3001/uz
+```
+
+Til marshrutlash `/uz | /ru | /en`, standart til — `uz`. Til segmentisiz
+kelgan so'rov `middleware.ts` orqali yo'naltiriladi; tartib: yo'ldagi
+segment -> cookie -> brauzer sozlamasi -> `uz`.
+
+Matnlar **kalitlar orqali** keladi (`src/i18n/messages/`). O'zbekcha fayl —
+manba: uning tipiga boshqa tillar bo'ysunadi, shuning uchun tarjima
+qilinmagan kalit **kompilyatsiyada** ushlanadi, ishga tushirilganda emas.
+
+Tashqi i18n kutubxonasi qasddan qo'shilmadi: S06 ga marshrutlash va
+kalitlar yetarli, to'liq strategiya esa (bazadagi ko'p tilli kontent bilan
+birga) S15 da hal qilinadi.
+
+> Sahifalar hozircha `noindex`: placeholder kontent qidiruvga tushmasligi
+> kerak (CLAUDE.md §19). `NEXT_PUBLIC_ALLOW_INDEXING=true` buni yoqadi.
+
 ## CI va Docker
 
 `.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:
@@ -239,11 +260,14 @@ Qadamlar tartibi muhim: **build** birinchi keladi, chunki turbo shu paytda
 Prisma klientini yaratadi va seed `@barff/types` ni qurilgan `dist` dan
 import qiladi.
 
-### API tasviri
+### Tasvirlar
 
 ```bash
 docker build -f services/api/Dockerfile -t barff-api .
 docker run --rm -p 3000:3000 --env-file .env barff-api
+
+docker build -f apps/web/Dockerfile -t barff-web .
+docker run --rm -p 3001:3001 barff-web
 ```
 
 Tasvir `node` foydalanuvchisi ostida ishlaydi, root emas (CLAUDE.md §12).

@@ -21,7 +21,13 @@
   /* Matn */
   --color-fg: #f4f6f5;
   --color-fg-muted: #9aa3a0;
-  --color-fg-subtle: #626a68;
+  /*
+   * Eng past kontrastli matn rangi. Qiymat WCAG AA (4.5:1) chegarasiga
+   * qarab tanlangan: oldingi #626a68 atigi 3.65:1 berardi va axe testi
+   * uni haqli ravishda rad etdi. Bu yerdagi har qanday o'zgarish
+   * `contrast.test.ts` dan o'tishi shart.
+   */
+  --color-fg-subtle: #7a827f;
 
   /* BARFF yashil — REPLACE_WITH_REAL_DATA */
   --color-brand-50: #eafaf0;

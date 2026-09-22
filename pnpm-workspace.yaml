@@ -16,3 +16,5 @@ onlyBuiltDependencies:
   - prisma
   - '@prisma/client'
   - '@prisma/engines'
+  # unrs-resolver — eslint-config-next ning native resolver'i.
+  - unrs-resolver
