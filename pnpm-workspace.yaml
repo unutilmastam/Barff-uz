@@ -7,3 +7,6 @@ packages:
 # pnpm 10 da skriptlar sukut bo'yicha bloklangani uchun aniq ruxsat beramiz.
 onlyBuiltDependencies:
   - esbuild
+  # @swc/core — NestJS dekoratorlari uchun test transformeri (native binar).
+  # @scarf/scarf QASDDAN ro'yxatga kiritilmagan: u telemetriya yuboradi.
+  - '@swc/core'
