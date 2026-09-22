@@ -276,6 +276,36 @@ Ilovaning `globals.css` fayli `@source` bilan `packages/ui/src` ni
 ko'rsatishi **shart** — Tailwind v4 ishchi maydondagi boshqa paketlarni
 o'zi topmaydi va usiz komponentlar uslubsiz chiqadi.
 
+## Media va fayl saqlash
+
+`POST /media` quvuri (CLAUDE.md §20):
+
+```
+hajm -> imzo bo'yicha tur -> qayta ishlash -> obyekt saqlash -> metadata
+```
+
+Tartib muhim. Tur **fayl mazmuni** bo'yicha aniqlanadi — kengaytma ham,
+`Content-Type` sarlavhasi ham mijoz beradigan ma'lumot. `.png` deb
+nomlangan HTML saqlanib, keyin brauzerda ochilsa, bu saqlangan XSS
+bo'lardi.
+
+Qabul qilinadi: JPEG, PNG, WebP, AVIF, PDF. SVG **qabul qilinmaydi** — u
+ichida skript saqlashi mumkin.
+
+| Xususiyat                | Holat                                                              |
+| ------------------------ | ------------------------------------------------------------------ |
+| Standart ko'rinuvchanlik | `PRIVATE` — ommaviylik aniq so'ralishi kerak                       |
+| Maxfiy fayl              | faqat imzolangan, muddatli havola orqali                           |
+| Bucket                   | hech qachon ommaviy emas; ommaviy fayllar CDN orqali               |
+| Obyekt kaliti            | `id` va aniqlangan turdan; mijoz bergan nom ishlatilmaydi          |
+| Rasm variantlari         | 320/640/1024/1600w, WebP va AVIF                                   |
+| Blur o'rindosh           | 16px WebP, `data:` URL sifatida                                    |
+| EXIF                     | variantlarga ko'chirilmaydi (geolokatsiya sizib chiqmasligi uchun) |
+
+Provayder adapter ortida: lokalda MinIO, production'da S3. S3 sozlanmasa
+lokalda xotiradagi variant ishlatiladi; **production'da** sozlama
+yetishmasa ilova ko'tarilmaydi.
+
 ## CI va Docker
 
 `.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:

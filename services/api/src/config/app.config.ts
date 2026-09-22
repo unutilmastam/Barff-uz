@@ -105,6 +105,45 @@ export class AppConfig {
     return this.get('AUTH_USER_CACHE_SECONDS');
   }
 
+  /** S3 to'liq sozlanganmi. */
+  get hasS3(): boolean {
+    return (
+      this.config.get('S3_BUCKET', { infer: true }) !== undefined &&
+      this.config.get('S3_ACCESS_KEY_ID', { infer: true }) !== undefined &&
+      this.config.get('S3_SECRET_ACCESS_KEY', { infer: true }) !== undefined
+    );
+  }
+
+  get s3(): {
+    endpoint?: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    forcePathStyle: boolean;
+    publicUrl?: string;
+  } {
+    const endpoint = this.get('S3_ENDPOINT');
+    const publicUrl = this.get('S3_PUBLIC_URL');
+
+    return {
+      ...(endpoint !== undefined ? { endpoint } : {}),
+      region: this.get('S3_REGION'),
+      bucket: this.get('S3_BUCKET') ?? '',
+      accessKeyId: this.get('S3_ACCESS_KEY_ID') ?? '',
+      secretAccessKey: this.get('S3_SECRET_ACCESS_KEY') ?? '',
+      forcePathStyle: this.get('S3_FORCE_PATH_STYLE') ?? false,
+      ...(publicUrl !== undefined ? { publicUrl } : {}),
+    };
+  }
+
+  get media(): { maxBytes: number; signedUrlTtl: number } {
+    return {
+      maxBytes: this.get('MEDIA_MAX_BYTES'),
+      signedUrlTtl: this.get('MEDIA_SIGNED_URL_TTL'),
+    };
+  }
+
   /** Aniq yoqilmagan bo'lsa — production'da o'chiq, qolgan joyda yoniq. */
   get swaggerEnabled(): boolean {
     return this.get('SWAGGER_ENABLED') ?? !this.isProduction;
