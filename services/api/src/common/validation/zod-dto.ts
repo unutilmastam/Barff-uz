@@ -18,15 +18,23 @@ export interface ZodDtoClass<TOutput = unknown, TInput = unknown> {
   jsonSchema: Record<string, unknown>;
 }
 
-export function createZodDto<TOutput, TInput>(
-  schema: z.ZodType<TOutput, TInput>,
-): ZodDtoClass<TOutput, TInput> {
+/**
+ * Tip parametri SXEMANING O'ZIDAN olinadi, `TOutput`/`TInput` dan emas.
+ *
+ * Avvalgi imzo (`schema: z.ZodType<TOutput, TInput>`) `.extend()` va
+ * `.partial()` natijalari uchun `unknown` ga tushib qolardi, natijada
+ * DTO klassi bo'sh chiqib, controller'da "page, limit yo'q" degan
+ * tushunarsiz xato berardi.
+ */
+export function createZodDto<TSchema extends z.ZodType>(
+  schema: TSchema,
+): ZodDtoClass<z.output<TSchema>, z.input<TSchema>> {
   class Dto {
     static zodSchema = schema;
     static jsonSchema = toOpenApiSchema(schema);
   }
 
-  return Dto as unknown as ZodDtoClass<TOutput, TInput>;
+  return Dto as unknown as ZodDtoClass<z.output<TSchema>, z.input<TSchema>>;
 }
 
 export function isZodDto(value: unknown): value is ZodDtoClass {
