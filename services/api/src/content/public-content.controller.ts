@@ -1,8 +1,9 @@
-import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiErrorDto } from '../common/dto/api-error';
 import { ApiZodQuery } from '../common/swagger/zod-schema.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { EtagInterceptor } from '../public/etag.interceptor';
 import { ContentService } from './content.service';
 import { ContentListQueryDto } from './dto/content.dto';
 
@@ -15,6 +16,9 @@ import { ContentListQueryDto } from './dto/content.dto';
 @ApiTags('content')
 @Controller()
 @Public()
+// ETag va `Cache-Control` — javob o'zgarmagan bo'lsa brauzer va CDN
+// `304` oladi va tana umuman yuborilmaydi.
+@UseInterceptors(EtagInterceptor)
 export class PublicContentController {
   constructor(private readonly content: ContentService) {}
 

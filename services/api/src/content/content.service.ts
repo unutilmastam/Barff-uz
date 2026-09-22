@@ -1,10 +1,13 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@barff/db';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { type RequestContext } from '../auth/auth.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
+import { STORAGE_ADAPTER, type StorageAdapter } from '../media/storage/storage.adapter';
+import { CacheService } from '../public/cache/cache.service';
+import { toPublicNewsArticle, toPublicNewsSummary } from '../public/public.mappers';
 import { PUBLISHED_ONLY, PUBLISHED_WHERE, publishedNewsWhere } from './content.filters';
 
 interface Actor {
@@ -24,10 +27,28 @@ const MEDIA_SELECT = {
 
 @Injectable()
 export class ContentService {
+  /**
+   * Kesh muddati.
+   *
+   * Kontent mahsulotlardan ko'ra kamroq o'zgaradi, lekin nashr qilingan
+   * yangilik darhol ko'rinishi kerak — shuning uchun muddat qisqa va
+   * yozuv o'zgarganda kesh baribir aniq bekor qilinadi.
+   */
+  private static readonly CACHE_TTL_SECONDS = 300;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly cache: CacheService,
+    @Inject(STORAGE_ADAPTER) private readonly storage: StorageAdapter,
   ) {}
+
+  private readonly url = (key: string): string => this.storage.publicUrl(key);
+
+  /** Kontentning har qanday o'zgarishi ommaviy javoblarga ta'sir qiladi. */
+  private invalidate(): Promise<void> {
+    return this.cache.invalidate('content');
+  }
 
   // ===========================================================================
   // YANGILIKLAR
@@ -35,6 +56,16 @@ export class ContentService {
 
   async listNewsPublic(query: ListQuery) {
     const request = toPageRequest(query);
+
+    return this.cache.wrap(
+      'content',
+      `news:list:${request.page}:${request.limit}`,
+      ContentService.CACHE_TTL_SECONDS,
+      () => this.loadNewsList(request),
+    );
+  }
+
+  private async loadNewsList(request: ReturnType<typeof toPageRequest>) {
     const where = publishedNewsWhere();
 
     const [items, total] = await Promise.all([
@@ -57,20 +88,31 @@ export class ContentService {
       this.prisma.newsArticle.count({ where }),
     ]);
 
-    return paginate(items, total, request);
+    return paginate(
+      items.map((item) => toPublicNewsSummary(item, this.url)),
+      total,
+      request,
+    );
   }
 
   async findNewsBySlugPublic(slug: string) {
-    const article = await this.prisma.newsArticle.findFirst({
-      where: { slug, ...publishedNewsWhere() },
-      include: { coverImage: MEDIA_SELECT },
-    });
+    return this.cache.wrap(
+      'content',
+      `news:slug:${slug}`,
+      ContentService.CACHE_TTL_SECONDS,
+      async () => {
+        const article = await this.prisma.newsArticle.findFirst({
+          where: { slug, ...publishedNewsWhere() },
+          include: { coverImage: MEDIA_SELECT },
+        });
 
-    if (article === null) {
-      throw new NotFoundException({ message: 'Yangilik topilmadi', code: 'NEWS_NOT_FOUND' });
-    }
+        if (article === null) {
+          throw new NotFoundException({ message: 'Yangilik topilmadi', code: 'NEWS_NOT_FOUND' });
+        }
 
-    return article;
+        return toPublicNewsArticle(article, this.url);
+      },
+    );
   }
 
   async listNewsAdmin(query: ListQuery & { status?: string | undefined }) {
@@ -108,6 +150,9 @@ export class ContentService {
   ) {
     const article = await this.unique(() => this.prisma.newsArticle.create({ data }));
 
+    // Javob qaytarilishidan OLDIN — keyingi so'rov yangi holatni oladi.
+    await this.invalidate();
+
     await this.audit.record({
       action: AUDIT_ACTIONS.CONTENT_CREATED,
       entity: 'NewsArticle',
@@ -132,6 +177,8 @@ export class ContentService {
       this.prisma.newsArticle.update({ where: { id }, data }),
     );
 
+    await this.invalidate();
+
     await this.audit.record({
       action: AUDIT_ACTIONS.CONTENT_UPDATED,
       entity: 'NewsArticle',
@@ -150,6 +197,8 @@ export class ContentService {
     await this.findNewsAdmin(id);
     await this.prisma.newsArticle.update({ where: { id }, data: { deletedAt: new Date() } });
 
+    await this.invalidate();
+
     await this.audit.record({
       action: AUDIT_ACTIONS.CONTENT_DELETED,
       entity: 'NewsArticle',
@@ -165,11 +214,13 @@ export class ContentService {
   // ===========================================================================
 
   listCertificatesPublic() {
-    return this.prisma.certificate.findMany({
-      where: PUBLISHED_WHERE,
-      orderBy: { displayOrder: 'asc' },
-      include: { mediaAsset: { select: { id: true, key: true, mimeType: true } } },
-    });
+    return this.cache.wrap('content', 'certificates', ContentService.CACHE_TTL_SECONDS, () =>
+      this.prisma.certificate.findMany({
+        where: PUBLISHED_WHERE,
+        orderBy: { displayOrder: 'asc' },
+        include: { mediaAsset: { select: { id: true, key: true, mimeType: true } } },
+      }),
+    );
   }
 
   listCertificatesAdmin() {
@@ -179,8 +230,10 @@ export class ContentService {
     });
   }
 
-  createCertificate(data: Prisma.CertificateUncheckedCreateInput) {
-    return this.prisma.certificate.create({ data });
+  async createCertificate(data: Prisma.CertificateUncheckedCreateInput) {
+    const row = await this.prisma.certificate.create({ data });
+    await this.invalidate();
+    return row;
   }
 
   async updateCertificate(id: string, data: Prisma.CertificateUncheckedUpdateInput) {
@@ -188,7 +241,9 @@ export class ContentService {
       this.prisma.certificate.findFirst({ where: { id, deletedAt: null } }),
       'Sertifikat',
     );
-    return this.prisma.certificate.update({ where: { id }, data });
+    const row = await this.prisma.certificate.update({ where: { id }, data });
+    await this.invalidate();
+    return row;
   }
 
   async deleteCertificate(id: string) {
@@ -197,6 +252,7 @@ export class ContentService {
       'Sertifikat',
     );
     await this.prisma.certificate.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.invalidate();
   }
 
   // ===========================================================================
@@ -204,11 +260,17 @@ export class ContentService {
   // ===========================================================================
 
   listGalleryPublic(album?: string) {
-    return this.prisma.galleryItem.findMany({
-      where: { ...PUBLISHED_WHERE, ...(album !== undefined ? { album } : {}) },
-      orderBy: { displayOrder: 'asc' },
-      include: { mediaAsset: MEDIA_SELECT },
-    });
+    return this.cache.wrap(
+      'content',
+      `gallery:${album ?? '-'}`,
+      ContentService.CACHE_TTL_SECONDS,
+      () =>
+        this.prisma.galleryItem.findMany({
+          where: { ...PUBLISHED_WHERE, ...(album !== undefined ? { album } : {}) },
+          orderBy: { displayOrder: 'asc' },
+          include: { mediaAsset: MEDIA_SELECT },
+        }),
+    );
   }
 
   listGalleryAdmin() {
@@ -218,8 +280,10 @@ export class ContentService {
     });
   }
 
-  createGalleryItem(data: Prisma.GalleryItemUncheckedCreateInput) {
-    return this.prisma.galleryItem.create({ data });
+  async createGalleryItem(data: Prisma.GalleryItemUncheckedCreateInput) {
+    const row = await this.prisma.galleryItem.create({ data });
+    await this.invalidate();
+    return row;
   }
 
   async updateGalleryItem(id: string, data: Prisma.GalleryItemUncheckedUpdateInput) {
@@ -227,7 +291,9 @@ export class ContentService {
       this.prisma.galleryItem.findFirst({ where: { id, deletedAt: null } }),
       'Galereya elementi',
     );
-    return this.prisma.galleryItem.update({ where: { id }, data });
+    const row = await this.prisma.galleryItem.update({ where: { id }, data });
+    await this.invalidate();
+    return row;
   }
 
   async deleteGalleryItem(id: string) {
@@ -236,6 +302,7 @@ export class ContentService {
       'Galereya elementi',
     );
     await this.prisma.galleryItem.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.invalidate();
   }
 
   // ===========================================================================
@@ -243,11 +310,15 @@ export class ContentService {
   // ===========================================================================
 
   listDocumentsPublic() {
-    return this.prisma.publicDocument.findMany({
-      where: PUBLISHED_WHERE,
-      orderBy: { displayOrder: 'asc' },
-      include: { mediaAsset: { select: { id: true, key: true, mimeType: true, byteSize: true } } },
-    });
+    return this.cache.wrap('content', 'documents', ContentService.CACHE_TTL_SECONDS, () =>
+      this.prisma.publicDocument.findMany({
+        where: PUBLISHED_WHERE,
+        orderBy: { displayOrder: 'asc' },
+        include: {
+          mediaAsset: { select: { id: true, key: true, mimeType: true, byteSize: true } },
+        },
+      }),
+    );
   }
 
   listDocumentsAdmin() {
@@ -257,8 +328,10 @@ export class ContentService {
     });
   }
 
-  createDocument(data: Prisma.PublicDocumentUncheckedCreateInput) {
-    return this.prisma.publicDocument.create({ data });
+  async createDocument(data: Prisma.PublicDocumentUncheckedCreateInput) {
+    const row = await this.prisma.publicDocument.create({ data });
+    await this.invalidate();
+    return row;
   }
 
   async updateDocument(id: string, data: Prisma.PublicDocumentUncheckedUpdateInput) {
@@ -266,7 +339,9 @@ export class ContentService {
       this.prisma.publicDocument.findFirst({ where: { id, deletedAt: null } }),
       'Hujjat',
     );
-    return this.prisma.publicDocument.update({ where: { id }, data });
+    const row = await this.prisma.publicDocument.update({ where: { id }, data });
+    await this.invalidate();
+    return row;
   }
 
   async deleteDocument(id: string) {
@@ -275,6 +350,7 @@ export class ContentService {
       'Hujjat',
     );
     await this.prisma.publicDocument.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.invalidate();
   }
 
   // ===========================================================================
@@ -282,11 +358,13 @@ export class ContentService {
   // ===========================================================================
 
   listProductionStepsPublic() {
-    return this.prisma.productionStep.findMany({
-      where: PUBLISHED_ONLY,
-      orderBy: { displayOrder: 'asc' },
-      include: { mediaAsset: MEDIA_SELECT },
-    });
+    return this.cache.wrap('content', 'steps', ContentService.CACHE_TTL_SECONDS, () =>
+      this.prisma.productionStep.findMany({
+        where: PUBLISHED_ONLY,
+        orderBy: { displayOrder: 'asc' },
+        include: { mediaAsset: MEDIA_SELECT },
+      }),
+    );
   }
 
   listProductionStepsAdmin() {
@@ -294,32 +372,38 @@ export class ContentService {
   }
 
   /** Bosqichlar ro'yxati qat'iy — shuning uchun yaratish emas, upsert. */
-  upsertProductionStep(slug: string, data: Prisma.ProductionStepUncheckedCreateInput) {
-    return this.prisma.productionStep.upsert({
+  async upsertProductionStep(slug: string, data: Prisma.ProductionStepUncheckedCreateInput) {
+    const row = await this.prisma.productionStep.upsert({
       where: { slug },
       update: data,
       create: { ...data, slug },
     });
+    await this.invalidate();
+    return row;
   }
 
   listHomepageSectionsPublic() {
-    return this.prisma.homepageSection.findMany({
-      where: PUBLISHED_ONLY,
-      orderBy: { displayOrder: 'asc' },
-      include: { mediaAsset: MEDIA_SELECT },
-    });
+    return this.cache.wrap('content', 'homepage', ContentService.CACHE_TTL_SECONDS, () =>
+      this.prisma.homepageSection.findMany({
+        where: PUBLISHED_ONLY,
+        orderBy: { displayOrder: 'asc' },
+        include: { mediaAsset: MEDIA_SELECT },
+      }),
+    );
   }
 
   listHomepageSectionsAdmin() {
     return this.prisma.homepageSection.findMany({ orderBy: { displayOrder: 'asc' } });
   }
 
-  upsertHomepageSection(key: string, data: Prisma.HomepageSectionUncheckedCreateInput) {
-    return this.prisma.homepageSection.upsert({
+  async upsertHomepageSection(key: string, data: Prisma.HomepageSectionUncheckedCreateInput) {
+    const row = await this.prisma.homepageSection.upsert({
       where: { key },
       update: data,
       create: { ...data, key },
     });
+    await this.invalidate();
+    return row;
   }
 
   // ===========================================================================
@@ -327,22 +411,26 @@ export class ContentService {
   // ===========================================================================
 
   findSeo(path: string) {
-    return this.prisma.seoMetadata.findUnique({
-      where: { path },
-      include: { ogImage: { select: { id: true, key: true } } },
-    });
+    return this.cache.wrap('content', `seo:${path}`, ContentService.CACHE_TTL_SECONDS, () =>
+      this.prisma.seoMetadata.findUnique({
+        where: { path },
+        include: { ogImage: { select: { id: true, key: true } } },
+      }),
+    );
   }
 
   listSeoAdmin() {
     return this.prisma.seoMetadata.findMany({ orderBy: { path: 'asc' } });
   }
 
-  upsertSeo(path: string, data: Prisma.SeoMetadataUncheckedCreateInput) {
-    return this.prisma.seoMetadata.upsert({
+  async upsertSeo(path: string, data: Prisma.SeoMetadataUncheckedCreateInput) {
+    const row = await this.prisma.seoMetadata.upsert({
       where: { path },
       update: data,
       create: { ...data, path },
     });
+    await this.invalidate();
+    return row;
   }
 
   // ===========================================================================
