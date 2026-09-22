@@ -28,7 +28,9 @@ export function toUpdateSchema<T extends z.ZodRawShape>(
   for (const [key, field] of Object.entries(schema.shape)) {
     const value = field as z.ZodType;
     // `ZodDefault` ni yechib, ichidagi asl sxemani olamiz.
-    const withoutDefault = value instanceof z.ZodDefault ? value.unwrap() : value;
+    // `.unwrap()` Zod'ning YADRO tipini qaytaradi (`$ZodType`), unda
+    // `.optional()` yo'q — shuning uchun ommaviy tipga qaytariladi.
+    const withoutDefault = (value instanceof z.ZodDefault ? value.unwrap() : value) as z.ZodType;
     shape[key] = withoutDefault.optional();
   }
 
