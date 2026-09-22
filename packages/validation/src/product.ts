@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { localizedSchema, paginationQuerySchema } from './primitives';
+import { toUpdateSchema } from './update-schema';
 
 /**
  * Mahsulot sxemalari.
@@ -72,7 +73,7 @@ export const productCategoryCreateSchema = z.object({
   seo: seoSchema.optional(),
 });
 
-export const productCategoryUpdateSchema = productCategoryCreateSchema.partial();
+export const productCategoryUpdateSchema = toUpdateSchema(productCategoryCreateSchema);
 
 export const productCreateSchema = z.object({
   slug: slugSchema,
@@ -91,7 +92,7 @@ export const productCreateSchema = z.object({
   displayOrder: z.number().int().min(0).max(10_000).default(0),
 });
 
-export const productUpdateSchema = productCreateSchema.partial();
+export const productUpdateSchema = toUpdateSchema(productCreateSchema);
 
 export const productVariantCreateSchema = z.object({
   sku: skuSchema,
@@ -103,7 +104,7 @@ export const productVariantCreateSchema = z.object({
   displayOrder: z.number().int().min(0).max(10_000).default(0),
 });
 
-export const productVariantUpdateSchema = productVariantCreateSchema.partial();
+export const productVariantUpdateSchema = toUpdateSchema(productVariantCreateSchema);
 
 /**
  * Narx.
