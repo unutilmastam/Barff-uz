@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'step/**']
+  pull_request:
+    branches: [main]
+
+# Bir branch uchun bir vaqtda bitta ishga tushirish: yangi push kelsa,
+# eskisi bekor qilinadi va navbat bekorga band bo'lmaydi.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: barff
+          POSTGRES_PASSWORD: barff
+          POSTGRES_DB: barff
+        ports: ['5432:5432']
+        # Servis tayyor bo'lgunicha kutiladi — aks holda migratsiya
+        # "connection refused" bilan yiqilardi.
+        options: >-
+          --health-cmd "pg_isready -U barff"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      LOG_LEVEL: error
+      DATABASE_URL: postgresql://barff:barff@127.0.0.1:5432/barff?schema=public
+      DATABASE_SHADOW_URL: postgresql://barff:barff@127.0.0.1:5432/barff_shadow?schema=public
+      REDIS_URL: redis://127.0.0.1:6379
+      # Test uchun qiymatlar. Haqiqiy sirlar CI'ga KIRMAYDI — ular faqat
+      # deploy workflow'ida, GitHub Secrets orqali ishlatiladi.
+      JWT_ACCESS_SECRET: ci-access-secret-kamida-32-belgi-uzunlikda
+      JWT_REFRESH_SECRET: ci-refresh-secret-kamida-32-belgi-uzunlikda
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Bog'liqliklarni o'rnatish
+        # `--frozen-lockfile`: lockfile bilan package.json mos kelmasa,
+        # CI jim ravishda boshqa versiyani o'rnatmaydi, balki yiqiladi.
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        # Build boshqa hamma narsadan OLDIN keladi va buning ikki sababi bor:
+        #   1) turbo `@barff/db#build` orqali Prisma klientini yaratadi;
+        #   2) seed `@barff/types` ni qurilgan `dist` dan import qiladi,
+        #      ya'ni qurilmagan bo'lsa "module not found" bilan yiqiladi.
+        run: pnpm build
+
+      - name: Migratsiyalar
+        run: pnpm db:deploy
+
+      - name: Boshlang'ich ma'lumotlar
+        # Testlar rol va ruxsatlarni bazadan o'qiydi (`role.findUniqueOrThrow`),
+        # shuning uchun seed testlardan OLDIN ishlashi shart.
+        run: pnpm db:seed
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Testlar
+        run: pnpm test
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: API tasvirini qurish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/api/Dockerfile
+          # Push QILINMAYDI — bu yerda faqat tasvir qurilishini tekshiramiz.
+          # Registry'ga yuborish deploy workflow'ida.
+          push: false
+          load: true
+          tags: barff-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Tasvir root'dan ishlamasligini tekshirish
+        # CLAUDE.md §12: konteyner root huquqi bilan ishlamasligi kerak.
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id barff-api:ci -u)
+          echo "Konteyner UID: $USER_ID"
+          if [ "$USER_ID" = "0" ]; then
+            echo "XATO: tasvir root sifatida ishlayapti"
+            exit 1
+          fi
+
+      - name: Tasvir ko'tarilishini tekshirish
+        # Baza va Redis yo'q, lekin API ko'tarilib, liveness probe javob
+        # berishi kerak: readiness `degraded` bo'ladi, liveness esa `200`.
+        run: |
+          docker run -d --name barff-api-ci \
+            -e NODE_ENV=production \
+            -e DATABASE_URL=postgresql://yoq@127.0.0.1:5432/yoq \
+            -e REDIS_URL=redis://127.0.0.1:6379 \
+            -e JWT_ACCESS_SECRET=ci-access-secret-kamida-32-belgi-uzunlikda \
+            -e JWT_REFRESH_SECRET=ci-refresh-secret-kamida-32-belgi-uzunlikda \
+            -p 3000:3000 barff-api:ci
+
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:3000/api/v1/health > /dev/null; then
+              echo "Liveness javob berdi"
+              docker rm -f barff-api-ci
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "XATO: API ko'tarilmadi"
+          docker logs barff-api-ci
+          docker rm -f barff-api-ci
+          exit 1

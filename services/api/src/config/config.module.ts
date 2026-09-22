@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { AppConfig } from './app.config';
 import { validateEnv } from './env.schema';
+import { localEnvFilePath } from './repo-root';
 
 @Global()
 @Module({
@@ -9,7 +10,10 @@ import { validateEnv } from './env.schema';
     NestConfigModule.forRoot({
       isGlobal: true,
       // Repo ildizidagi `.env` — barcha ilovalar uchun bitta manba.
-      envFilePath: ['../../.env'],
+      // Yo'l fayl joylashuvidan hisoblanadi, CWD'dan emas: aks holda
+      // ilova qaysi katalogdan ishga tushirilganiga qarab boshqa fayl
+      // yuklanardi (yoki umuman yuklanmasdi).
+      envFilePath: localEnvFilePath(),
       validate: validateEnv,
       cache: true,
     }),

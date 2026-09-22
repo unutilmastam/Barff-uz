@@ -11,8 +11,13 @@ import { validateEnv } from './config/env.schema';
 import { GLOBAL_PREFIX, setupSwagger } from './swagger';
 
 async function bootstrap(): Promise<void> {
-  // Muhit tekshiruvi Nest kontekstidan OLDIN: sozlama xato bo'lsa, xato
-  // xabari Nest'ning ichki stack trace'i ostida ko'milib ketmasligi kerak.
+  // Muhit tekshiruvi Nest ilovasi YARATILISHIDAN oldin: sozlama xato bo'lsa,
+  // xabar Nest'ning ichki stack trace'i ostida ko'milib ketmasligi kerak.
+  //
+  // DIQQAT: `.env` bundan ham oldinroq — `app.module` import qilinganda —
+  // `ConfigModule.forRoot()` tomonidan yuklanadi, chunki import'lar modul
+  // tanasidan avval bajariladi. Ya'ni bu yerda `process.env` allaqachon
+  // to'ldirilgan bo'ladi.
   const env = validateEnv(process.env as Record<string, unknown>);
   const logger = new JsonLogger(env.LOG_LEVEL);
 

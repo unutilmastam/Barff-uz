@@ -212,6 +212,38 @@ o'zgarishi audit jurnaliga yoziladi (CLAUDE.md §23). Parol va token'lar
 jurnalga ham, loglarga ham **hech qachon** tushmaydi — buni testlar chiqish
 oqimlarini ushlab turib tekshiradi.
 
+## CI va Docker
+
+`.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:
+
+| Job                            | Nima qiladi                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `Lint, typecheck, test, build` | postgres + redis servis konteynerlari bilan to'liq tekshiruv       |
+| `Docker image`                 | API tasvirini quradi, root emasligini va ko'tarilishini tekshiradi |
+
+Qadamlar tartibi muhim: **build** birinchi keladi, chunki turbo shu paytda
+Prisma klientini yaratadi va seed `@barff/types` ni qurilgan `dist` dan
+import qiladi.
+
+### API tasviri
+
+```bash
+docker build -f services/api/Dockerfile -t barff-api .
+docker run --rm -p 3000:3000 --env-file .env barff-api
+```
+
+Tasvir `node` foydalanuvchisi ostida ishlaydi, root emas (CLAUDE.md §12).
+Baza `alpine` emas, `bookworm-slim`: Prisma query engine'ining standart
+binary target'i Debian uchun, Alpine (musl) da esa alohida target kerak va
+u jim ravishda mos kelmay qolishi mumkin.
+
+**Baza yo'q bo'lsa ham tasvir ko'tariladi**: liveness `200`, readiness esa
+`503 degraded` qaytaradi. Bu ataylab shunday — baza bir lahzaga yo'qolganda
+har bir task quladigan bo'lsa, konteyner cheksiz qayta ishga tushish
+siklida qolardi.
+
+Deploy va branch himoyasi: `docs/BRANCH-PROTECTION.md`.
+
 ## Jonli sahifa haqida
 
 Ildizdagi `index.html` va `CNAME` — `barff.uz` da **hozir ishlab turgan** "tez orada"
