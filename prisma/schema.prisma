@@ -51,6 +51,7 @@ model User {
 
   roles       UserRole[]
   media       MediaAsset[]     @relation("MediaUploader")
+  newsArticles NewsArticle[]   @relation("NewsAuthor")
   auditLogs   AuditLog[]       @relation("AuditActor")
   settings    SystemSetting[]  @relation("SettingUpdatedBy")
   grantedRoles UserRole[]      @relation("RoleAssignedBy")
@@ -244,6 +245,14 @@ model MediaAsset {
 
   productImages    ProductImage[]
   productDocuments ProductDocument[]
+
+  newsCovers       NewsArticle[]     @relation("NewsCover")
+  certificateFiles Certificate[]     @relation("CertificateFile")
+  galleryItems     GalleryItem[]     @relation("GalleryMedia")
+  publicDocuments  PublicDocument[]  @relation("PublicDocumentFile")
+  productionSteps  ProductionStep[]  @relation("ProductionStepMedia")
+  seoImages        SeoMetadata[]     @relation("SeoOgImage")
+  homepageMedia    HomepageSection[] @relation("HomepageMedia")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -448,4 +457,217 @@ model ProductPrice {
 
   @@index([variantId, validFrom])
   @@map("product_prices")
+}
+
+// =============================================================================
+// KONTENT (S10)
+// =============================================================================
+
+/// Nashr holati.
+///
+/// `DRAFT` yozuvlar ommaviy API'da HECH QACHON ko'rinmaydi. Bu shart
+/// servis qatlamida markazlashtirilgan — har so'rovda qo'lda yozilsa,
+/// birortasida unutilishi va tayyor bo'lmagan matn saytga chiqib ketishi
+/// aniq.
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+/// Yangilik / maqola.
+model NewsArticle {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  slug String @unique
+
+  /// Localized<string>
+  title Json
+  /// Localized<string> | null — qisqa mazmun (ro'yxatlarda)
+  excerpt Json?
+  /// Localized<string> — to'liq matn
+  body Json
+
+  coverImageId String?     @db.Uuid
+  coverImage   MediaAsset? @relation("NewsCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  status ContentStatus @default(DRAFT)
+  /// Nashr sanasi. Kelajakdagi sana — rejalashtirilgan nashr.
+  publishedAt DateTime?
+
+  seo Json?
+
+  authorId String? @db.Uuid
+  author   User?   @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, publishedAt])
+  @@index([createdAt])
+  @@map("news")
+}
+
+/// Sertifikat / sifat hujjati.
+///
+/// DIQQAT: sertifikatlar O'YLAB TOPILMAYDI (CLAUDE.md §19). Yozuv faqat
+/// haqiqiy hujjat yuklangandan keyin nashr qilinadi.
+model Certificate {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Localized<string>
+  title Json
+  /// Localized<string> | null
+  description Json?
+
+  /// Kim bergan (organ nomi).
+  issuer String?
+  /// Sertifikat raqami.
+  number String?
+
+  issuedAt  DateTime?
+  expiresAt DateTime?
+
+  /// Hujjat fayli (PDF yoki rasm).
+  mediaAssetId String?     @db.Uuid
+  mediaAsset   MediaAsset? @relation("CertificateFile", fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  status       ContentStatus @default(DRAFT)
+  displayOrder Int           @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, displayOrder])
+  @@map("certificates")
+}
+
+/// Galereya elementi (zavod fotolari, mahsulot suratlari).
+model GalleryItem {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  mediaAssetId String     @db.Uuid
+  mediaAsset   MediaAsset @relation("GalleryMedia", fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  /// Localized<string> | null
+  caption Json?
+  /// Guruhlash uchun: `factory`, `products`, `events`.
+  album String?
+
+  status       ContentStatus @default(DRAFT)
+  displayOrder Int           @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, album, displayOrder])
+  @@map("gallery_items")
+}
+
+/// Ommaviy hujjat (katalog, narxlar ro'yxati, shartnoma namunasi).
+model PublicDocument {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Localized<string>
+  title Json
+  /// Localized<string> | null
+  description Json?
+
+  mediaAssetId String     @db.Uuid
+  mediaAsset   MediaAsset @relation("PublicDocumentFile", fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  status       ContentStatus @default(DRAFT)
+  displayOrder Int           @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, displayOrder])
+  @@map("documents")
+}
+
+/// Ishlab chiqarish bosqichi (CLAUDE.md §4).
+///
+/// Sakkiz bosqich matn va rasm bilan birga CMS'dan boshqariladi, kodda
+/// qattiq yozilmaydi — tarjimalar va tavsiflar o'zgarishi mumkin.
+model ProductionStep {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `xomashyo`, `qabul-qilish`, ... — kodda havola qilish uchun.
+  slug String @unique
+
+  /// Localized<string>
+  title Json
+  /// Localized<string> | null
+  description Json?
+
+  mediaAssetId String?     @db.Uuid
+  mediaAsset   MediaAsset? @relation("ProductionStepMedia", fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  status       ContentStatus @default(DRAFT)
+  displayOrder Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, displayOrder])
+  @@map("production_steps")
+}
+
+/// Sahifa uchun SEO meta (CLAUDE.md §19).
+model SeoMetadata {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Sahifa yo'li: `/`, `/products`, `/news/anor-sharbati`.
+  path String @unique
+
+  /// Localized<string> | null
+  title Json?
+  /// Localized<string> | null
+  description Json?
+
+  ogImageId String?     @db.Uuid
+  ogImage   MediaAsset? @relation("SeoOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  /// `true` bo'lsa sahifa indekslanmaydi.
+  noIndex Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("seo_metadata")
+}
+
+/// Bosh sahifa bo'limi (hero va boshqalar).
+///
+/// Bo'limlar ro'yxati CMS'dan boshqariladi: matn, rasm va tartib
+/// o'zgarishi uchun deploy kerak bo'lmasligi lozim (CLAUDE.md §8).
+model HomepageSection {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `hero`, `stats`, `factory`, `products`, `process`, `quality`, `cta`, `news`
+  key String @unique
+
+  /// Localized<string> | null
+  heading Json?
+  /// Localized<string> | null
+  subheading Json?
+  /// Localized<string> | null — tugma matni
+  ctaLabel Json?
+  ctaHref  String?
+
+  mediaAssetId String?     @db.Uuid
+  mediaAsset   MediaAsset? @relation("HomepageMedia", fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  status       ContentStatus @default(DRAFT)
+  displayOrder Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, displayOrder])
+  @@map("homepage_sections")
 }

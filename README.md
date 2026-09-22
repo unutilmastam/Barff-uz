@@ -335,6 +335,38 @@ ko'rsatmaydi.
 > Seed'dagi mahsulotlar **`[MOCK]`** bilan boshlanadi. Haqiqiy nomlar,
 > hajmlar, tarkib va narxlar BARFF dan kelishi kerak (CLAUDE.md §1).
 
+## Kontent (CMS)
+
+Yangiliklar, sertifikatlar, galereya, hujjatlar, ishlab chiqarish
+bosqichlari, bosh sahifa bo'limlari va sahifa SEO'si.
+
+**Nashr holati** hamma turda bir xil: `DRAFT` yoki `PUBLISHED`. Yangi
+yozuv standart holatda **qoralama** bo'ladi — nashr qilish alohida
+qaror bo'lishi kerak, tasodifiy emas.
+
+Ommaviy API faqat nashr qilinganlarni ko'rsatadi va bu shart servisda
+**bitta joyda** turadi (`content.filters.ts`). Yangiliklar uchun
+qo'shimcha shart bor: `publishedAt` kelajakda bo'lsa, maqola
+`PUBLISHED` bo'lsa ham hali ko'rinmaydi — bu rejalashtirilgan nashrni
+beradi.
+
+| Ommaviy                    | Admin                                            |
+| -------------------------- | ------------------------------------------------ |
+| `GET /news`, `/news/:slug` | `/admin/content/news` (qoralamalar ham)          |
+| `GET /certificates`        | `/admin/content/certificates`                    |
+| `GET /gallery?album=`      | `/admin/content/gallery`                         |
+| `GET /documents`           | `/admin/content/documents`                       |
+| `GET /production-steps`    | `/admin/content/production-steps/:slug` (upsert) |
+| `GET /homepage-sections`   | `/admin/content/homepage-sections/:key` (upsert) |
+| `GET /seo?path=`           | `/admin/content/seo` (upsert)                    |
+
+Sakkiz bosqich (`Xomashyo → … → Yetkazib berish`) seed'da yaratiladi,
+lekin **qoralama holatida**: tavsiflar `REPLACE_WITH_REAL_DATA` va ular
+BARFF dan kelmaguncha saytda ko'rinmaydi.
+
+> Sertifikatlar **o'ylab topilmaydi** (CLAUDE.md §19). Yozuv faqat
+> haqiqiy hujjat yuklangandan keyin nashr qilinadi.
+
 ## CI va Docker
 
 `.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:

@@ -281,6 +281,48 @@ async function seedMockProducts(): Promise<void> {
   console.log(`  mahsulotlar: ${MOCK_PRODUCTS.length} ta (hammasi MOCK)`);
 }
 
+/**
+ * Ishlab chiqarish bosqichlari (CLAUDE.md §4).
+ *
+ * Ketma-ketlik spec'da qat'iy belgilangan, shuning uchun u seed'da
+ * yaratiladi. Sarlavhalar va tavsiflar esa CMS'dan tahrirlanadi —
+ * tavsiflar hozircha REPLACE_WITH_REAL_DATA, chunki jarayon tafsilotlari
+ * BARFF dan kelishi kerak.
+ */
+const PRODUCTION_STEPS = [
+  { slug: 'xomashyo', uz: 'Xomashyo', ru: 'Сырьё', en: 'Raw materials' },
+  { slug: 'qabul-qilish', uz: 'Qabul qilish', ru: 'Приёмка', en: 'Intake' },
+  { slug: 'saralash', uz: 'Saralash', ru: 'Сортировка', en: 'Sorting' },
+  { slug: 'ishlab-chiqarish', uz: 'Ishlab chiqarish', ru: 'Производство', en: 'Production' },
+  { slug: 'sifat-nazorati', uz: 'Sifat nazorati', ru: 'Контроль качества', en: 'Quality control' },
+  { slug: 'qadoqlash', uz: 'Qadoqlash', ru: 'Упаковка', en: 'Packaging' },
+  { slug: 'ombor', uz: 'Ombor', ru: 'Склад', en: 'Warehouse' },
+  { slug: 'yetkazib-berish', uz: 'Yetkazib berish', ru: 'Доставка', en: 'Delivery' },
+];
+
+async function seedProductionSteps(): Promise<void> {
+  for (const [index, step] of PRODUCTION_STEPS.entries()) {
+    await prisma.productionStep.upsert({
+      where: { slug: step.slug },
+      update: { displayOrder: index },
+      create: {
+        slug: step.slug,
+        title: { uz: step.uz, ru: step.ru, en: step.en },
+        description: {
+          uz: 'REPLACE_WITH_REAL_DATA',
+          ru: 'REPLACE_WITH_REAL_DATA',
+          en: 'REPLACE_WITH_REAL_DATA',
+        },
+        displayOrder: index,
+        // Tavsiflar to'ldirilmaguncha saytda ko'rinmaydi.
+        status: 'DRAFT',
+      },
+    });
+  }
+
+  console.log(`  ishlab chiqarish bosqichlari: ${PRODUCTION_STEPS.length} ta (tavsiflar MOCK)`);
+}
+
 async function main(): Promise<void> {
   console.log('Seed boshlandi');
 
@@ -289,6 +331,7 @@ async function main(): Promise<void> {
   await seedAdmin(roleIds);
   await seedSettings();
   await seedMockProducts();
+  await seedProductionSteps();
 
   console.log('Seed tugadi');
 }

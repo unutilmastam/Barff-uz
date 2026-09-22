@@ -9,6 +9,7 @@ import { ZodValidationPipe } from './common/validation/zod-validation.pipe';
 import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
+import { ContentModule } from './content/content.module';
 import { MediaModule } from './media/media.module';
 import { ProductsModule } from './products/products.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -42,6 +43,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     MediaModule,
     ProductsModule,
+    ContentModule,
     HealthModule,
   ],
   providers: [
