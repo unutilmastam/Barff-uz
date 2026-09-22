@@ -139,8 +139,13 @@ jobs:
         # devDependency'lar olib tashlangandan keyin `argon2` (native modul)
         # hali ham yuklanishi shart — aks holda parol tekshiruvi faqat
         # birinchi kirish urinishida, ya'ni production'da quladi.
+        #
+        # `-w` MUHIM: pnpm ishchi maydonida bog'liqliklar paket ichidagi
+        # `node_modules` da yotadi. Node ularni FAYL joylashuvidan boshlab
+        # qidiradi, shuning uchun tekshiruv ham ilova ishlaydigan katalogdan
+        # turib bajarilishi kerak — repo ildizidan emas.
         run: |
-          docker run --rm --entrypoint node barff-api:ci \
+          docker run --rm -w /repo/services/api --entrypoint node barff-api:ci \
             -e "require('argon2'); require('@barff/db'); console.log('native modullar OK')"
 
       - name: Tasvir ko'tarilishini tekshirish
