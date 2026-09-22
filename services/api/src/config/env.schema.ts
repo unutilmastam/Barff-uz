@@ -52,6 +52,44 @@ export const envSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
 
+  /**
+   * JWT sirlari. Access va refresh uchun ALOHIDA sirlar ishlatiladi: bitta sir
+   * bo'lsa, access token refresh sifatida (yoki aksincha) taqdim etilishi
+   * mumkin bo'lardi. Minimal uzunlik — 32 belgi.
+   */
+  JWT_ACCESS_SECRET: z.string().min(32, {
+    message: "JWT_ACCESS_SECRET kamida 32 ta belgidan iborat bo'lishi kerak",
+  }),
+  JWT_ACCESS_TTL: z.string().default('15m'),
+  JWT_REFRESH_SECRET: z.string().min(32, {
+    message: "JWT_REFRESH_SECRET kamida 32 ta belgidan iborat bo'lishi kerak",
+  }),
+  JWT_REFRESH_TTL: z.string().default('30d'),
+
+  COOKIE_DOMAIN: z.string().optional(),
+  /** Production'da har doim `true` bo'lishi kerak (faqat HTTPS orqali). */
+  COOKIE_SECURE: booleanish.optional(),
+
+  /** Bitta akkaunt uchun muvaffaqiyatsiz kirishlar chegarasi. */
+  AUTH_LOGIN_MAX_ATTEMPTS: z.coerce.number().int().min(1).default(5),
+
+  /**
+   * Bitta IP uchun chegara. Akkaunt chegarasidan ANCHA yuqori bo'lishi kerak:
+   * bitta ofis yoki mobil operator NAT ortida o'nlab foydalanuvchi turadi va
+   * ular bir-birining hisobiga bloklanib qolmasligi lozim. Bu chegara
+   * odamlarning xatosini emas, avtomatlashtirilgan hujumni ushlash uchun.
+   */
+  AUTH_LOGIN_MAX_ATTEMPTS_PER_IP: z.coerce.number().int().min(1).default(50),
+
+  AUTH_LOGIN_LOCK_SECONDS: z.coerce.number().int().min(1).default(900),
+
+  /**
+   * Foydalanuvchi ruxsatlari keshi (soniya). Qisqa TTL: rol o'zgarishi
+   * shuncha vaqt ichida kuchga kiradi, kesh esa aniq bekor qilinganda
+   * darhol yangilanadi.
+   */
+  AUTH_USER_CACHE_SECONDS: z.coerce.number().int().min(0).default(60),
+
   /** Swagger standart holatda production'da o'chiq. */
   SWAGGER_ENABLED: booleanish.optional(),
 });

@@ -4,6 +4,8 @@ import { validateEnv } from './env.schema';
 const base = {
   DATABASE_URL: 'postgresql://barff@localhost:5432/barff',
   REDIS_URL: 'redis://localhost:6379',
+  JWT_ACCESS_SECRET: 'a'.repeat(32),
+  JWT_REFRESH_SECRET: 'b'.repeat(32),
 };
 
 describe('validateEnv', () => {
@@ -15,11 +17,21 @@ describe('validateEnv', () => {
   });
 
   it('REDIS_URL yoq bolsa toxtaydi', () => {
-    expect(() => validateEnv({ DATABASE_URL: base.DATABASE_URL })).toThrow(/REDIS_URL/);
+    expect(() => validateEnv({ ...base, REDIS_URL: undefined })).toThrow(/REDIS_URL/);
   });
 
   it('DATABASE_URL yoq bolsa toxtaydi', () => {
-    expect(() => validateEnv({ REDIS_URL: base.REDIS_URL })).toThrow(/DATABASE_URL/);
+    expect(() => validateEnv({ ...base, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
+  });
+
+  it('qisqa JWT sirini rad etadi', () => {
+    expect(() => validateEnv({ ...base, JWT_ACCESS_SECRET: 'qisqa' })).toThrow(/JWT_ACCESS_SECRET/);
+  });
+
+  it('JWT sirlari yoq bolsa toxtaydi', () => {
+    expect(() => validateEnv({ ...base, JWT_REFRESH_SECRET: undefined })).toThrow(
+      /JWT_REFRESH_SECRET/,
+    );
   });
 
   it('notogri DATABASE_URL protokolini rad etadi', () => {

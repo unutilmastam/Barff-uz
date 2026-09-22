@@ -59,6 +59,52 @@ export class AppConfig {
     return this.get('REDIS_URL');
   }
 
+  get jwt(): {
+    accessSecret: string;
+    accessTtl: string;
+    refreshSecret: string;
+    refreshTtl: string;
+  } {
+    return {
+      accessSecret: this.get('JWT_ACCESS_SECRET'),
+      accessTtl: this.get('JWT_ACCESS_TTL'),
+      refreshSecret: this.get('JWT_REFRESH_SECRET'),
+      refreshTtl: this.get('JWT_REFRESH_TTL'),
+    };
+  }
+
+  /**
+   * Cookie sozlamalari.
+   *
+   * `secure` production'da MAJBURIY: HTTPS'siz yuborilgan cookie tarmoqda
+   * ochiq ketadi, shuning uchun uni muhit o'zgaruvchisi bilan production'da
+   * o'chirib bo'lmaydi.
+   */
+  get cookie(): { domain?: string; secure: boolean; sameSite: 'lax' | 'strict' | 'none' } {
+    const domain = this.get('COOKIE_DOMAIN');
+    const secure = this.isProduction || (this.get('COOKIE_SECURE') ?? false);
+
+    return {
+      ...(domain !== undefined && domain.length > 0 ? { domain } : {}),
+      secure,
+      // Ilovalar turli subdomenlarda (partner./admin.) — `lax` bilan
+      // navigatsiya so'rovlari o'tadi, CSRF yuzasi esa tor qoladi.
+      sameSite: 'lax',
+    };
+  }
+
+  get loginThrottle(): { maxAttempts: number; maxAttemptsPerIp: number; lockSeconds: number } {
+    return {
+      maxAttempts: this.get('AUTH_LOGIN_MAX_ATTEMPTS'),
+      maxAttemptsPerIp: this.get('AUTH_LOGIN_MAX_ATTEMPTS_PER_IP'),
+      lockSeconds: this.get('AUTH_LOGIN_LOCK_SECONDS'),
+    };
+  }
+
+  get userCacheSeconds(): number {
+    return this.get('AUTH_USER_CACHE_SECONDS');
+  }
+
   /** Aniq yoqilmagan bo'lsa — production'da o'chiq, qolgan joyda yoniq. */
   get swaggerEnabled(): boolean {
     return this.get('SWAGGER_ENABLED') ?? !this.isProduction;

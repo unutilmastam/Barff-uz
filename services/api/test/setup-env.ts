@@ -15,3 +15,7 @@ process.env['DATABASE_URL'] ??= 'postgresql://barff@127.0.0.1:5432/barff?schema=
 process.env['REDIS_URL'] ??= 'redis://127.0.0.1:6379';
 process.env['API_CORS_ORIGINS'] ??= 'http://localhost:3001';
 process.env['SWAGGER_ENABLED'] ??= 'true';
+process.env['JWT_ACCESS_SECRET'] ??= 'test-access-secret-kamida-32-belgi-uzunlikda';
+process.env['JWT_REFRESH_SECRET'] ??= 'test-refresh-secret-kamida-32-belgi-uzunlikda';
+process.env['JWT_ACCESS_TTL'] ??= '15m';
+process.env['JWT_REFRESH_TTL'] ??= '30d';

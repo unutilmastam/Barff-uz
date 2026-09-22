@@ -172,6 +172,46 @@ bo'lsa, mijoz `X-Forwarded-For` ni o'zi yozib rate limiter'ni chetlab o'tadi;
 **kichik** bo'lsa — barcha foydalanuvchilar bitta proksi IP'si ostida
 birlashib, bir-birining limitini yeydi.
 
+## Autentifikatsiya va RBAC
+
+Endpoint'lar **standart holatda yopiq**: `JwtAuthGuard` global guard sifatida
+ishlaydi, ochiq qilish uchun esa `@Public()` kerak. Ya'ni yangi endpoint
+qo'shganda himoyani unutib bo'lmaydi — aksincha, ochishni unutish mumkin,
+bu esa ancha xavfsiz xato turi.
+
+```ts
+@Roles('ADMIN', 'SALES')          // sanab o'tilganlardan kamida bittasi
+@Permissions('orders.manage')     // sanab o'tilganlarning BARCHASI
+```
+
+Uchta qoida diqqatga loyiq:
+
+1. **Ruxsatlar token ichidan O'QILMAYDI.** Access token'da `roles` bor, lekin
+   guard'lar har so'rovda bazadan (qisqa muddatli kesh orqali) o'qiydi.
+   Shuning uchun admin rolni olib tashlasa, o'zgarish token muddati tugashini
+   kutmasdan darhol kuchga kiradi.
+2. **Refresh rotation + qayta ishlatishni aniqlash.** Har refresh'da yangi
+   juftlik beriladi, eskisi darhol bekor bo'ladi. Allaqachon ishlatilgan token
+   qayta kelsa, bu o'g'irlanish belgisi deb hisoblanib, o'sha sessiyaning
+   **barcha** token'lari bekor qilinadi.
+3. **Xato xabarlari ma'lumot sizdirmaydi.** "Foydalanuvchi topilmadi" va
+   "parol noto'g'ri" javoblari bir xil; mavjud bo'lmagan email uchun ham
+   argon2 ishlatiladi, shunda javob vaqti farq qilmaydi.
+
+Token'lar brauzerga **HttpOnly** cookie orqali beriladi — JavaScript ularni
+o'qiy olmaydi, ya'ni XSS token'ni o'g'irlay olmaydi. Refresh cookie faqat
+`/api/v1/auth` yo'liga yuboriladi.
+
+Kirish urinishlari email va IP bo'yicha alohida cheklanadi. Bu S02 dagi umumiy
+rate limiter'dan farq qiladi: u so'rovlar **sonini** cheklaydi, bu esa faqat
+**muvaffaqiyatsiz** kirishlarni hisoblaydi, shuning uchun to'g'ri parol bilan
+kirayotgan foydalanuvchi bloklanmaydi.
+
+Kirish, chiqish, token yangilash, qayta ishlatish aniqlanishi va rol
+o'zgarishi audit jurnaliga yoziladi (CLAUDE.md §23). Parol va token'lar
+jurnalga ham, loglarga ham **hech qachon** tushmaydi — buni testlar chiqish
+oqimlarini ushlab turib tekshiradi.
+
 ## Jonli sahifa haqida
 
 Ildizdagi `index.html` va `CNAME` — `barff.uz` da **hozir ishlab turgan** "tez orada"

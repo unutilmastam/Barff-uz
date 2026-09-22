@@ -34,5 +34,10 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
+  {
+    // Seed — CLI skripti: uning yagona chiqish kanali konsol.
+    files: ['prisma/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
   prettier,
 );

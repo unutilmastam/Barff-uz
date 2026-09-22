@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { type Response } from 'express';
+import { Public } from '../auth/decorators/public.decorator';
 import { HealthService } from './health.service';
 import { type ReadinessResult } from './health.types';
 
@@ -10,6 +11,8 @@ import { type ReadinessResult } from './health.types';
 // Load balancer va ECS probe'lari tez-tez so'rov yuboradi — ularni
 // rate limiter bloklab qo'ymasligi kerak.
 @SkipThrottle()
+// Probe'lar token bilan kelmaydi — orkestrator ularni avtorizatsiyasiz chaqiradi.
+@Public()
 export class HealthController {
   constructor(private readonly health: HealthService) {}
 
