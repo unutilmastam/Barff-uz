@@ -18,3 +18,5 @@ onlyBuiltDependencies:
   - '@prisma/engines'
   # unrs-resolver — eslint-config-next ning native resolver'i.
   - unrs-resolver
+  # sharp — rasm qayta ishlash uchun native modul.
+  - sharp

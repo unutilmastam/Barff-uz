@@ -50,6 +50,7 @@ model User {
   deletedAt DateTime?
 
   roles       UserRole[]
+  media       MediaAsset[]     @relation("MediaUploader")
   auditLogs   AuditLog[]       @relation("AuditActor")
   settings    SystemSetting[]  @relation("SettingUpdatedBy")
   grantedRoles UserRole[]      @relation("RoleAssignedBy")
@@ -186,4 +187,69 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// =============================================================================
+// MEDIA (S08)
+// =============================================================================
+
+enum MediaVisibility {
+  /// CDN orqali hammaga ochiq (mahsulot rasmlari, zavod fotolari).
+  PUBLIC
+  /// Faqat imzolangan havola orqali (shartnomalar, ichki hujjatlar).
+  PRIVATE
+}
+
+enum MediaKind {
+  IMAGE
+  DOCUMENT
+}
+
+/// Yuklangan fayl haqidagi ma'lumot (CLAUDE.md §20).
+///
+/// Faylning O'ZI obyekt saqlashda (S3/MinIO), bu yerda faqat metadata.
+model MediaAsset {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Obyekt saqlashdagi kalit. Kengaytma ANIQLANGAN turdan olinadi,
+  /// mijoz bergan fayl nomidan emas.
+  key String @unique
+
+  /// Mijoz yuborgan nom — faqat ko'rsatish uchun saqlanadi.
+  originalName String
+  /// Imzo baytlari bo'yicha ANIQLANGAN tur, sarlavhadan olingani emas.
+  mimeType     String
+  byteSize     Int
+
+  kind       MediaKind
+  visibility MediaVisibility @default(PRIVATE)
+
+  width  Int?
+  height Int?
+
+  /// Rasm yuklangunicha ko'rsatiladigan kichik o'rindosh.
+  blurDataUrl String?
+
+  /// O'lcham variantlari: [{ label, key, width, format, mimeType, byteSize }].
+  variants Json?
+
+  /// Ko'p tilli alt matn (CLAUDE.md §19: alt text).
+  altText Json?
+
+  /// Bir xil faylni qayta yuklashni aniqlash uchun (sha256).
+  checksum String
+
+  uploadedById String? @db.Uuid
+  uploadedBy   User?   @relation("MediaUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  /// Yumshoq o'chirish: fayl boshqa yozuvlarda ishlatilayotgan bo'lishi mumkin.
+  deletedAt DateTime?
+
+  @@index([kind])
+  @@index([visibility])
+  @@index([checksum])
+  @@index([createdAt])
+  @@map("media_assets")
 }

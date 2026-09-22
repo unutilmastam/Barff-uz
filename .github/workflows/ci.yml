@@ -152,12 +152,21 @@ jobs:
         # Baza va Redis yo'q, lekin API ko'tarilib, liveness probe javob
         # berishi kerak: readiness `degraded` bo'ladi, liveness esa `200`.
         run: |
+          # S3 sozlamalari BERILADI, garchi bu yerda hech narsa yuklanmasa
+          # ham: API production rejimida obyekt saqlashsiz ishga tushishdan
+          # bosh tortadi (xotiradagi saqlash qayta ishga tushirishda barcha
+          # fayllarni yo'qotardi). Ya'ni to'liq sozlangan konteynerni
+          # sinayapmiz, yarim sozlanganini emas.
           docker run -d --name barff-api-ci \
             -e NODE_ENV=production \
             -e DATABASE_URL=postgresql://yoq@127.0.0.1:5432/yoq \
             -e REDIS_URL=redis://127.0.0.1:6379 \
             -e JWT_ACCESS_SECRET=ci-access-secret-kamida-32-belgi-uzunlikda \
             -e JWT_REFRESH_SECRET=ci-refresh-secret-kamida-32-belgi-uzunlikda \
+            -e S3_BUCKET=barff-media-ci \
+            -e S3_ACCESS_KEY_ID=ci-kalit \
+            -e S3_SECRET_ACCESS_KEY=ci-sir \
+            -e S3_ENDPOINT=http://127.0.0.1:9000 \
             -p 3000:3000 barff-api:ci
 
           for i in $(seq 1 30); do

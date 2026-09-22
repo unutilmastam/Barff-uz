@@ -90,6 +90,31 @@ export const envSchema = z.object({
    */
   AUTH_USER_CACHE_SECONDS: z.coerce.number().int().min(0).default(60),
 
+  /**
+   * Obyekt saqlash (S3 / MinIO).
+   *
+   * Ixtiyoriy: sozlanmasa lokalda xotiradagi variant ishlatiladi.
+   * Production'da `StorageModule` ularning mavjudligini talab qiladi.
+   */
+  S3_ENDPOINT: z.url().optional(),
+  S3_REGION: z.string().default('us-east-1'),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
+  /** MinIO subdomen ko'rinishidagi bucket manzillarini qo'llab-quvvatlamaydi. */
+  S3_FORCE_PATH_STYLE: booleanish.optional(),
+  /** Ommaviy fayllar beriladigan CDN manzili. */
+  S3_PUBLIC_URL: z.url().optional(),
+
+  /** Yuklanadigan faylning eng katta hajmi (bayt). */
+  MEDIA_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .default(15 * 1024 * 1024),
+  /** Imzolangan havola amal qilish muddati (soniya). */
+  MEDIA_SIGNED_URL_TTL: z.coerce.number().int().min(30).default(300),
+
   /** Swagger standart holatda production'da o'chiq. */
   SWAGGER_ENABLED: booleanish.optional(),
 });

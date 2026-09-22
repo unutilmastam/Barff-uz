@@ -7,6 +7,8 @@ export const AUDIT_ACTIONS = {
   TOKEN_REFRESH: 'auth.token.refresh',
   TOKEN_REUSE_DETECTED: 'auth.token.reuse_detected',
   ROLE_CHANGED: 'user.role.changed',
+  MEDIA_UPLOADED: 'media.uploaded',
+  MEDIA_DELETED: 'media.deleted',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
