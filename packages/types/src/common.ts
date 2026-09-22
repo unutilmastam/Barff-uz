@@ -8,12 +8,19 @@ export type Localized<T = string> = Record<Locale, T>;
 export const SORT_ORDERS = ['asc', 'desc'] as const;
 export type SortOrder = (typeof SORT_ORDERS)[number];
 
-/** Ro'yxat so'rovlari uchun umumiy parametrlar (CLAUDE.md §11). */
+/**
+ * Ro'yxat so'rovlari uchun umumiy parametrlar (CLAUDE.md §11).
+ *
+ * `page`/`limit` majburiy: `paginationQuerySchema` ularni standart qiymat
+ * bilan to'ldiradi, shuning uchun bu tip sxemadan CHIQQAN shaklni tasvirlaydi.
+ * `sortBy` da `| undefined` aniq yozilgan — `exactOptionalPropertyTypes`
+ * yoqilganda Zod'ning `.optional()` natijasi aynan shunday bo'ladi.
+ */
 export interface PaginationQuery {
   page: number;
   limit: number;
-  sortBy?: string;
-  sortOrder?: SortOrder;
+  sortBy?: string | undefined;
+  sortOrder?: SortOrder | undefined;
 }
 
 /** Sahifalangan javobning yagona shakli — barcha ro'yxat endpoint'lari shuni qaytaradi. */

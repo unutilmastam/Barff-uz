@@ -1,0 +1,12 @@
+{
+  "extends": "@barff/config/tsconfig/library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "**/*.test.ts", "**/*.e2e-spec.ts"]
+}

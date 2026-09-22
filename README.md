@@ -57,7 +57,7 @@ pnpm dev                 # barcha app'lar (turbo)
 | MinIO (S3)       | 9000 | http://localhost:9000             |
 | MinIO konsoli    | 9001 | http://localhost:9001             |
 
-> Portlar S02/S06 va keyingi qadamlarda app'lar qo'shilgach amalda biriktiriladi.
+> Web/dealer/admin/delivery portlari S06 va keyingi qadamlarda app'lar qo'shilgach biriktiriladi.
 
 ## Struktura
 
@@ -76,6 +76,41 @@ prisma          sxema va migratsiyalar
 infrastructure  IaC va deploy
 docs            ochiq savollar, qadamlar jurnali
 ```
+
+## API'ni lokal ishga tushirish
+
+```bash
+pnpm docker:up                    # postgres + redis + minio
+cp .env.example .env              # qiymatlarni to'ldiring
+pnpm --filter @barff/api dev      # http://localhost:3000/api/v1
+```
+
+Tekshirish:
+
+| Yo'l                | Nima qiladi                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `GET /health`       | liveness — process tirikmi (tashqi bog'liqliklarga tegmaydi) |
+| `GET /health/ready` | readiness — bog'liqliklar ishlayaptimi; nosozlikda `503`     |
+| `GET /docs`         | Swagger UI                                                   |
+| `GET /docs-json`    | OpenAPI hujjati (JSON)                                       |
+
+Liveness va readiness ATAYLAB ajratilgan: Redis uzilganda readiness `503`
+qaytarib instansiyani rotatsiyadan chiqaradi, liveness esa `200` bo'lib qoladi —
+aks holda orkestrator konteynerni bekorga qayta ishga tushiraverardi.
+
+### Muhim muhit o'zgaruvchilari
+
+| O'zgaruvchi            | Izoh                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `REDIS_URL`            | majburiy — bo'lmasa API ishga tushmaydi (fail fast)                                 |
+| `API_CORS_ORIGINS`     | vergul bilan ajratilgan ro'yxat; bo'sh bo'lsa brauzer so'rovlari o'tmaydi           |
+| `API_TRUST_PROXY_HOPS` | API oldidagi proksi soni (Cloudflare + ALB = 2, lokalda 0) — pastdagi izohga qarang |
+| `SWAGGER_ENABLED`      | berilmasa: production'da o'chiq, qolgan joyda yoniq                                 |
+
+`API_TRUST_PROXY_HOPS` ni to'g'ri qo'yish muhim: qiymat haqiqiydan **katta**
+bo'lsa, mijoz `X-Forwarded-For` ni o'zi yozib rate limiter'ni chetlab o'tadi;
+**kichik** bo'lsa — barcha foydalanuvchilar bitta proksi IP'si ostida
+birlashib, bir-birining limitini yeydi.
 
 ## Jonli sahifa haqida
 
