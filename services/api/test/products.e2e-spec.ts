@@ -254,6 +254,31 @@ describe('Products (e2e)', () => {
     });
   });
 
+  describe('qisman yangilash boshqa maydonlarni buzmaydi', () => {
+    it('slugni ozgartirish isActive va displayOrder ni QAYTARMAYDI', async () => {
+      const created = await createProduct(adminToken, {
+        ...validBody('qisman'),
+        isActive: false,
+        displayOrder: 42,
+      }).expect(201);
+      createdProductIds.push(created.body.id);
+
+      // Faqat slug yuboriladi. Zod'ning `.partial()` usuli bu yerda
+      // `isActive: true` va `displayOrder: 0` qo'shib yuborardi — ya'ni
+      // sarlavhani tahrirlash mahsulotni jimgina saytga chiqarib
+      // yuborardi.
+      const updated = await request(app.getHttpServer())
+        .patch(`${base}/admin/products/${created.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ slug: `${slugPrefix}-qisman-yangi` })
+        .expect(200);
+
+      expect(updated.body.isActive).toBe(false);
+      expect(updated.body.displayOrder).toBe(42);
+      expect(updated.body.slug).toBe(`${slugPrefix}-qisman-yangi`);
+    });
+  });
+
   describe('ommaviy javob shakli', () => {
     it('kop tilli maydon TOLIQ obyekt sifatida qaytadi', async () => {
       const created = await createProduct(adminToken, validBody('tillar')).expect(201);
