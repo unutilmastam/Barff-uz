@@ -242,6 +242,9 @@ model MediaAsset {
   uploadedById String? @db.Uuid
   uploadedBy   User?   @relation("MediaUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
+  productImages    ProductImage[]
+  productDocuments ProductDocument[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   /// Yumshoq o'chirish: fayl boshqa yozuvlarda ishlatilayotgan bo'lishi mumkin.
@@ -252,4 +255,197 @@ model MediaAsset {
   @@index([checksum])
   @@index([createdAt])
   @@map("media_assets")
+}
+
+// =============================================================================
+// MAHSULOTLAR (S09)
+// =============================================================================
+
+/// Hujjat turi: sertifikat, spetsifikatsiya yoki boshqa.
+enum ProductDocumentKind {
+  CERTIFICATE
+  SPECIFICATION
+  OTHER
+}
+
+/// Mahsulot kategoriyasi (sharbatlar, gazli ichimliklar, ...).
+///
+/// Ko'p tilli maydonlar JSON sifatida `{ uz, ru, en }` ko'rinishida
+/// saqlanadi — `@barff/types` dagi `Localized<T>` tipiga mos.
+model ProductCategory {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  slug String @unique
+  /// Localized<string>
+  name        Json
+  /// Localized<string> | null
+  description Json?
+
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  /// Ichma-ich kategoriyalar uchun.
+  parentId String?          @db.Uuid
+  parent   ProductCategory? @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductCategory[] @relation("CategoryTree")
+
+  /// SEO meta (title, description) — Localized.
+  seo Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  products Product[]
+
+  @@index([isActive, displayOrder])
+  @@index([parentId])
+  @@map("product_categories")
+}
+
+model Product {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Ommaviy URL uchun. O'ZGARMASLIGI kerak — o'zgarsa, tashqi havolalar
+  /// buziladi va SEO yo'qoladi.
+  slug String @unique
+  /// Ichki artikul. Variantlarning o'z SKU'si ham bo'ladi.
+  sku  String @unique
+
+  categoryId String          @db.Uuid
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
+
+  /// Localized<string>
+  name Json
+  /// Localized<string> | null
+  description Json?
+  /// Localized<string> | null — tarkibi
+  ingredients Json?
+  /// Localized<string> | null — saqlash sharoiti
+  storage Json?
+
+  /// Localized<string> | null — ta'mi (olma, shaftoli, ...)
+  flavor Json?
+
+  /// Yaroqlilik muddati (kun).
+  shelfLifeDays Int?
+
+  /// Ozuqaviy qiymat: { per100ml: { energyKcal, protein, carbs, sugar, fat } }
+  /// Aniq tuzilma S12 da mijoz ma'lumoti bilan qat'iylashtiriladi.
+  nutrition Json?
+
+  seo Json?
+
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  variants  ProductVariant[]
+  images    ProductImage[]
+  documents ProductDocument[]
+
+  @@index([categoryId])
+  @@index([isActive, displayOrder])
+  @@index([createdAt])
+  @@map("products")
+}
+
+/// Mahsulot varianti — hajm bo'yicha (0.5 l, 1 l, ...).
+model ProductVariant {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sku     String  @unique
+  barcode String? @unique
+
+  /// Hajm millilitrda. Butun son: 0.5 l -> 500.
+  volumeMl Int
+
+  /// Bir qadoqdagi dona soni (masalan 12 tali blok).
+  unitsPerPack Int?
+
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  prices ProductPrice[]
+
+  @@index([productId, isActive])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  mediaAssetId String     @db.Uuid
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  /// Asosiy rasm — ro'yxatlarda ko'rsatiladi.
+  isPrimary    Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, mediaAssetId])
+  @@index([productId, displayOrder])
+  @@map("product_images")
+}
+
+model ProductDocument {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  mediaAssetId String     @db.Uuid
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  /// Localized<string>
+  title Json
+  kind  ProductDocumentKind @default(OTHER)
+
+  displayOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, mediaAssetId])
+  @@index([productId])
+  @@map("product_documents")
+}
+
+/// Variant narxi.
+///
+/// Diler darajalariga bog'liq narxlar S23 da qo'shiladi; bu yerda
+/// asosiy (ro'yxat) narxi.
+model ProductPrice {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  variantId String         @db.Uuid
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  /// DIQQAT: summa BUTUN SONDA, eng kichik birlikda (tiyin) saqlanadi.
+  /// Suzuvchi nuqta ishlatilsa, narxlar yig'indisida xato to'planardi.
+  amount   Int
+  currency String @default("UZS")
+
+  /// Amal qilish oralig'i. `validTo` bo'sh bo'lsa — hozirgi narx.
+  validFrom DateTime  @default(now())
+  validTo   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([variantId, validFrom])
+  @@map("product_prices")
 }

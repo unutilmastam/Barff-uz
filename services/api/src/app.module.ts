@@ -10,6 +10,7 @@ import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
 import { MediaModule } from './media/media.module';
+import { ProductsModule } from './products/products.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { UsersModule } from './users/users.module';
@@ -40,6 +41,7 @@ import { UsersModule } from './users/users.module';
     AuditModule,
     AuthModule,
     MediaModule,
+    ProductsModule,
     HealthModule,
   ],
   providers: [

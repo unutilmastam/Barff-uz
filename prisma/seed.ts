@@ -189,6 +189,98 @@ async function seedSettings(): Promise<void> {
   console.log(`  sozlamalar: ${settings.length}`);
 }
 
+/**
+ * Namuna mahsulotlar.
+ *
+ * DIQQAT: bularning HAMMASI o'ylab topilgan (CLAUDE.md §1). Haqiqiy
+ * nomlar, hajmlar, tarkib va narxlar BARFF dan kelishi kerak — shu
+ * sababli har bir nom `[MOCK]` bilan boshlanadi va uni saytda ko'rgan
+ * odam darhol bu vaqtinchalik ma'lumot ekanini tushunadi.
+ *
+ * Narxlar TIYINDA (butun son): 12 000 so'm -> 1 200 000.
+ */
+const MOCK_CATEGORY = {
+  slug: 'mock-sharbatlar',
+  name: { uz: '[MOCK] Sharbatlar', ru: '[MOCK] Соки', en: '[MOCK] Juices' },
+  description: {
+    uz: 'REPLACE_WITH_REAL_DATA — kategoriya tavsifi',
+    ru: 'REPLACE_WITH_REAL_DATA — описание категории',
+    en: 'REPLACE_WITH_REAL_DATA — category description',
+  },
+};
+
+const MOCK_PRODUCTS = [
+  {
+    slug: 'mock-anor-sharbati',
+    sku: 'MOCK-ANOR',
+    name: {
+      uz: '[MOCK] Anor sharbati',
+      ru: '[MOCK] Гранатовый сок',
+      en: '[MOCK] Pomegranate juice',
+    },
+    flavor: { uz: 'Anor', ru: 'Гранат', en: 'Pomegranate' },
+    variants: [
+      { sku: 'MOCK-ANOR-500', volumeMl: 500, amount: 1_200_000 },
+      { sku: 'MOCK-ANOR-1000', volumeMl: 1000, amount: 2_100_000 },
+    ],
+  },
+  {
+    slug: 'mock-olma-sharbati',
+    sku: 'MOCK-OLMA',
+    name: { uz: '[MOCK] Olma sharbati', ru: '[MOCK] Яблочный сок', en: '[MOCK] Apple juice' },
+    flavor: { uz: 'Olma', ru: 'Яблоко', en: 'Apple' },
+    variants: [{ sku: 'MOCK-OLMA-1000', volumeMl: 1000, amount: 1_800_000 }],
+  },
+];
+
+async function seedMockProducts(): Promise<void> {
+  const category = await prisma.productCategory.upsert({
+    where: { slug: MOCK_CATEGORY.slug },
+    update: { name: MOCK_CATEGORY.name, description: MOCK_CATEGORY.description },
+    create: MOCK_CATEGORY,
+  });
+
+  for (const item of MOCK_PRODUCTS) {
+    const product = await prisma.product.upsert({
+      where: { slug: item.slug },
+      update: { name: item.name, flavor: item.flavor },
+      create: {
+        slug: item.slug,
+        sku: item.sku,
+        categoryId: category.id,
+        name: item.name,
+        flavor: item.flavor,
+        description: {
+          uz: 'REPLACE_WITH_REAL_DATA',
+          ru: 'REPLACE_WITH_REAL_DATA',
+          en: 'REPLACE_WITH_REAL_DATA',
+        },
+        shelfLifeDays: 180,
+      },
+    });
+
+    for (const variant of item.variants) {
+      const saved = await prisma.productVariant.upsert({
+        where: { sku: variant.sku },
+        update: { volumeMl: variant.volumeMl },
+        create: { productId: product.id, sku: variant.sku, volumeMl: variant.volumeMl },
+      });
+
+      const existingPrice = await prisma.productPrice.findFirst({
+        where: { variantId: saved.id, validTo: null },
+      });
+
+      if (existingPrice === null) {
+        await prisma.productPrice.create({
+          data: { variantId: saved.id, amount: variant.amount, currency: 'UZS' },
+        });
+      }
+    }
+  }
+
+  console.log(`  mahsulotlar: ${MOCK_PRODUCTS.length} ta (hammasi MOCK)`);
+}
+
 async function main(): Promise<void> {
   console.log('Seed boshlandi');
 
@@ -196,6 +288,7 @@ async function main(): Promise<void> {
   const roleIds = await seedRoles(permissionIds);
   await seedAdmin(roleIds);
   await seedSettings();
+  await seedMockProducts();
 
   console.log('Seed tugadi');
 }

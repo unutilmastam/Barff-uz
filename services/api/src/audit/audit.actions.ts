@@ -9,6 +9,11 @@ export const AUDIT_ACTIONS = {
   ROLE_CHANGED: 'user.role.changed',
   MEDIA_UPLOADED: 'media.uploaded',
   MEDIA_DELETED: 'media.deleted',
+  PRODUCT_CREATED: 'product.created',
+  PRODUCT_UPDATED: 'product.updated',
+  PRODUCT_DELETED: 'product.deleted',
+  CATEGORY_CREATED: 'product.category.created',
+  CATEGORY_UPDATED: 'product.category.updated',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
