@@ -1,0 +1,28 @@
+# Tasvirga TUSHMASLIGI kerak bo'lgan narsalar.
+# Diqqat: `.env` shu yerda — sirlar hech qachon tasvir qatlamiga yozilmaydi
+# (CLAUDE.md §12). Ular runtime'da ECS/Secrets Manager orqali beriladi.
+.env
+.env.*
+!.env.example
+
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+packages/db/generated
+
+.git
+.github
+.vscode
+.idea
+
+*.log
+*.md
+!README.md
+
+docker-compose.yml
+Dockerfile
+**/Dockerfile
+.dockerignore

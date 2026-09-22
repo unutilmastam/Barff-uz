@@ -1,0 +1,106 @@
+name: Deploy — staging
+
+# SKELET. Hozir ishga tushmaydi: AWS infratuzilmasi S40 da quriladi.
+# Faqat qo'lda (`workflow_dispatch`) chaqiriladi va kerakli sozlamalar
+# bo'lmasa, o'zi to'xtaydi.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Staging'ga deploy qilishni tasdiqlang (ha deb yozing)"
+        required: true
+        default: 'yoq'
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # OIDC orqali AWS rolini olish uchun. Uzoq muddatli kalitlar (AWS_ACCESS_KEY_ID)
+  # SAQLANMAYDI: ular o'g'irlansa, muddatsiz amal qilardi (CLAUDE.md §12).
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build, push va ECS'ga deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging
+
+    steps:
+      - name: Tasdiqni tekshirish
+        if: inputs.confirm != 'ha'
+        run: |
+          echo "Deploy tasdiqlanmadi. 'ha' deb yozing."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - name: Sozlamalar tayyorligini tekshirish
+        id: preflight
+        env:
+          ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+        run: |
+          missing=""
+          [ -z "$ROLE_ARN" ]       && missing="$missing AWS_DEPLOY_ROLE_ARN(secret)"
+          [ -z "$ECR_REPOSITORY" ] && missing="$missing ECR_REPOSITORY(var)"
+          [ -z "$ECS_CLUSTER" ]    && missing="$missing ECS_CLUSTER(var)"
+          [ -z "$ECS_SERVICE" ]    && missing="$missing ECS_SERVICE(var)"
+
+          if [ -n "$missing" ]; then
+            echo "Quyidagilar sozlanmagan:$missing"
+            echo "AWS infratuzilmasi S40 da quriladi (docs/OPEN-QUESTIONS.md, Q18)."
+            exit 1
+          fi
+
+      - name: AWS rolini olish (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: ECR'ga kirish
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Tasvirni qurish va yuborish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/api/Dockerfile
+          push: true
+          # Ikki teg: commit SHA (aniq versiyaga qaytish uchun) va `staging`
+          # (joriy holatni ko'rsatuvchi harakatlanuvchi teg).
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Migratsiyalarni qo'llash
+        # DIQQAT: migratsiya yangi tasvir ishga tushishidan OLDIN qo'llanadi,
+        # va u faqat ORQAGA MOS o'zgarishlarni o'z ichiga olishi kerak —
+        # aks holda eski task'lar hali ishlab turgan paytda ular buziladi.
+        # Ustun o'chirish kabi mos kelmaydigan o'zgarishlar ikki bosqichda
+        # bajariladi (avval kod, keyin sxema).
+        run: |
+          echo "S40 da bu yerda ECS one-off task yoki migration job chaqiriladi"
+
+      - name: ECS servisini yangilash
+        run: |
+          aws ecs update-service \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --service "${{ vars.ECS_SERVICE }}" \
+            --force-new-deployment
+
+      - name: Deploy yakunlanishini kutish
+        # Kutmasdan "muvaffaqiyatli" deb hisoblash xato bo'lardi: yangi task
+        # healthcheck'dan o'tmay qaytib ketishi mumkin.
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --services "${{ vars.ECS_SERVICE }}"

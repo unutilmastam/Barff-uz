@@ -100,10 +100,24 @@ import { PrismaClient, type User } from '@barff/db';
 
 ```bash
 pnpm docker:up                    # postgres + redis + minio
-cp .env.example .env              # DATABASE_URL va DATABASE_SHADOW_URL ni to'ldiring
+cp .env.example .env              # qiymatlarni to'ldiring (pastga qarang)
 pnpm db:deploy                    # migratsiyalarni qo'llash
 SEED_ADMIN_EMAIL=siz@barff.uz pnpm db:seed
 ```
+
+`.env.example` da ataylab faqat NOMLAR turadi, qiymatlar yo'q (CLAUDE.md §12).
+Lokal uchun kerakli qiymatlar:
+
+| O'zgaruvchi           | Lokal qiymat                                                            |
+| --------------------- | ----------------------------------------------------------------------- |
+| `DATABASE_URL`        | `postgresql://barff:barff_local_dev@127.0.0.1:5432/barff?schema=public` |
+| `DATABASE_SHADOW_URL` | xuddi shunday, lekin baza nomi `barff_shadow`                           |
+| `REDIS_URL`           | `redis://127.0.0.1:6379`                                                |
+| `JWT_ACCESS_SECRET`   | `openssl rand -base64 48`                                               |
+| `JWT_REFRESH_SECRET`  | boshqa qiymat, yana `openssl rand -base64 48`                           |
+
+Foydalanuvchi nomi va paroli `docker-compose.yml` dagi `POSTGRES_*` bilan
+belgilanadi — o'sha yagona manba.
 
 `db:seed` **idempotent** — qayta ishga tushirilsa mavjud yozuvlarni buzmaydi
 va admin parolini o'zgartirmaydi.
@@ -211,6 +225,38 @@ Kirish, chiqish, token yangilash, qayta ishlatish aniqlanishi va rol
 o'zgarishi audit jurnaliga yoziladi (CLAUDE.md §23). Parol va token'lar
 jurnalga ham, loglarga ham **hech qachon** tushmaydi — buni testlar chiqish
 oqimlarini ushlab turib tekshiradi.
+
+## CI va Docker
+
+`.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:
+
+| Job                            | Nima qiladi                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `Lint, typecheck, test, build` | postgres + redis servis konteynerlari bilan to'liq tekshiruv       |
+| `Docker image`                 | API tasvirini quradi, root emasligini va ko'tarilishini tekshiradi |
+
+Qadamlar tartibi muhim: **build** birinchi keladi, chunki turbo shu paytda
+Prisma klientini yaratadi va seed `@barff/types` ni qurilgan `dist` dan
+import qiladi.
+
+### API tasviri
+
+```bash
+docker build -f services/api/Dockerfile -t barff-api .
+docker run --rm -p 3000:3000 --env-file .env barff-api
+```
+
+Tasvir `node` foydalanuvchisi ostida ishlaydi, root emas (CLAUDE.md §12).
+Baza `alpine` emas, `bookworm-slim`: Prisma query engine'ining standart
+binary target'i Debian uchun, Alpine (musl) da esa alohida target kerak va
+u jim ravishda mos kelmay qolishi mumkin.
+
+**Baza yo'q bo'lsa ham tasvir ko'tariladi**: liveness `200`, readiness esa
+`503 degraded` qaytaradi. Bu ataylab shunday — baza bir lahzaga yo'qolganda
+har bir task quladigan bo'lsa, konteyner cheksiz qayta ishga tushish
+siklida qolardi.
+
+Deploy va branch himoyasi: `docs/BRANCH-PROTECTION.md`.
 
 ## Jonli sahifa haqida
 

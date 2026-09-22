@@ -9,6 +9,10 @@ pnpm-lock.yaml
 # Jonli "tez orada" sahifasi — qo'lda yozilgan, formatlanmaydi.
 index.html
 
+# Generatsiya qilingan Prisma klienti. Busiz `pnpm format` uni har safar
+# qayta yozardi, `format:check` esa toza checkout'da (CI) yiqilardi.
+packages/db/generated/
+
 # Loyiha hujjatlari mijoz tomonidan yuritiladi.
 CLAUDE.md
 ROADMAP.md
