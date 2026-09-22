@@ -100,10 +100,24 @@ import { PrismaClient, type User } from '@barff/db';
 
 ```bash
 pnpm docker:up                    # postgres + redis + minio
-cp .env.example .env              # DATABASE_URL va DATABASE_SHADOW_URL ni to'ldiring
+cp .env.example .env              # qiymatlarni to'ldiring (pastga qarang)
 pnpm db:deploy                    # migratsiyalarni qo'llash
 SEED_ADMIN_EMAIL=siz@barff.uz pnpm db:seed
 ```
+
+`.env.example` da ataylab faqat NOMLAR turadi, qiymatlar yo'q (CLAUDE.md §12).
+Lokal uchun kerakli qiymatlar:
+
+| O'zgaruvchi           | Lokal qiymat                                                            |
+| --------------------- | ----------------------------------------------------------------------- |
+| `DATABASE_URL`        | `postgresql://barff:barff_local_dev@127.0.0.1:5432/barff?schema=public` |
+| `DATABASE_SHADOW_URL` | xuddi shunday, lekin baza nomi `barff_shadow`                           |
+| `REDIS_URL`           | `redis://127.0.0.1:6379`                                                |
+| `JWT_ACCESS_SECRET`   | `openssl rand -base64 48`                                               |
+| `JWT_REFRESH_SECRET`  | boshqa qiymat, yana `openssl rand -base64 48`                           |
+
+Foydalanuvchi nomi va paroli `docker-compose.yml` dagi `POSTGRES_*` bilan
+belgilanadi — o'sha yagona manba.
 
 `db:seed` **idempotent** — qayta ishga tushirilsa mavjud yozuvlarni buzmaydi
 va admin parolini o'zgartirmaydi.
