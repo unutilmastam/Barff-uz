@@ -1,10 +1,13 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@barff/db';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { type RequestContext } from '../auth/auth.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
+import { STORAGE_ADAPTER, type StorageAdapter } from '../media/storage/storage.adapter';
+import { CacheService } from '../public/cache/cache.service';
+import { toPublicProduct } from '../public/public.mappers';
 
 /**
  * Ommaviy API uchun shart.
@@ -53,10 +56,18 @@ const PUBLIC_INCLUDE = {
 
 @Injectable()
 export class ProductsService {
+  /** Ommaviy javoblar keshi muddati. */
+  private static readonly CACHE_TTL_SECONDS = 300;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly cache: CacheService,
+    @Inject(STORAGE_ADAPTER) private readonly storage: StorageAdapter,
   ) {}
+
+  /** Rasm variantlari uchun ommaviy manzil. */
+  private readonly url = (key: string): string => this.storage.publicUrl(key);
 
   // ---------------------------------------------------------------------------
   // Ommaviy
@@ -78,6 +89,17 @@ export class ProductsService {
   }) {
     const request = toPageRequest(query);
 
+    const cacheKey = `list:${request.page}:${request.limit}:${request.sortOrder}:${query.categorySlug ?? '-'}:${query.search ?? '-'}`;
+
+    return this.cache.wrap('products', cacheKey, ProductsService.CACHE_TTL_SECONDS, async () => {
+      return this.loadPublicList(query, request);
+    });
+  }
+
+  private async loadPublicList(
+    query: { categorySlug?: string | undefined; search?: string | undefined },
+    request: ReturnType<typeof toPageRequest>,
+  ) {
     const where: Prisma.ProductWhereInput = {
       ...PUBLIC_PRODUCT_WHERE,
       ...(query.categorySlug !== undefined
@@ -106,28 +128,43 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return paginate(items, total, request);
+    // Prisma qatori EMAS, aniq tuzilgan javob: yangi ustun qo'shilsa,
+    // u o'z-o'zidan ommaviy API'ga chiqib ketmaydi.
+    return paginate(
+      items.map((item) => toPublicProduct(item, this.url)),
+      total,
+      request,
+    );
   }
 
   async findBySlugPublic(slug: string) {
-    const product = await this.prisma.product.findFirst({
-      where: { slug, ...PUBLIC_PRODUCT_WHERE },
-      include: PUBLIC_INCLUDE,
-    });
+    return this.cache.wrap(
+      'products',
+      `slug:${slug}`,
+      ProductsService.CACHE_TTL_SECONDS,
+      async () => {
+        const product = await this.prisma.product.findFirst({
+          where: { slug, ...PUBLIC_PRODUCT_WHERE },
+          include: PUBLIC_INCLUDE,
+        });
 
-    if (product === null) {
-      throw new NotFoundException({ message: 'Mahsulot topilmadi', code: 'PRODUCT_NOT_FOUND' });
-    }
+        if (product === null) {
+          throw new NotFoundException({ message: 'Mahsulot topilmadi', code: 'PRODUCT_NOT_FOUND' });
+        }
 
-    return product;
+        return toPublicProduct(product, this.url);
+      },
+    );
   }
 
   async listPublicCategories() {
-    return this.prisma.productCategory.findMany({
-      where: { isActive: true, deletedAt: null },
-      orderBy: { displayOrder: 'asc' },
-      select: { id: true, slug: true, name: true, description: true, parentId: true },
-    });
+    return this.cache.wrap('products', 'categories', ProductsService.CACHE_TTL_SECONDS, () =>
+      this.prisma.productCategory.findMany({
+        where: { isActive: true, deletedAt: null },
+        orderBy: { displayOrder: 'asc' },
+        select: { slug: true, name: true, description: true, parentId: true },
+      }),
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -172,6 +209,10 @@ export class ProductsService {
 
     const product = await this.runUnique(() => this.prisma.product.create({ data }));
 
+    // Kesh javob qaytarilishidan OLDIN bekor qilinadi — shunda keyingi
+    // so'rov yangi ma'lumotni oladi (DoD: bir so'rov siklida).
+    await this.cache.invalidate('products');
+
     await this.audit.record({
       action: AUDIT_ACTIONS.PRODUCT_CREATED,
       entity: 'Product',
@@ -198,6 +239,8 @@ export class ProductsService {
     }
 
     const product = await this.runUnique(() => this.prisma.product.update({ where: { id }, data }));
+
+    await this.cache.invalidate('products');
 
     await this.audit.record({
       action: AUDIT_ACTIONS.PRODUCT_UPDATED,
@@ -228,6 +271,8 @@ export class ProductsService {
       data: { deletedAt: new Date(), isActive: false },
     });
 
+    await this.cache.invalidate('products');
+
     await this.audit.record({
       action: AUDIT_ACTIONS.PRODUCT_DELETED,
       entity: 'Product',
@@ -246,14 +291,21 @@ export class ProductsService {
     data: Omit<Prisma.ProductVariantUncheckedCreateInput, 'productId'>,
   ) {
     await this.findByIdAdmin(productId);
-    return this.runUnique(() =>
+    const variant = await this.runUnique(() =>
       this.prisma.productVariant.create({ data: { ...data, productId } }),
     );
+    // Variant mahsulot javobining bir qismi — kesh eskiradi.
+    await this.cache.invalidate('products');
+    return variant;
   }
 
   async updateVariant(id: string, data: Prisma.ProductVariantUncheckedUpdateInput) {
     await this.assertVariantExists(id);
-    return this.runUnique(() => this.prisma.productVariant.update({ where: { id }, data }));
+    const variant = await this.runUnique(() =>
+      this.prisma.productVariant.update({ where: { id }, data }),
+    );
+    await this.cache.invalidate('products');
+    return variant;
   }
 
   async addPrice(
@@ -261,7 +313,10 @@ export class ProductsService {
     data: Omit<Prisma.ProductPriceUncheckedCreateInput, 'variantId'>,
   ) {
     await this.assertVariantExists(variantId);
-    return this.prisma.productPrice.create({ data: { ...data, variantId } });
+    const price = await this.prisma.productPrice.create({ data: { ...data, variantId } });
+    // Narx o'zgarishi eng sezgir holat: eski narx ko'rinib turishi mumkin emas.
+    await this.cache.invalidate('products');
+    return price;
   }
 
   // --- Yordamchilar -----------------------------------------------------------

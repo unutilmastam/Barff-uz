@@ -367,6 +367,31 @@ BARFF dan kelmaguncha saytda ko'rinmaydi.
 > Sertifikatlar **o'ylab topilmaydi** (CLAUDE.md §19). Yozuv faqat
 > haqiqiy hujjat yuklangandan keyin nashr qilinadi.
 
+## Ommaviy API keshi
+
+Ommaviy o'qish endpoint'lari Redis'da keshlanadi (TTL 5 daqiqa) va
+brauzer/CDN uchun `ETag` hamda `Cache-Control` beradi.
+
+**Bekor qilish versiya hisoblagichi orqali.** Har bir nom (`products`,
+`content`) o'z versiyasiga ega va kesh kaliti unga bog'liq. Admin
+yozuvni o'zgartirganda versiya bitta `INCR` bilan oshadi — o'sha
+nomdagi barcha eski kalitlar bir zumda ahamiyatsiz bo'lib qoladi.
+
+> `SCAN` + `DEL` yondashuvi ataylab ishlatilmagan: u katta bazada sekin
+> va atomar emas — tozalash davomida eski qiymat qaytib turishi mumkin.
+
+**Kesh yo'qolsa ham ilova ishlaydi.** Redis xatolari yutiladi va so'rov
+to'g'ridan-to'g'ri bazaga tushadi: kesh tezlik uchun, to'g'rilik uchun
+emas.
+
+**Javoblar aniq shakllantiriladi** (`public.mappers.ts`). Prisma qatorini
+to'g'ridan-to'g'ri qaytarish `deletedAt`, `updatedAt`, `categoryId` va
+obyekt saqlashdagi `key` kabi ichki maydonlarni tashqariga chiqarardi.
+Endi yangi ustun qo'shilsa, u o'z-o'zidan ommaviy API'ga chiqmaydi.
+
+`ETag` mos kelsa `304` qaytadi va **tana umuman yuborilmaydi** — katta
+mahsulot ro'yxatlari uchun sezilarli trafik tejaydi.
+
 ## CI va Docker
 
 `.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:

@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiErrorDto } from '../common/dto/api-error';
 import { ApiZodQuery } from '../common/swagger/zod-schema.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { EtagInterceptor } from '../public/etag.interceptor';
 import { ProductListQueryDto } from './dto/product.dto';
 import { ProductsService } from './products.service';
 
@@ -16,6 +17,9 @@ import { ProductsService } from './products.service';
 @ApiTags('products')
 @Controller('products')
 @Public()
+// ETag va `Cache-Control` — javob o'zgarmagan bo'lsa brauzer va CDN
+// `304` oladi va tana umuman yuborilmaydi.
+@UseInterceptors(EtagInterceptor)
 export class PublicProductsController {
   constructor(private readonly products: ProductsService) {}
 
