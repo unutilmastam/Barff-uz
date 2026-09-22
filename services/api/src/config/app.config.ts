@@ -51,6 +51,10 @@ export class AppConfig {
     return this.get('API_TRUST_PROXY_HOPS');
   }
 
+  get databaseUrl(): string {
+    return this.get('DATABASE_URL');
+  }
+
   get redisUrl(): string {
     return this.get('REDIS_URL');
   }

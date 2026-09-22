@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { validateEnv } from './env.schema';
 
-const base = { REDIS_URL: 'redis://localhost:6379' };
+const base = {
+  DATABASE_URL: 'postgresql://barff@localhost:5432/barff',
+  REDIS_URL: 'redis://localhost:6379',
+};
 
 describe('validateEnv', () => {
   it('standart qiymatlar bilan ishlaydi', () => {
@@ -12,11 +15,23 @@ describe('validateEnv', () => {
   });
 
   it('REDIS_URL yoq bolsa toxtaydi', () => {
-    expect(() => validateEnv({})).toThrow(/REDIS_URL/);
+    expect(() => validateEnv({ DATABASE_URL: base.DATABASE_URL })).toThrow(/REDIS_URL/);
+  });
+
+  it('DATABASE_URL yoq bolsa toxtaydi', () => {
+    expect(() => validateEnv({ REDIS_URL: base.REDIS_URL })).toThrow(/DATABASE_URL/);
+  });
+
+  it('notogri DATABASE_URL protokolini rad etadi', () => {
+    expect(() => validateEnv({ ...base, DATABASE_URL: 'mysql://localhost:3306/x' })).toThrow(
+      /DATABASE_URL/,
+    );
   });
 
   it('notogri REDIS_URL protokolini rad etadi', () => {
-    expect(() => validateEnv({ REDIS_URL: 'postgres://localhost:5432' })).toThrow(/REDIS_URL/);
+    expect(() => validateEnv({ ...base, REDIS_URL: 'postgres://localhost:5432' })).toThrow(
+      /REDIS_URL/,
+    );
   });
 
   it('CORS royxatini vergul boyicha ajratadi', () => {

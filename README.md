@@ -31,16 +31,22 @@ pnpm dev                 # barcha app'lar (turbo)
 
 ## Skriptlar
 
-| Buyruq             | Vazifasi                                 |
-| ------------------ | ---------------------------------------- |
-| `pnpm dev`         | barcha app'larni ishlab chiqish rejimida |
-| `pnpm build`       | hammasini qurish                         |
-| `pnpm lint`        | ESLint                                   |
-| `pnpm typecheck`   | TypeScript tekshiruvi                    |
-| `pnpm test`        | testlar                                  |
-| `pnpm format`      | Prettier bilan formatlash                |
-| `pnpm docker:up`   | lokal infratuzilma (detached)            |
-| `pnpm docker:down` | infratuzilmani to'xtatish                |
+| Buyruq             | Vazifasi                                  |
+| ------------------ | ----------------------------------------- |
+| `pnpm dev`         | barcha app'larni ishlab chiqish rejimida  |
+| `pnpm build`       | hammasini qurish                          |
+| `pnpm lint`        | ESLint                                    |
+| `pnpm typecheck`   | TypeScript tekshiruvi                     |
+| `pnpm test`        | testlar                                   |
+| `pnpm format`      | Prettier bilan formatlash                 |
+| `pnpm docker:up`   | lokal infratuzilma (detached)             |
+| `pnpm docker:down` | infratuzilmani to'xtatish                 |
+| `pnpm db:generate` | Prisma klientini qayta yaratish           |
+| `pnpm db:migrate`  | yangi migratsiya yaratish va qo'llash     |
+| `pnpm db:deploy`   | mavjud migratsiyalarni qo'llash (CI/prod) |
+| `pnpm db:reset`    | bazani tozalab, qaytadan qurish           |
+| `pnpm db:seed`     | boshlang'ich ma'lumotlar                  |
+| `pnpm db:studio`   | Prisma Studio                             |
 
 ## Portlar
 
@@ -72,10 +78,64 @@ packages/types  umumiy TS tiplari
 packages/config eslint/tsconfig/tailwind presetlari
 packages/validation  Zod sxemalari
 packages/utils  yordamchi funksiyalar
+packages/db     Prisma klienti (generatsiya qilinadi)
 prisma          sxema va migratsiyalar
 infrastructure  IaC va deploy
 docs            ochiq savollar, qadamlar jurnali
 ```
+
+## Ma'lumotlar bazasi
+
+Sxema va migratsiyalar repo ildizidagi `prisma/` da. Generatsiya qilingan
+klient `packages/db/generated/` ga chiqadi va **commit qilinmaydi** — uni
+`pnpm db:generate` qayta yaratadi (turbo `build` zanjirida avtomatik ishlaydi).
+
+Ilovalar `@prisma/client` ni to'g'ridan-to'g'ri import qilmaydi:
+
+```ts
+import { PrismaClient, type User } from '@barff/db';
+```
+
+### Noldan qurish
+
+```bash
+pnpm docker:up                    # postgres + redis + minio
+cp .env.example .env              # DATABASE_URL va DATABASE_SHADOW_URL ni to'ldiring
+pnpm db:deploy                    # migratsiyalarni qo'llash
+SEED_ADMIN_EMAIL=siz@barff.uz pnpm db:seed
+```
+
+`db:seed` **idempotent** — qayta ishga tushirilsa mavjud yozuvlarni buzmaydi
+va admin parolini o'zgartirmaydi.
+
+### Admin foydalanuvchisi
+
+Kodda standart parol **yo'q**: u production'ga ko'chib o'tib, hammaga ma'lum
+bo'lib qolardi (CLAUDE.md §12). Shuning uchun:
+
+| Holat                                      | Nima bo'ladi                                             |
+| ------------------------------------------ | -------------------------------------------------------- |
+| `SEED_ADMIN_EMAIL` berilmagan              | admin yaratilmaydi, seed davom etadi                     |
+| `SEED_ADMIN_PASSWORD` berilgan             | o'sha parol argon2id bilan hashlanadi                    |
+| parol berilmagan, `NODE_ENV != production` | bir martalik tasodifiy parol yaratilib, konsolga chiqadi |
+| parol berilmagan, `NODE_ENV = production`  | seed **xato bilan to'xtaydi**                            |
+
+Parollar faqat argon2id hash ko'rinishida saqlanadi — ochiq parol hech qayerda
+yozilmaydi.
+
+### Seed nimani yaratadi
+
+- 37 ta ruxsat (`@barff/types` dagi `PERMISSIONS` katalogidan)
+- 6 ta rol: `ADMIN, SALES, WAREHOUSE, LOGISTICS, DRIVER, DEALER` va ularning
+  standart ruxsatlari (`DEFAULT_ROLE_PERMISSIONS`)
+- 3 ta tizim sozlamasi — qiymatlari hozircha `MOCK` / `REPLACE_WITH_REAL_DATA`
+
+`VISITOR` bazaga yozilmaydi: u autentifikatsiyasiz mehmon holati, biriktirib
+bo'ladigan rol emas.
+
+> Rol-ruxsat jadvali seed'dan keyin CMS orqali o'zgartirilishi mumkin, shuning
+> uchun kod avtorizatsiyani **bazadagi holatga** qarab hal qiladi, hech qachon
+> `DEFAULT_ROLE_PERMISSIONS` konstantasiga qarab emas.
 
 ## API'ni lokal ishga tushirish
 

@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@barff/db": "workspace:*",
     "@barff/types": "workspace:*",
     "@barff/utils": "workspace:*",
     "@barff/validation": "workspace:*",

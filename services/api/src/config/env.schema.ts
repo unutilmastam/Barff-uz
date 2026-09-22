@@ -49,6 +49,7 @@ export const envSchema = z.object({
    */
   API_TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
 
+  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
 
   /** Swagger standart holatda production'da o'chiq. */

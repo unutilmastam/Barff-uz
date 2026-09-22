@@ -17,6 +17,8 @@ export default tseslint.config(
       '**/.turbo/**',
       '**/coverage/**',
       'index.html',
+      // Generatsiya qilingan Prisma klienti tekshirilmaydi.
+      'packages/db/generated/**',
     ],
   },
   js.configs.recommended,
