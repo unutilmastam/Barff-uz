@@ -34,7 +34,14 @@ const PUBLIC_INCLUDE = {
     orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
     include: {
       mediaAsset: {
-        select: { id: true, key: true, width: true, height: true, blurDataUrl: true, variants: true },
+        select: {
+          id: true,
+          key: true,
+          width: true,
+          height: true,
+          blurDataUrl: true,
+          variants: true,
+        },
       },
     },
   },
@@ -163,9 +170,7 @@ export class ProductsService {
   async create(data: Prisma.ProductUncheckedCreateInput, actor: Actor, ctx: RequestContext) {
     await this.assertCategoryExists(data.categoryId);
 
-    const product = await this.runUnique(() =>
-      this.prisma.product.create({ data }),
-    );
+    const product = await this.runUnique(() => this.prisma.product.create({ data }));
 
     await this.audit.record({
       action: AUDIT_ACTIONS.PRODUCT_CREATED,
@@ -192,9 +197,7 @@ export class ProductsService {
       await this.assertCategoryExists(data.categoryId);
     }
 
-    const product = await this.runUnique(() =>
-      this.prisma.product.update({ where: { id }, data }),
-    );
+    const product = await this.runUnique(() => this.prisma.product.update({ where: { id }, data }));
 
     await this.audit.record({
       action: AUDIT_ACTIONS.PRODUCT_UPDATED,
@@ -238,7 +241,10 @@ export class ProductsService {
 
   // --- Variantlar -------------------------------------------------------------
 
-  async addVariant(productId: string, data: Omit<Prisma.ProductVariantUncheckedCreateInput, 'productId'>) {
+  async addVariant(
+    productId: string,
+    data: Omit<Prisma.ProductVariantUncheckedCreateInput, 'productId'>,
+  ) {
     await this.findByIdAdmin(productId);
     return this.runUnique(() =>
       this.prisma.productVariant.create({ data: { ...data, productId } }),
@@ -250,7 +256,10 @@ export class ProductsService {
     return this.runUnique(() => this.prisma.productVariant.update({ where: { id }, data }));
   }
 
-  async addPrice(variantId: string, data: Omit<Prisma.ProductPriceUncheckedCreateInput, 'variantId'>) {
+  async addPrice(
+    variantId: string,
+    data: Omit<Prisma.ProductPriceUncheckedCreateInput, 'variantId'>,
+  ) {
     await this.assertVariantExists(variantId);
     return this.prisma.productPrice.create({ data: { ...data, variantId } });
   }

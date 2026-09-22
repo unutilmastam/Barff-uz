@@ -306,6 +306,35 @@ Provayder adapter ortida: lokalda MinIO, production'da S3. S3 sozlanmasa
 lokalda xotiradagi variant ishlatiladi; **production'da** sozlama
 yetishmasa ilova ko'tarilmaydi.
 
+## Mahsulotlar
+
+Ikki xil endpoint to'plami:
+
+| Yo'l                                   | Kim uchun                           | Xulq                                        |
+| -------------------------------------- | ----------------------------------- | ------------------------------------------- |
+| `GET /products`, `GET /products/:slug` | ochiq                               | faqat **faol va o'chirilmagan** mahsulotlar |
+| `GET /products/categories`             | ochiq                               | faol kategoriyalar                          |
+| `/admin/products/*`                    | `products.view` / `products.manage` | faol bo'lmaganlar ham ko'rinadi             |
+
+Ommaviy so'rovdagi "faol va o'chirilmagan" sharti servisda **bitta joyda**
+turadi. Har so'rovda qo'lda yozilsa, birortasida unutilishi va o'chirilgan
+mahsulot saytda ko'rinib qolishi aniq.
+
+**Ko'p tilli maydonlar** javobda to'liq obyekt sifatida qaytadi
+(`{ uz, ru, en }`), bitta til emas — shu tufayli til almashtirilganda
+qayta so'rov kerak bo'lmaydi va kesh bitta nusxada qoladi.
+
+**Narxlar butun sonda, tiyinda** saqlanadi: 12 000 so'm → `1200000`.
+Kasr summa validatsiyada rad etiladi — suzuvchi nuqta yig'indida xato
+to'playdi.
+
+**O'chirish yumshoq**: mahsulot buyurtmalarda havola qilingan bo'lishi
+mumkin, shuning uchun yozuv bazada qoladi, ommaviy API esa uni
+ko'rsatmaydi.
+
+> Seed'dagi mahsulotlar **`[MOCK]`** bilan boshlanadi. Haqiqiy nomlar,
+> hajmlar, tarkib va narxlar BARFF dan kelishi kerak (CLAUDE.md §1).
+
 ## CI va Docker
 
 `.github/workflows/ci.yml` har push va PR'da ishlaydi. Ikki job:

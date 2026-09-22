@@ -23,7 +23,7 @@ export const slugSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .min(2, { message: "Slug juda qisqa" })
+  .min(2, { message: 'Slug juda qisqa' })
   .max(120)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message: "Slug faqat kichik harf, raqam va defisdan iborat bo'lishi kerak",
@@ -44,7 +44,9 @@ export const skuSchema = z
 export const barcodeSchema = z
   .string()
   .trim()
-  .regex(/^\d{8}$|^\d{12,13}$/, { message: "Shtrix-kod 8, 12 yoki 13 raqamdan iborat bo'lishi kerak" });
+  .regex(/^\d{8}$|^\d{12,13}$/, {
+    message: "Shtrix-kod 8, 12 yoki 13 raqamdan iborat bo'lishi kerak",
+  });
 
 /** 100 ml uchun ozuqaviy qiymat. */
 export const nutritionSchema = z.object({
@@ -112,7 +114,7 @@ export const productVariantUpdateSchema = productVariantCreateSchema.partial();
 export const productPriceCreateSchema = z.object({
   amount: z
     .number()
-    .int({ message: "Narx butun songa (tiyinda) keltirilishi kerak" })
+    .int({ message: 'Narx butun songa (tiyinda) keltirilishi kerak' })
     .min(0)
     .max(1_000_000_000_000),
   currency: z.string().trim().toUpperCase().length(3).default('UZS'),

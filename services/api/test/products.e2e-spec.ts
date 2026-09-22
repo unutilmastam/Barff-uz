@@ -158,9 +158,7 @@ describe('Products (e2e)', () => {
       }).expect(201);
       createdProductIds.push(created.body.id);
 
-      const res = await request(app.getHttpServer())
-        .get(`${base}/products?limit=100`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get(`${base}/products?limit=100`).expect(200);
 
       const slugs = (res.body.items as { slug: string }[]).map((p) => p.slug);
       expect(slugs).not.toContain(created.body.slug);
@@ -173,9 +171,7 @@ describe('Products (e2e)', () => {
       }).expect(201);
       createdProductIds.push(created.body.id);
 
-      await request(app.getHttpServer())
-        .get(`${base}/products/${created.body.slug}`)
-        .expect(404);
+      await request(app.getHttpServer()).get(`${base}/products/${created.body.slug}`).expect(404);
     });
 
     it("o'chirilgan mahsulot ommaviy API da yo'q", async () => {
@@ -183,9 +179,7 @@ describe('Products (e2e)', () => {
       createdProductIds.push(created.body.id);
 
       // Avval ko'rinadi.
-      await request(app.getHttpServer())
-        .get(`${base}/products/${created.body.slug}`)
-        .expect(200);
+      await request(app.getHttpServer()).get(`${base}/products/${created.body.slug}`).expect(200);
 
       await request(app.getHttpServer())
         .delete(`${base}/admin/products/${created.body.id}`)
@@ -193,9 +187,7 @@ describe('Products (e2e)', () => {
         .expect(204);
 
       // O'chirilgandan keyin yo'q.
-      await request(app.getHttpServer())
-        .get(`${base}/products/${created.body.slug}`)
-        .expect(404);
+      await request(app.getHttpServer()).get(`${base}/products/${created.body.slug}`).expect(404);
     });
 
     it("yumshoq o'chirish yozuvni bazada saqlab qoladi", async () => {

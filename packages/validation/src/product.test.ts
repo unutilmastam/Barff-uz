@@ -106,9 +106,9 @@ describe('productCreateSchema', () => {
   });
 
   it('haddan tashqari uzun yaroqlilik muddatini rad etadi', () => {
-    expect(
-      productCreateSchema.safeParse({ ...validProduct, shelfLifeDays: 4000 }).success,
-    ).toBe(false);
+    expect(productCreateSchema.safeParse({ ...validProduct, shelfLifeDays: 4000 }).success).toBe(
+      false,
+    );
   });
 
   it('nolga teng yaroqlilik muddatini rad etadi', () => {

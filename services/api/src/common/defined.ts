@@ -17,9 +17,7 @@
  */
 // Cheklov `object`, `Record<string, unknown>` emas: DTO'lar klass
 // nusxalari bo'lgani uchun ularda indeks imzosi yo'q.
-export function defined<T extends object>(
-  input: T,
-): { [K in keyof T]: Exclude<T[K], undefined> } {
+export function defined<T extends object>(input: T): { [K in keyof T]: Exclude<T[K], undefined> } {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(input)) {

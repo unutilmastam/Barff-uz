@@ -213,7 +213,11 @@ const MOCK_PRODUCTS = [
   {
     slug: 'mock-anor-sharbati',
     sku: 'MOCK-ANOR',
-    name: { uz: '[MOCK] Anor sharbati', ru: '[MOCK] Гранатовый сок', en: '[MOCK] Pomegranate juice' },
+    name: {
+      uz: '[MOCK] Anor sharbati',
+      ru: '[MOCK] Гранатовый сок',
+      en: '[MOCK] Pomegranate juice',
+    },
     flavor: { uz: 'Anor', ru: 'Гранат', en: 'Pomegranate' },
     variants: [
       { sku: 'MOCK-ANOR-500', volumeMl: 500, amount: 1_200_000 },
