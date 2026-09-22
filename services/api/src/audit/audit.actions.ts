@@ -14,6 +14,9 @@ export const AUDIT_ACTIONS = {
   PRODUCT_DELETED: 'product.deleted',
   CATEGORY_CREATED: 'product.category.created',
   CATEGORY_UPDATED: 'product.category.updated',
+  CONTENT_CREATED: 'content.created',
+  CONTENT_UPDATED: 'content.updated',
+  CONTENT_DELETED: 'content.deleted',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
