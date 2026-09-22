@@ -57,6 +57,32 @@ describe('matn ranglari fon qatlamlarida', () => {
   }
 });
 
+/**
+ * Tugmalarning MATN/FON juftliklari.
+ *
+ * Bu blok keyinroq qo'shildi: dastlabki test faqat "matn qorong'i fon
+ * ustida" holatini qoplagan edi va `danger` tugmasidagi oq matn (3.85:1)
+ * e'tibordan chetda qolgandi — uni brauzerda ishlagan axe topdi.
+ */
+describe('tugma matn/fon juftliklari', () => {
+  const pairs = [
+    { name: 'primary', fg: 'color-ink-900', bg: 'color-brand-500' },
+    { name: 'danger', fg: 'color-ink-900', bg: 'color-danger' },
+  ] as const;
+
+  for (const pair of pairs) {
+    it(`${pair.name} tugmasi AA dan o'tadi`, () => {
+      expect(contrastRatio(token(pair.fg), token(pair.bg))).toBeGreaterThanOrEqual(AA_NORMAL);
+    });
+  }
+
+  it("danger fonida OQ matn AA dan o'tmaydi — shuning uchun ishlatilmaydi", () => {
+    // Bu testning maqsadi — qarorni qayd etish. Kimdir tugmani oq matnga
+    // qaytarmoqchi bo'lsa, sabab shu yerda yozilgan.
+    expect(contrastRatio(token('color-fg'), token('color-danger'))).toBeLessThan(AA_NORMAL);
+  });
+});
+
 describe('aksent ranglari', () => {
   it('brand-400 qora fonda yirik matn uchun yetarli', () => {
     expect(contrastRatio(token('color-brand-400'), token('color-ink-900'))).toBeGreaterThanOrEqual(

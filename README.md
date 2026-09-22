@@ -73,7 +73,7 @@ apps/dealer     diler portali       partner.barff.uz
 apps/admin      admin CMS           admin.barff.uz
 apps/delivery   haydovchi PWA       delivery.barff.uz
 services/api    NestJS API          api.barff.uz
-packages/ui     dizayn tizimi
+packages/ui     dizayn tizimi (primitivlar + yuzalar)
 packages/types  umumiy TS tiplari
 packages/config eslint/tsconfig/tailwind presetlari
 packages/validation  Zod sxemalari
@@ -246,6 +246,35 @@ birga) S15 da hal qilinadi.
 
 > Sahifalar hozircha `noindex`: placeholder kontent qidiruvga tushmasligi
 > kerak (CLAUDE.md §19). `NEXT_PUBLIC_ALLOW_INDEXING=true` buni yoqadi.
+
+## Dizayn tizimi (`packages/ui`)
+
+14 ta primitiv va 5 ta BARFF yuzasi. Ranglar bu paketda **emas** —
+`@barff/config/tailwind/theme.css` da; bu yerda faqat shu tokenlarni
+ishlatadigan komponentlar.
+
+Komponentlarni ko'rish: **`/uz/dev/ui`** (faqat `pnpm dev` da).
+
+```bash
+pnpm --filter @barff/web dev     # http://localhost:3001/uz/dev/ui
+```
+
+Bu sahifa production build'ga **umuman tushmaydi**: fayl nomi
+`page.dev.tsx` va `next.config.ts` bu kengaytmani faqat ishlab chiqish
+rejimida sahifa deb hisoblaydi.
+
+### Radix nega ishlatiladi
+
+Dialog, Sheet, Tabs, Accordion, Select va Checkbox — Radix ustiga
+qurilgan. Fokus tutqichi, `Escape` bilan yopish, skrollni bloklash,
+`aria-modal` va fokusni qaytarish kabi narsalarni qo'lda yozish xatoga
+juda moyil. Qolgan primitivlar qo'shimcha kutubxonasiz.
+
+### Tailwind va ishchi maydon
+
+Ilovaning `globals.css` fayli `@source` bilan `packages/ui/src` ni
+ko'rsatishi **shart** — Tailwind v4 ishchi maydondagi boshqa paketlarni
+o'zi topmaydi va usiz komponentlar uslubsiz chiqadi.
 
 ## CI va Docker
 
