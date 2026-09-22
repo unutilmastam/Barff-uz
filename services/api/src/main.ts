@@ -2,6 +2,7 @@ import 'reflect-metadata';
 
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { JsonLogger } from './common/logger/json.logger';
@@ -30,6 +31,8 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix(GLOBAL_PREFIX);
   app.use(helmet());
+  // HttpOnly cookie'lardagi token'larni o'qish uchun (S04).
+  app.use(cookieParser());
 
   // Qat'iy CORS: ro'yxatdagi origin'lar bo'lmasa, brauzer so'rovlari o'tmaydi.
   // `credentials: true` — S04 dagi HttpOnly cookie'lar uchun; shu sababli

@@ -28,6 +28,8 @@
 | Q18 | AWS akkaunti, domen boshqaruvi va Cloudflare kirish huquqlari                                                                                                                                                | S40      | ochiq |
 | Q19 | Rate limiting instansiya xotirasida hisoblanadi — bir nechta ECS task'da amaldagi limit shuncha barobar oshadi. Taqsimlangan (Redis) hisoblagich kerakmi, yoki Cloudflare WAF darajasidagi himoya yetarlimi? | S41      | ochiq |
 | Q20 | Production'da API oldida nechta proksi turadi (Cloudflare + ALB = 2)? `API_TRUST_PROXY_HOPS` aynan shu songa teng bo'lishi shart — xato qiymat rate limiter'ni chetlab o'tishga yo'l ochadi.                 | S40      | ochiq |
+| Q21 | Dilerlar bitta ofis/NAT ortidan kirishadimi? Shunday bo'lsa, `AUTH_LOGIN_MAX_ATTEMPTS_PER_IP` (hozir 50) yetarlimi — bir ofisdagi bir necha xodim bir-birini bloklab qo'ymaydimi?                            | S22      | ochiq |
+| Q22 | Admin uchun MFA qachon yoqilsin? Sxemada `mfaEnabled`/`mfaSecret` maydonlari tayyor, amalga oshirish esa hali yo'q (CLAUDE.md §12 buni ixtiyoriy deydi).                                                     | S41      | ochiq |
 
 ---
 
