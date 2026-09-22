@@ -173,3 +173,41 @@ jobs:
           docker logs barff-api-ci
           docker rm -f barff-api-ci
           exit 1
+
+      - name: Web tasvirini qurish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: false
+          load: true
+          tags: barff-web:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Web tasviri root'dan ishlamasligini tekshirish
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id barff-web:ci -u)
+          echo "Konteyner UID: $USER_ID"
+          if [ "$USER_ID" = "0" ]; then
+            echo "XATO: tasvir root sifatida ishlayapti"
+            exit 1
+          fi
+
+      - name: Web tasviri ko'tarilishini tekshirish
+        run: |
+          docker run -d --name barff-web-ci -p 3001:3001 barff-web:ci
+
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:3001/uz > /dev/null; then
+              echo "Web shell javob berdi"
+              docker rm -f barff-web-ci
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "XATO: web ko'tarilmadi"
+          docker logs barff-web-ci
+          docker rm -f barff-web-ci
+          exit 1

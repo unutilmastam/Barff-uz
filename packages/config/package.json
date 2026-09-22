@@ -13,5 +13,11 @@
     "./tsconfig/library.json": "./tsconfig/library.json",
     "./eslint/base": "./eslint/base.mjs",
     "./tailwind/theme.css": "./tailwind/theme.css"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }

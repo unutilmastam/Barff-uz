@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+@import '@barff/config/tailwind/theme.css';
+
+/*
+ * Ilovaga xos qatlam. Dizayn tokenlari `@barff/config` da — ular barcha
+ * ilovalar uchun umumiy (S07 da `packages/ui` shu tokenlarni ishlatadi).
+ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ink-900);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Klaviatura bilan yurgan foydalanuvchi qayerdaligini KO'RISHI shart.
+   * `outline: none` bilan olib tashlash — eng keng tarqalgan a11y xatosi.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-500);
+    color: var(--color-ink-900);
+  }
+}
+
+@layer components {
+  /* Klaviatura foydalanuvchisi uchun: fokus olgandagina ko'rinadi. */
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    border-radius: 0.5rem;
+    background-color: var(--color-brand-500);
+    padding: 0.75rem 1.25rem;
+    color: var(--color-ink-900);
+    font-weight: 600;
+    transition: top var(--duration-fast) var(--ease-barff);
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+}
