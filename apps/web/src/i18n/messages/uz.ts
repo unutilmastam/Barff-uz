@@ -27,6 +27,72 @@ export const uz = {
     heroSubtitle: "Zamonaviy ishlab chiqarish, qat'iy sifat nazorati.",
     heroCta: "Mahsulotlarni ko'rish",
     heroSecondaryCta: "Hamkor bo'lish",
+
+    statsEyebrow: 'Raqamlarda',
+    statsTitle: 'BARFF bir qarashda',
+    statFounded: 'Tashkil etilgan',
+    statCapacity: 'Ishlab chiqarish quvvati',
+    statProducts: 'Mahsulot turlari',
+    statRegions: 'Yetkazib berish hududlari',
+
+    factoryEyebrow: 'Ishlab chiqarish',
+    factoryTitle: 'Zamonaviy liniya, nazorat ostidagi jarayon',
+    factoryBody:
+      'Xomashyoni qabul qilishdan qadoqlashgacha — har bosqich yozib boriladi va nazorat qilinadi.',
+
+    productsEyebrow: 'Mahsulotlar',
+    productsTitle: 'Assortiment',
+    productsAll: 'Barcha mahsulotlar',
+
+    processEyebrow: 'Jarayon',
+    processTitle: 'Xomashyodan yetkazib berishgacha',
+
+    qualityEyebrow: 'Sifat',
+    qualityTitle: 'Sifat nazorati va hujjatlar',
+    qualityEmpty: 'Sertifikatlar hali yuklanmagan.',
+
+    ctaTitle: "BARFF hamkori bo'ling",
+    ctaBody: "Dilerlik shartlari, narxlar va yetkazib berish bo'yicha bog'lanamiz.",
+    ctaAction: 'Ariza qoldirish',
+
+    newsEyebrow: 'Yangiliklar',
+    newsTitle: "So'nggi yangiliklar",
+    newsAll: 'Barcha yangiliklar',
+  },
+  company: {
+    title: 'Kompaniya',
+    subtitle: 'BARFF haqida',
+    intro:
+      "BARFF — ichimliklar ishlab chiqaruvchi korxona. Kompaniya tomonidan tasdiqlangan ma'lumotlar kelgach, bu bo'lim to'ldiriladi.",
+    missionTitle: 'Yondashuvimiz',
+    missionBody:
+      "Har bir partiya nazoratdan o'tadi, har bir jarayon yozib boriladi. Bu — mahsulot sifatining asosi.",
+    valuesTitle: 'Tamoyillar',
+    valueQuality: 'Sifat',
+    valueQualityBody: "Kirish nazoratidan tayyor mahsulotgacha bo'lgan tekshiruv.",
+    valueTransparency: 'Shaffoflik',
+    valueTransparencyBody: "Hujjatlar va sertifikatlar ochiq ko'rinishda.",
+    valuePartnership: 'Hamkorlik',
+    valuePartnershipBody: 'Dilerlar bilan uzoq muddatli ish.',
+  },
+  products: {
+    title: 'Mahsulotlar',
+    subtitle: 'BARFF assortimenti',
+    empty: "Mahsulotlar hali qo'shilmagan.",
+    volume: 'Hajm',
+    volumeUnit: 'ml',
+    perPack: 'Blokda',
+    sku: 'Artikul',
+    ingredients: 'Tarkibi',
+    storage: 'Saqlash sharoiti',
+    shelfLife: 'Yaroqlilik muddati',
+    shelfLifeDays: 'kun',
+    nutrition: 'Oziqaviy qiymati (100 ml)',
+    documents: 'Hujjatlar',
+    variants: 'Variantlar',
+    priceOnRequest: "Narx so'rov bo'yicha",
+    category: 'Kategoriya',
+    backToProducts: 'Mahsulotlarga qaytish',
   },
   footer: {
     rights: 'Barcha huquqlar himoyalangan',
@@ -36,6 +102,13 @@ export const uz = {
   },
   common: {
     loading: 'Yuklanmoqda',
+    /** Tasdiqlanmagan ma'lumot yonida turadi (CLAUDE.md §1). */
+    mockBadge: 'MOCK',
+    mockNotice:
+      "Bu bo'limdagi raqamlar NAMUNA. Ular BARFF tomonidan tasdiqlangandan keyin almashtiriladi.",
+    unavailableTitle: "Ma'lumot vaqtincha mavjud emas",
+    unavailableBody: "Ma'lumotni yuklab bo'lmadi. Sahifani biroz keyinroq yangilang.",
+    empty: "Hozircha ma'lumot yo'q",
     skipToContent: 'Asosiy kontentga o’tish',
     languageSwitcher: 'Tilni tanlash',
     openMenu: 'Menyuni ochish',

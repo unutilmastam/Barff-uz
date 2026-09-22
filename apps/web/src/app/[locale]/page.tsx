@@ -1,8 +1,39 @@
-import Link from 'next/link';
-import { Container } from '@/components/layout/Container';
+import { notFound } from 'next/navigation';
+import { FactorySection } from '@/components/home/FactorySection';
+import { HeroSection } from '@/components/home/HeroSection';
+import { NewsSection } from '@/components/home/NewsSection';
+import { PartnerCta } from '@/components/home/PartnerCta';
+import { ProcessSection } from '@/components/home/ProcessSection';
+import { ProductsSection } from '@/components/home/ProductsSection';
+import { QualitySection } from '@/components/home/QualitySection';
+import { StatsSection } from '@/components/home/StatsSection';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
-import { notFound } from 'next/navigation';
+import {
+  getCertificates,
+  getHomepageSections,
+  getLatestNews,
+  getProductionSteps,
+  getProducts,
+} from '@/lib/content';
+
+/**
+ * Bosh sahifa (CLAUDE.md §4).
+ *
+ * Sahifa build paytida tayyorlanadi va `revalidate` muddatidan keyin
+ * fonda yangilanadi (ISR). Ya'ni tashrifchi API javobini KUTMAYDI —
+ * u tayyor HTML oladi, CMS'dagi o'zgarish esa bir necha daqiqada
+ * saytga yetib boradi.
+ */
+/**
+ * ISR muddati (soniya).
+ *
+ * Bu yerda ANIQ son turishi shart: Next segment sozlamalarini build
+ * paytida STATIK tahlil qiladi va o'zgaruvchiga havolani tushunmaydi
+ * ("Unknown identifier" xatosi). `CONTENT_REVALIDATE_SECONDS` bilan bir
+ * xil qiymat — ikkalasi `content.ts` dagi izohda bog'langan.
+ */
+export const revalidate = 300;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -10,37 +41,36 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const messages = await getMessages(locale);
 
+  // Bo'limlar bir-biriga bog'liq emas — parallel o'qiladi. Biri
+  // kelmasa, qolganlari baribir ko'rsatiladi.
+  const [sections, products, steps, certificates, news] = await Promise.all([
+    getHomepageSections(locale),
+    getProducts(locale, { limit: 8 }),
+    getProductionSteps(locale),
+    getCertificates(locale),
+    getLatestNews(locale, 3),
+  ]);
+
+  const section = (key: string) => sections?.find((item) => item.key === key);
+
   return (
-    <Container as="section" className="flex min-h-[70vh] flex-col justify-center py-20">
-      <div className="max-w-3xl">
-        {/*
-          Sahifada bitta `<h1>`. Sarlavha darajalari ketma-ket bo'lishi
-          ekran o'quvchida tuzilma to'g'ri o'qilishini ta'minlaydi.
-        */}
-        <h1 className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-          {messages.home.heroTitle}
-        </h1>
-
-        <p className="mt-6 max-w-xl text-lg text-[var(--color-fg-muted)] sm:text-xl">
-          {messages.home.heroSubtitle}
-        </p>
-
-        <div className="mt-10 flex flex-wrap gap-3">
-          <Link
-            href={`/${locale}`}
-            className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)]"
-          >
-            {messages.home.heroCta}
-          </Link>
-
-          <Link
-            href={`/${locale}`}
-            className="rounded-full border border-[var(--color-line-strong)] px-6 py-3 font-medium text-[var(--color-fg)] transition-colors hover:bg-[var(--color-glass)]"
-          >
-            {messages.home.heroSecondaryCta}
-          </Link>
-        </div>
-      </div>
-    </Container>
+    <>
+      <HeroSection locale={locale} messages={messages} section={section('hero')} />
+      <StatsSection messages={messages} />
+      <FactorySection locale={locale} messages={messages} section={section('factory')} />
+      <ProductsSection
+        locale={locale}
+        messages={messages}
+        products={products === null ? null : products.items}
+      />
+      <ProcessSection locale={locale} messages={messages} steps={steps} />
+      <QualitySection locale={locale} messages={messages} certificates={certificates} />
+      <PartnerCta locale={locale} messages={messages} section={section('cta')} />
+      <NewsSection
+        locale={locale}
+        messages={messages}
+        articles={news === null ? null : news.items}
+      />
+    </>
   );
 }

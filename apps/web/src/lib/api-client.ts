@@ -37,13 +37,23 @@ export interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
   /** `Accept-Language` uchun. Serverdagi kontent shu tilda qaytadi. */
   locale?: string;
+  /**
+   * Next.js kesh muddati (soniya).
+   *
+   * `RequestInit` da bunday maydon yo'q — u Next'ning `fetch` ustidagi
+   * kengaytmasi. Shuning uchun u shu yerda ANIQ e'lon qilinadi va
+   * so'rovga `next: { revalidate }` sifatida uzatiladi; aks holda
+   * `...rest` orqali o'tkazilgan noma'lum kalit jimgina yo'qolardi.
+   */
+  revalidate?: number;
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { body, locale, headers, ...rest } = options;
+  const { body, locale, headers, revalidate, ...rest } = options;
 
   const response = await fetch(`${baseUrl()}${path}`, {
     ...rest,
+    ...(revalidate !== undefined ? { next: { revalidate } } : {}),
     headers: {
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...(locale !== undefined ? { 'Accept-Language': locale } : {}),

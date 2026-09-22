@@ -180,6 +180,30 @@ describe('Content (e2e)', () => {
       expect((list.body as { key: string }[]).map((s) => s.key)).not.toContain(key);
     });
 
+    /**
+     * Ommaviy javob ichki maydonlarni CHIQARMASLIGI kerak.
+     *
+     * Eng xavflisi — obyekt saqlashdagi `key`: u bilan fayl manzilini
+     * taxmin qilish mumkin. Shu sababli javobda faqat tayyor `url` bo'ladi.
+     */
+    it('ommaviy kontent javobi ichki maydonlarni chiqarmaydi', async () => {
+      const created = await admin('post', '/documents')
+        .send({ title: L('Ommaviy hujjat'), mediaAssetId: mediaId, status: 'PUBLISHED' })
+        .expect(201);
+
+      const list = await request(app.getHttpServer()).get(`${base}/documents`).expect(200);
+      const found = (list.body as { id: string }[]).find((d) => d.id === created.body.id);
+
+      expect(found).toBeDefined();
+      const serialized = JSON.stringify(found);
+
+      for (const leaked of ['deletedAt', 'updatedAt', 'createdAt', 'mediaAssetId', '"key"']) {
+        expect(serialized).not.toContain(leaked);
+      }
+      // Fayl manzili bor, lekin obyekt kaliti yo'q.
+      expect(found).toMatchObject({ file: { mimeType: 'image/png' } });
+    });
+
     it('ADMIN royxatida qoralamalar KORINADI', async () => {
       const res = await admin('get', '/news?limit=100&status=DRAFT').expect(200);
       expect(res.body.items.length).toBeGreaterThan(0);
