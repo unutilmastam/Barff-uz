@@ -24,6 +24,12 @@ RUN corepack enable
 FROM base AS build
 WORKDIR /repo
 
+# pnpm dev -> prod ga o'tishda `node_modules` ni tozalamoqchi bo'ladi va
+# TTY yo'qligi sababli tasdiq so'rab to'xtaydi
+# (ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY). `CI=true` uni interaktiv
+# bo'lmagan rejimga o'tkazadi.
+ENV CI=true
+
 # Lockfile bilan aynan bir xil versiyalar o'rnatiladi: CI'da o'tgan narsa
 # production'da boshqa versiya bilan qurilib qolmasligi kerak.
 COPY . .
@@ -34,10 +40,16 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 RUN pnpm db:generate
 RUN pnpm --filter @barff/api... build
 
-# devDependencies olib tashlanadi. `--frozen-lockfile` shu yerda ham:
-# prune paytida versiya o'zgarib ketmasligi uchun.
+# devDependencies olib tashlanadi: test kutubxonalari va qurish vositalari
+# production tasvirida turishi shart emas.
+#
+# `--ignore-scripts` ATAYLAB ishlatilmayapti: `argon2` — native modul, uning
+# o'rnatish skripti bloklansa, parol tekshiruvi ishga tushganda quladi.
+# Prisma'ning postinstall'i bu bosqichda ogohlantirish berishi mumkin
+# (uning devDependency'lari endi yo'q), lekin bu halokatli emas —
+# klient allaqachon qurish bosqichida yaratilgan.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-  pnpm install --frozen-lockfile --prod --ignore-scripts
+  pnpm install --frozen-lockfile --prod
 
 # -----------------------------------------------------------------------------
 # Ishga tushirish bosqichi

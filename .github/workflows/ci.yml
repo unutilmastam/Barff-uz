@@ -135,6 +135,14 @@ jobs:
             exit 1
           fi
 
+      - name: Native modullar yuklanishini tekshirish
+        # devDependency'lar olib tashlangandan keyin `argon2` (native modul)
+        # hali ham yuklanishi shart — aks holda parol tekshiruvi faqat
+        # birinchi kirish urinishida, ya'ni production'da quladi.
+        run: |
+          docker run --rm --entrypoint node barff-api:ci \
+            -e "require('argon2'); require('@barff/db'); console.log('native modullar OK')"
+
       - name: Tasvir ko'tarilishini tekshirish
         # Baza va Redis yo'q, lekin API ko'tarilib, liveness probe javob
         # berishi kerak: readiness `degraded` bo'ladi, liveness esa `200`.
