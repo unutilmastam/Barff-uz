@@ -101,7 +101,11 @@ export class ContentService {
     return article;
   }
 
-  async createNews(data: Prisma.NewsArticleUncheckedCreateInput, actor: Actor, ctx: RequestContext) {
+  async createNews(
+    data: Prisma.NewsArticleUncheckedCreateInput,
+    actor: Actor,
+    ctx: RequestContext,
+  ) {
     const article = await this.unique(() => this.prisma.newsArticle.create({ data }));
 
     await this.audit.record({
@@ -180,12 +184,18 @@ export class ContentService {
   }
 
   async updateCertificate(id: string, data: Prisma.CertificateUncheckedUpdateInput) {
-    await this.assertExists(this.prisma.certificate.findFirst({ where: { id, deletedAt: null } }), 'Sertifikat');
+    await this.assertExists(
+      this.prisma.certificate.findFirst({ where: { id, deletedAt: null } }),
+      'Sertifikat',
+    );
     return this.prisma.certificate.update({ where: { id }, data });
   }
 
   async deleteCertificate(id: string) {
-    await this.assertExists(this.prisma.certificate.findFirst({ where: { id, deletedAt: null } }), 'Sertifikat');
+    await this.assertExists(
+      this.prisma.certificate.findFirst({ where: { id, deletedAt: null } }),
+      'Sertifikat',
+    );
     await this.prisma.certificate.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
@@ -213,12 +223,18 @@ export class ContentService {
   }
 
   async updateGalleryItem(id: string, data: Prisma.GalleryItemUncheckedUpdateInput) {
-    await this.assertExists(this.prisma.galleryItem.findFirst({ where: { id, deletedAt: null } }), 'Galereya elementi');
+    await this.assertExists(
+      this.prisma.galleryItem.findFirst({ where: { id, deletedAt: null } }),
+      'Galereya elementi',
+    );
     return this.prisma.galleryItem.update({ where: { id }, data });
   }
 
   async deleteGalleryItem(id: string) {
-    await this.assertExists(this.prisma.galleryItem.findFirst({ where: { id, deletedAt: null } }), 'Galereya elementi');
+    await this.assertExists(
+      this.prisma.galleryItem.findFirst({ where: { id, deletedAt: null } }),
+      'Galereya elementi',
+    );
     await this.prisma.galleryItem.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
@@ -246,12 +262,18 @@ export class ContentService {
   }
 
   async updateDocument(id: string, data: Prisma.PublicDocumentUncheckedUpdateInput) {
-    await this.assertExists(this.prisma.publicDocument.findFirst({ where: { id, deletedAt: null } }), 'Hujjat');
+    await this.assertExists(
+      this.prisma.publicDocument.findFirst({ where: { id, deletedAt: null } }),
+      'Hujjat',
+    );
     return this.prisma.publicDocument.update({ where: { id }, data });
   }
 
   async deleteDocument(id: string) {
-    await this.assertExists(this.prisma.publicDocument.findFirst({ where: { id, deletedAt: null } }), 'Hujjat');
+    await this.assertExists(
+      this.prisma.publicDocument.findFirst({ where: { id, deletedAt: null } }),
+      'Hujjat',
+    );
     await this.prisma.publicDocument.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 

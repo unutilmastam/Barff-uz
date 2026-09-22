@@ -55,7 +55,7 @@ export class AdminContentController {
 
   @Get('news')
   @Permissions('content.view')
-  @ApiOperation({ summary: "Yangiliklar (qoralamalar ham)" })
+  @ApiOperation({ summary: 'Yangiliklar (qoralamalar ham)' })
   @ApiZodQuery(AdminContentListQueryDto)
   listNews(@Query() query: AdminContentListQueryDto) {
     return this.content.listNewsAdmin(query);
@@ -130,11 +130,11 @@ export class AdminContentController {
   @Patch('certificates/:id')
   @Permissions('content.manage')
   @ApiZodBody(CertificateUpdateDto)
-  updateCertificate(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CertificateUpdateDto,
-  ) {
-    return this.content.updateCertificate(id, toJson(dto) as Prisma.CertificateUncheckedUpdateInput);
+  updateCertificate(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CertificateUpdateDto) {
+    return this.content.updateCertificate(
+      id,
+      toJson(dto) as Prisma.CertificateUncheckedUpdateInput,
+    );
   }
 
   @Delete('certificates/:id')
@@ -163,7 +163,10 @@ export class AdminContentController {
   @Permissions('content.manage')
   @ApiZodBody(GalleryItemUpdateDto)
   updateGalleryItem(@Param('id', ParseUUIDPipe) id: string, @Body() dto: GalleryItemUpdateDto) {
-    return this.content.updateGalleryItem(id, toJson(dto) as Prisma.GalleryItemUncheckedUpdateInput);
+    return this.content.updateGalleryItem(
+      id,
+      toJson(dto) as Prisma.GalleryItemUncheckedUpdateInput,
+    );
   }
 
   @Delete('gallery/:id')
@@ -215,7 +218,7 @@ export class AdminContentController {
 
   @Put('production-steps/:slug')
   @Permissions('content.manage')
-  @ApiOperation({ summary: "Bosqichni yaratish yoki yangilash" })
+  @ApiOperation({ summary: 'Bosqichni yaratish yoki yangilash' })
   @ApiZodBody(ProductionStepUpsertDto)
   upsertProductionStep(@Param('slug') slug: string, @Body() dto: ProductionStepUpsertDto) {
     return this.content.upsertProductionStep(

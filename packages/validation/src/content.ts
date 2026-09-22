@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { localizedSchema, paginationQuerySchema } from './primitives';
 import { seoSchema, slugSchema } from './product';
+import { toUpdateSchema } from './update-schema';
 
 /**
  * Kontent sxemalari (yangiliklar, sertifikatlar, galereya, hujjatlar).
@@ -34,7 +35,7 @@ export const newsCreateSchema = z.object({
   seo: seoSchema.optional(),
 });
 
-export const newsUpdateSchema = newsCreateSchema.partial();
+export const newsUpdateSchema = toUpdateSchema(newsCreateSchema);
 
 export const certificateCreateSchema = z.object({
   title: localizedSchema(title),
@@ -48,7 +49,7 @@ export const certificateCreateSchema = z.object({
   displayOrder: z.number().int().min(0).max(10_000).default(0),
 });
 
-export const certificateUpdateSchema = certificateCreateSchema.partial();
+export const certificateUpdateSchema = toUpdateSchema(certificateCreateSchema);
 
 export const galleryItemCreateSchema = z.object({
   mediaAssetId: z.uuid(),
@@ -58,7 +59,7 @@ export const galleryItemCreateSchema = z.object({
   displayOrder: z.number().int().min(0).max(10_000).default(0),
 });
 
-export const galleryItemUpdateSchema = galleryItemCreateSchema.partial();
+export const galleryItemUpdateSchema = toUpdateSchema(galleryItemCreateSchema);
 
 export const publicDocumentCreateSchema = z.object({
   title: localizedSchema(title),
@@ -68,7 +69,7 @@ export const publicDocumentCreateSchema = z.object({
   displayOrder: z.number().int().min(0).max(10_000).default(0),
 });
 
-export const publicDocumentUpdateSchema = publicDocumentCreateSchema.partial();
+export const publicDocumentUpdateSchema = toUpdateSchema(publicDocumentCreateSchema);
 
 export const productionStepUpsertSchema = z.object({
   slug: slugSchema,

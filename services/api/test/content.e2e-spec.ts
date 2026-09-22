@@ -81,10 +81,9 @@ describe('Content (e2e)', () => {
   });
 
   const admin = (method: 'post' | 'patch' | 'put' | 'get' | 'delete', path: string) =>
-    request(app.getHttpServer())[method](`${base}/admin/content${path}`).set(
-      'Authorization',
-      `Bearer ${adminToken}`,
-    );
+    request(app.getHttpServer())
+      [method](`${base}/admin/content${path}`)
+      .set('Authorization', `Bearer ${adminToken}`);
 
   // ===========================================================================
   describe('QORALAMALAR OMMAVIY API DA KO‘RINMAYDI', () => {
@@ -207,7 +206,14 @@ describe('Content (e2e)', () => {
     });
 
     it('ommaviy endpointlar tokensiz ochiladi', async () => {
-      for (const path of ['/news', '/certificates', '/gallery', '/documents', '/production-steps', '/homepage-sections']) {
+      for (const path of [
+        '/news',
+        '/certificates',
+        '/gallery',
+        '/documents',
+        '/production-steps',
+        '/homepage-sections',
+      ]) {
         await request(app.getHttpServer()).get(`${base}${path}`).expect(200);
       }
     });
@@ -232,7 +238,9 @@ describe('Content (e2e)', () => {
       const slug = `${prefix}-takror`;
       cleanupSlugs.push(slug);
 
-      await admin('post', '/news').send({ slug, title: L('A'), body: L('B') }).expect(201);
+      await admin('post', '/news')
+        .send({ slug, title: L('A'), body: L('B') })
+        .expect(201);
       const res = await admin('post', '/news')
         .send({ slug, title: L('C'), body: L('D') })
         .expect(409);
