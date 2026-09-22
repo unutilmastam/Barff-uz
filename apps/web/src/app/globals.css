@@ -2,6 +2,13 @@
 @import '@barff/config/tailwind/theme.css';
 
 /*
+ * Tailwind v4 sinflarni manba fayllardan skanerlaydi, lekin ishchi
+ * maydondagi boshqa paketlarni o'zi topmaydi. Busiz `@barff/ui`
+ * komponentlari uslubsiz chiqardi.
+ */
+@source '../../../../packages/ui/src';
+
+/*
  * Ilovaga xos qatlam. Dizayn tokenlari `@barff/config` da — ular barcha
  * ilovalar uchun umumiy (S07 da `packages/ui` shu tokenlarni ishlatadi).
  */
