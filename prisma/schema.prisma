@@ -1,0 +1,189 @@
+// BARFF platformasi — ma'lumotlar bazasi sxemasi (CLAUDE.md §10).
+//
+// S03 doirasi: foydalanuvchilar, rollar, ruxsatlar, tizim sozlamalari va
+// audit jurnali. Mahsulot, buyurtma, ombor va yetkazib berish modellari
+// keyingi qadamlarda (S09, S26, S30, S32) shu faylga qo'shiladi.
+
+generator client {
+  provider = "prisma-client-js"
+  // pnpm ishchi maydonida standart joy ishonchsiz — generatsiya qilingan
+  // klient aniq bir paket ichiga chiqariladi va `@barff/db` orqali ulashiladi.
+  output   = "../packages/db/generated"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Migratsiyalarni tekshirish uchun alohida baza (prisma migrate dev).
+  shadowDatabaseUrl = env("DATABASE_SHADOW_URL")
+}
+
+// =============================================================================
+// FOYDALANUVCHILAR VA RUXSATLAR
+// =============================================================================
+
+/// Tizimga kira oladigan har qanday shaxs: admin, sotuvchi, omborchi,
+/// logist, haydovchi yoki diler kontakti.
+model User {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  email String  @unique
+  /// 998XXXXXXXXX ko'rinishida saqlanadi (`@barff/utils` normalizePhone).
+  phone String? @unique
+
+  /// DIQQAT: faqat HASH. Ochiq parol hech qachon saqlanmaydi (CLAUDE.md §12).
+  passwordHash String
+
+  fullName String
+  isActive Boolean @default(true)
+
+  /// Admin uchun majburiy MFA (CLAUDE.md §12) — S04 da yoqiladi.
+  mfaEnabled Boolean @default(false)
+  mfaSecret  String?
+
+  lastLoginAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  /// Yumshoq o'chirish: audit jurnalidagi havolalar buzilmasligi uchun
+  /// foydalanuvchi yozuvi fizik o'chirilmaydi.
+  deletedAt DateTime?
+
+  roles       UserRole[]
+  auditLogs   AuditLog[]       @relation("AuditActor")
+  settings    SystemSetting[]  @relation("SettingUpdatedBy")
+  grantedRoles UserRole[]      @relation("RoleAssignedBy")
+
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("users")
+}
+
+/// Rol — ruxsatlar to'plami (`@barff/types` dagi ROLES bilan mos).
+model Role {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// ADMIN, SALES, WAREHOUSE, LOGISTICS, DRIVER, DEALER
+  code        String  @unique
+  name        String
+  description String?
+
+  /// Tizim roli — CMS orqali o'chirib bo'lmaydi.
+  isSystem Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+/// Bitta aniq ruxsat, masalan `orders.status.change`.
+model Permission {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  code        String  @unique
+  /// CMS'da guruhlab ko'rsatish uchun: `orders`, `warehouse`, ...
+  group       String
+  description String?
+
+  createdAt DateTime @default(now())
+
+  roles RolePermission[]
+
+  @@index([group])
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String @db.Uuid
+  roleId String @db.Uuid
+
+  assignedAt   DateTime @default(now())
+  /// Kim biriktirgani — rol o'zgarishi audit qilinadigan amal (CLAUDE.md §23).
+  assignedById String?  @db.Uuid
+
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedBy User? @relation("RoleAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// =============================================================================
+// TIZIM
+// =============================================================================
+
+/// Runtime'da o'zgaradigan sozlamalar (CLAUDE.md §8).
+/// Sirlar BU YERGA yozilmaydi — ular AWS Secrets Manager'da (§12).
+model SystemSetting {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  key   String @unique
+  value Json
+
+  description String?
+  /// `true` bo'lsa, qiymat autentifikatsiyasiz API orqali ham berilishi mumkin.
+  isPublic    Boolean @default(false)
+
+  updatedAt   DateTime @updatedAt
+  updatedById String?  @db.Uuid
+  updatedBy   User?    @relation("SettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([isPublic])
+  @@map("system_settings")
+}
+
+/// Sezgir amallar jurnali (CLAUDE.md §23).
+///
+/// `before`/`after` ga parol, token va boshqa sirlar YOZILMAYDI — yozuvdan
+/// oldin tozalanadi.
+model AuditLog {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Foydalanuvchi o'chirilsa ham jurnal qatori qoladi, shuning uchun
+  /// bajaruvchining emaili alohida nusxa sifatida saqlanadi.
+  actorId    String? @db.Uuid
+  actorEmail String?
+  actor      User?   @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  /// `user.login`, `order.status.change`, `stock.adjust`, ...
+  action String
+  /// Qaysi model: `User`, `Order`, `WarehouseStock`, ...
+  entity   String
+  entityId String?
+
+  before Json?
+  after  Json?
+
+  ip        String?
+  userAgent String?
+  /// So'rov loglari bilan bog'lash uchun (S02 request-id).
+  requestId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -10,3 +10,9 @@ onlyBuiltDependencies:
   # @swc/core — NestJS dekoratorlari uchun test transformeri (native binar).
   # @scarf/scarf QASDDAN ro'yxatga kiritilmagan: u telemetriya yuboradi.
   - '@swc/core'
+  # argon2 — native parol hashlash moduli.
+  - argon2
+  # prisma / @prisma/client — klient generatsiyasi.
+  - prisma
+  - '@prisma/client'
+  - '@prisma/engines'

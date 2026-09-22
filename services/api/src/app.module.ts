@@ -7,6 +7,7 @@ import { ZodValidationPipe } from './common/validation/zod-validation.pipe';
 import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
+import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { RedisModule } from './redis/redis.module';
         },
       ],
     }),
+    PrismaModule,
     RedisModule,
     HealthModule,
   ],

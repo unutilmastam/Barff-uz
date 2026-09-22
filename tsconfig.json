@@ -6,6 +6,6 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["*.mjs", "*.ts"],
-  "exclude": ["node_modules", "dist", ".next", ".turbo"]
+  "include": ["*.mjs", "*.ts", "prisma/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".next", ".turbo", "packages/db/generated"]
 }

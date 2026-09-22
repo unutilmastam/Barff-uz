@@ -11,6 +11,7 @@
 process.env['NODE_ENV'] = 'test';
 process.env['LOG_LEVEL'] = 'error';
 process.env['API_PORT'] ??= '3000';
+process.env['DATABASE_URL'] ??= 'postgresql://barff@127.0.0.1:5432/barff?schema=public';
 process.env['REDIS_URL'] ??= 'redis://127.0.0.1:6379';
 process.env['API_CORS_ORIGINS'] ??= 'http://localhost:3001';
 process.env['SWAGGER_ENABLED'] ??= 'true';
