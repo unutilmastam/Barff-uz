@@ -220,3 +220,59 @@ jobs:
           docker logs barff-web-ci
           docker rm -f barff-web-ci
           exit 1
+
+      - name: Admin tasvirini qurish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/admin/Dockerfile
+          push: false
+          load: true
+          tags: barff-admin:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Admin tasviri root'dan ishlamasligini tekshirish
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id barff-admin:ci -u)
+          echo "Konteyner UID: $USER_ID"
+          if [ "$USER_ID" = "0" ]; then
+            echo "XATO: tasvir root sifatida ishlayapti"
+            exit 1
+          fi
+
+      - name: Admin tasviri ko'tarilishini tekshirish
+        run: |
+          docker run -d --name barff-admin-ci -p 3002:3002 barff-admin:ci
+
+          for i in $(seq 1 30); do
+            # Kirish sahifasi — sessiyasiz ham ochilishi kerak.
+            if curl -sf http://127.0.0.1:3002/login > /dev/null; then
+              echo "Admin shell javob berdi"
+              docker rm -f barff-admin-ci
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "XATO: admin ko'tarilmadi"
+          docker logs barff-admin-ci
+          docker rm -f barff-admin-ci
+          exit 1
+
+      - name: Admin qidiruvga tushmasligini tekshirish
+        run: |
+          docker run -d --name barff-admin-robots -p 3002:3002 barff-admin:ci
+          sleep 8
+
+          # Admin panel HECH QACHON indekslanmasligi kerak — sarlavha
+          # har bir javobda bo'lishi shart (CLAUDE.md §19).
+          HEADERS=$(curl -sI http://127.0.0.1:3002/login || true)
+          docker rm -f barff-admin-robots
+
+          if ! echo "$HEADERS" | grep -qi "x-robots-tag: noindex"; then
+            echo "XATO: X-Robots-Tag sarlavhasi yo'q"
+            echo "$HEADERS"
+            exit 1
+          fi
+          echo "X-Robots-Tag joyida"
