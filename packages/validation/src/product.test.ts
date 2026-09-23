@@ -90,12 +90,42 @@ describe('productCreateSchema', () => {
     expect(parsed.displayOrder).toBe(0);
   });
 
-  it('uchala til ham majburiy', () => {
+  /**
+   * QISMAN tarjima QABUL QILINADI.
+   *
+   * Avval uchala til ham majburiy edi, sabab shunday izohlangandi:
+   * "tarjimasiz mahsulot saytda bo'sh sarlavha bilan chiqardi". Bu
+   * endi TO'G'RI EMAS — S12 dagi `text()` yordamchisi tarjimasi yo'q
+   * tilda boshqa tildagi matnni ko'rsatadi.
+   *
+   * Uchala tilni talab qilish esa haqiqiy oqimni bloklardi: muharrir
+   * o'zbekcha yozadi, tarjimon ruschasini keyinroq qo'shadi.
+   */
+  it('qisman tarjimani qabul qiladi', () => {
     const result = productCreateSchema.safeParse({
       ...validProduct,
       name: { uz: 'Anor', ru: 'Гранат' },
     });
-    // Tarjimasiz mahsulot saytda bo'sh sarlavha bilan chiqardi.
+
+    expect(result.success).toBe(true);
+  });
+
+  it("bo'sh tarjimalarni OLIB TASHLAYDI", () => {
+    const parsed = productCreateSchema.parse({
+      ...validProduct,
+      name: { uz: 'Anor', ru: '', en: '' },
+    });
+
+    // "Tarjima bor, lekin bo'sh" degan chalkash holat qolmasligi kerak.
+    expect(parsed.name).toEqual({ uz: 'Anor' });
+  });
+
+  it('hech bir tilda matn bolmasa RAD ETADI', () => {
+    const result = productCreateSchema.safeParse({
+      ...validProduct,
+      name: { uz: '', ru: '', en: '' },
+    });
+
     expect(result.success).toBe(false);
   });
 

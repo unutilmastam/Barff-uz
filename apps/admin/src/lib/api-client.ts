@@ -51,15 +51,25 @@ export interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
 export async function apiFetch<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { body, locale, headers, revalidate, ...rest } = options;
 
+  /*
+    Fayl yuklash `FormData` bilan ketadi va u O'ZGARTIRILMAYDI.
+
+    `JSON.stringify(formData)` `"{}"` beradi — ya'ni fayl yo'qoladi va
+    server bo'sh so'rov oladi. `Content-Type` ham QO'YILMAYDI: uni
+    brauzer `boundary` bilan birga o'zi qo'yishi kerak, aks holda
+    server qismlarni ajrata olmaydi.
+  */
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+
   const response = await fetch(`${baseUrl()}${path}`, {
     ...rest,
     ...(revalidate !== undefined ? { next: { revalidate } } : {}),
     headers: {
-      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...(body !== undefined && !isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(locale !== undefined ? { 'Accept-Language': locale } : {}),
       ...headers,
     },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    ...(body !== undefined ? { body: isFormData ? (body as FormData) : JSON.stringify(body) } : {}),
     // Cookie'lar bilan autentifikatsiya (S04) — token'lar HttpOnly cookie'da.
     credentials: 'include',
   });

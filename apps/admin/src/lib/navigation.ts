@@ -40,28 +40,28 @@ const GROUPS: AdminNavGroup[] = [
   {
     label: 'Kontent',
     items: [
-      { href: '/content/news', label: 'Yangiliklar', permission: 'content.view', ready: false },
+      { href: '/content/news', label: 'Yangiliklar', permission: 'content.view', ready: true },
       {
         href: '/content/certificates',
         label: 'Sertifikatlar',
         permission: 'content.view',
-        ready: false,
+        ready: true,
       },
-      { href: '/content/gallery', label: 'Galereya', permission: 'content.view', ready: false },
-      { href: '/content/documents', label: 'Hujjatlar', permission: 'content.view', ready: false },
+      { href: '/content/gallery', label: 'Galereya', permission: 'content.view', ready: true },
+      { href: '/content/documents', label: 'Hujjatlar', permission: 'content.view', ready: true },
       {
         href: '/content/pages',
         label: 'Sahifalar va SEO',
         permission: 'content.view',
-        ready: false,
+        ready: true,
       },
-      { href: '/media', label: 'Media kutubxona', permission: 'content.view', ready: false },
+      { href: '/media', label: 'Media kutubxona', permission: 'content.view', ready: true },
     ],
   },
   {
     label: 'Katalog',
     items: [
-      { href: '/products', label: 'Mahsulotlar', permission: 'products.view', ready: false },
+      { href: '/products', label: 'Mahsulotlar', permission: 'products.view', ready: true },
       {
         href: '/products/categories',
         label: 'Kategoriyalar',
@@ -82,7 +82,7 @@ const GROUPS: AdminNavGroup[] = [
         href: '/system/settings',
         label: 'Sozlamalar',
         permission: 'settings.manage',
-        ready: false,
+        ready: true,
       },
       { href: '/system/audit', label: 'Audit jurnali', permission: 'audit.view', ready: false },
     ],
