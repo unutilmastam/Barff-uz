@@ -27,7 +27,7 @@ export const ROUTE_READY = {
   privacy: true,
   terms: true,
   /** S14 */
-  becomePartner: false,
+  becomePartner: true,
 } as const;
 
 export type RouteKey = keyof typeof ROUTE_READY;

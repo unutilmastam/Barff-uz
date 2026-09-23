@@ -171,6 +171,16 @@ async function seedSettings(): Promise<void> {
       isPublic: false,
     },
     {
+      key: 'notifications.lead',
+      value: {
+        telegramChatId: 'REPLACE_WITH_REAL_DATA',
+        email: 'REPLACE_WITH_REAL_DATA',
+      },
+      description: 'Yangi B2B ariza kimga xabar qilinadi (MOCK — Q12)',
+      // Bildirishnoma manzillari OMMAVIY EMAS: ular ichki kontaktlar.
+      isPublic: false,
+    },
+    {
       key: 'site.defaultLocale',
       value: { locale: 'uz' },
       description: 'Standart til',

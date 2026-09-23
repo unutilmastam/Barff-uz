@@ -12,8 +12,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   // Migratsiyalarni tekshirish uchun alohida baza (prisma migrate dev).
   shadowDatabaseUrl = env("DATABASE_SHADOW_URL")
 }
@@ -49,12 +49,15 @@ model User {
   /// foydalanuvchi yozuvi fizik o'chirilmaydi.
   deletedAt DateTime?
 
-  roles       UserRole[]
-  media       MediaAsset[]     @relation("MediaUploader")
-  newsArticles NewsArticle[]   @relation("NewsAuthor")
-  auditLogs   AuditLog[]       @relation("AuditActor")
-  settings    SystemSetting[]  @relation("SettingUpdatedBy")
-  grantedRoles UserRole[]      @relation("RoleAssignedBy")
+  roles         UserRole[]
+  media         MediaAsset[]    @relation("MediaUploader")
+  newsArticles  NewsArticle[]   @relation("NewsAuthor")
+  auditLogs     AuditLog[]      @relation("AuditActor")
+  settings      SystemSetting[] @relation("SettingUpdatedBy")
+  grantedRoles  UserRole[]      @relation("RoleAssignedBy")
+  assignedLeads Lead[]          @relation("LeadAssignee")
+  leadEvents    LeadEvent[]     @relation("LeadEventActor")
+  notifications Notification[]  @relation("NotificationRecipient")
 
   @@index([isActive])
   @@index([createdAt])
@@ -168,7 +171,7 @@ model AuditLog {
   actor      User?   @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
 
   /// `user.login`, `order.status.change`, `stock.adjust`, ...
-  action String
+  action   String
   /// Qaysi model: `User`, `Order`, `WarehouseStock`, ...
   entity   String
   entityId String?
@@ -284,7 +287,7 @@ enum ProductDocumentKind {
 model ProductCategory {
   id String @id @default(uuid(7)) @db.Uuid
 
-  slug String @unique
+  slug        String @unique
   /// Localized<string>
   name        Json
   /// Localized<string> | null
@@ -294,8 +297,8 @@ model ProductCategory {
   isActive     Boolean @default(true)
 
   /// Ichma-ich kategoriyalar uchun.
-  parentId String?          @db.Uuid
-  parent   ProductCategory? @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId String?           @db.Uuid
+  parent   ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
   children ProductCategory[] @relation("CategoryTree")
 
   /// SEO meta (title, description) — Localized.
@@ -325,13 +328,13 @@ model Product {
   category   ProductCategory @relation(fields: [categoryId], references: [id])
 
   /// Localized<string>
-  name Json
+  name        Json
   /// Localized<string> | null
   description Json?
   /// Localized<string> | null — tarkibi
   ingredients Json?
   /// Localized<string> | null — saqlash sharoiti
-  storage Json?
+  storage     Json?
 
   /// Localized<string> | null — ta'mi (olma, shaftoli, ...)
   flavor Json?
@@ -481,16 +484,16 @@ model NewsArticle {
   slug String @unique
 
   /// Localized<string>
-  title Json
+  title   Json
   /// Localized<string> | null — qisqa mazmun (ro'yxatlarda)
   excerpt Json?
   /// Localized<string> — to'liq matn
-  body Json
+  body    Json
 
   coverImageId String?     @db.Uuid
   coverImage   MediaAsset? @relation("NewsCover", fields: [coverImageId], references: [id], onDelete: SetNull)
 
-  status ContentStatus @default(DRAFT)
+  status      ContentStatus @default(DRAFT)
   /// Nashr sanasi. Kelajakdagi sana — rejalashtirilgan nashr.
   publishedAt DateTime?
 
@@ -516,7 +519,7 @@ model Certificate {
   id String @id @default(uuid(7)) @db.Uuid
 
   /// Localized<string>
-  title Json
+  title       Json
   /// Localized<string> | null
   description Json?
 
@@ -553,7 +556,7 @@ model GalleryItem {
   /// Localized<string> | null
   caption Json?
   /// Guruhlash uchun: `factory`, `products`, `events`.
-  album String?
+  album   String?
 
   status       ContentStatus @default(DRAFT)
   displayOrder Int           @default(0)
@@ -571,7 +574,7 @@ model PublicDocument {
   id String @id @default(uuid(7)) @db.Uuid
 
   /// Localized<string>
-  title Json
+  title       Json
   /// Localized<string> | null
   description Json?
 
@@ -600,7 +603,7 @@ model ProductionStep {
   slug String @unique
 
   /// Localized<string>
-  title Json
+  title       Json
   /// Localized<string> | null
   description Json?
 
@@ -625,7 +628,7 @@ model SeoMetadata {
   path String @unique
 
   /// Localized<string> | null
-  title Json?
+  title       Json?
   /// Localized<string> | null
   description Json?
 
@@ -652,12 +655,12 @@ model HomepageSection {
   key String @unique
 
   /// Localized<string> | null
-  heading Json?
+  heading    Json?
   /// Localized<string> | null
   subheading Json?
   /// Localized<string> | null — tugma matni
-  ctaLabel Json?
-  ctaHref  String?
+  ctaLabel   Json?
+  ctaHref    String?
 
   mediaAssetId String?     @db.Uuid
   mediaAsset   MediaAsset? @relation("HomepageMedia", fields: [mediaAssetId], references: [id], onDelete: SetNull)
@@ -670,4 +673,147 @@ model HomepageSection {
 
   @@index([status, displayOrder])
   @@map("homepage_sections")
+}
+
+// =============================================================================
+// B2B LEADLAR VA BILDIRISHNOMALAR (CLAUDE.md §9, §21)
+// =============================================================================
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  NEGOTIATION
+  CONVERTED
+  REJECTED
+}
+
+enum BusinessType {
+  DISTRIBUTOR
+  WHOLESALE
+  RETAIL
+  HORECA
+  OTHER
+}
+
+/// Ommaviy saytdan kelgan hamkorlik arizasi.
+///
+/// Bu yozuvlarni ANONIM foydalanuvchi yaratadi, shuning uchun manba
+/// ma'lumoti (IP, user agent) saqlanadi — spam tahlili va takroriy
+/// yuborishni cheklash uchun. Shaxsiy ma'lumot minimal: faqat forma
+/// maydonlari.
+model Lead {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  companyName String
+  contactName String
+  phone       String
+  email       String?
+  region      String
+
+  businessType BusinessType
+
+  desiredProducts        String?
+  estimatedMonthlyVolume Int?
+  message                String?
+
+  status LeadStatus @default(NEW)
+
+  /// Kim yuritmoqda (sotuvchi).
+  assignedToId String? @db.Uuid
+  assignedTo   User?   @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  /// Takroriy yuborishni aniqlash uchun: normallashtirilgan telefon + kompaniya.
+  /// Yagona EMAS — bir kompaniya qayta murojaat qilishi mumkin; bu faqat
+  /// qisqa vaqt ichidagi takrorni topish uchun indeks.
+  dedupeKey String
+
+  /// So'rov manbai. Shaxsni aniqlash uchun emas, suiiste'molni
+  /// cheklash uchun saqlanadi.
+  ip        String?
+  userAgent String?
+
+  events LeadEvent[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([dedupeKey, createdAt])
+  @@index([assignedToId])
+  @@map("leads")
+}
+
+/// Lead tarixi: holat o'zgarishi va izohlar.
+model LeadEvent {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  leadId String @db.Uuid
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  fromStatus LeadStatus?
+  toStatus   LeadStatus
+
+  note String?
+
+  actorId String? @db.Uuid
+  actor   User?   @relation("LeadEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+  @@map("lead_events")
+}
+
+enum NotificationChannel {
+  IN_APP
+  TELEGRAM
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+/// Yuborilgan (yoki yuborilmoqchi bo'lgan) bildirishnoma.
+///
+/// Har bir urinish yoziladi: provayder ishlamay qolsa, nima
+/// yuborilmagani ko'rinib turadi. `payload` da HECH QACHON parol yoki
+/// token bo'lmaydi (CLAUDE.md §23).
+model Notification {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `lead.created`, `order.status_changed`, ...
+  event   String
+  channel NotificationChannel
+
+  /// Kimga: foydalanuvchi (in-app) yoki tashqi manzil (chat id, email).
+  recipientId      String? @db.Uuid
+  recipient        User?   @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientAddress String?
+
+  subject String?
+  body    String
+
+  /// Qo'shimcha ma'lumot (entity id va h.k.).
+  payload Json?
+
+  status   NotificationStatus @default(PENDING)
+  error    String?
+  attempts Int                @default(0)
+  sentAt   DateTime?
+  /// In-app uchun: o'qilgan vaqti.
+  readAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([recipientId, readAt])
+  @@index([event, createdAt])
+  @@map("notifications")
 }
