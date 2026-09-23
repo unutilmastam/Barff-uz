@@ -2,7 +2,10 @@ import {
   type Locale,
   type Paginated,
   type PublicCertificate,
+  type PublicDocument,
+  type PublicGalleryItem,
   type PublicHomepageSection,
+  type PublicNewsArticle,
   type PublicNewsSummary,
   type PublicProduct,
   type PublicProductionStep,
@@ -103,4 +106,56 @@ export async function getLatestNews(
   limit = 3,
 ): Promise<Paginated<PublicNewsSummary> | null> {
   return get<Paginated<PublicNewsSummary>>(`/news?page=1&limit=${limit}`, locale);
+}
+
+export function getNews(
+  locale: Locale,
+  params: { page?: number; limit?: number } = {},
+): Promise<Paginated<PublicNewsSummary> | null> {
+  const query = new URLSearchParams({
+    page: String(params.page ?? 1),
+    limit: String(params.limit ?? 12),
+  });
+
+  return get<Paginated<PublicNewsSummary>>(`/news?${query.toString()}`, locale);
+}
+
+export function getNewsArticle(locale: Locale, slug: string): Promise<PublicNewsArticle | null> {
+  return get<PublicNewsArticle>(`/news/${encodeURIComponent(slug)}`, locale);
+}
+
+export function getGallery(locale: Locale, album?: string): Promise<PublicGalleryItem[] | null> {
+  const suffix = album !== undefined ? `?album=${encodeURIComponent(album)}` : '';
+
+  return get<PublicGalleryItem[]>(`/gallery${suffix}`, locale);
+}
+
+export function getDocuments(locale: Locale): Promise<PublicDocument[] | null> {
+  return get<PublicDocument[]>('/documents', locale);
+}
+
+/**
+ * Ommaviy sozlamalar: `{ 'site.contact': {...}, ... }`.
+ *
+ * Shakl sozlamaga qarab har xil, shuning uchun `unknown` qaytadi va
+ * o'qiydigan kod o'zi tekshiradi — noto'g'ri shakl sahifani yiqitmasligi
+ * kerak.
+ */
+export function getPublicSettings(locale: Locale): Promise<Record<string, unknown> | null> {
+  return get<Record<string, unknown>>('/settings', locale);
+}
+
+/** Barcha yangilik slug'lari — `generateStaticParams` uchun. */
+export async function getAllNewsSlugs(locale: Locale): Promise<string[]> {
+  const slugs: string[] = [];
+
+  for (let page = 1; page <= MAX_SLUG_PAGES; page += 1) {
+    const result = await getNews(locale, { page, limit: MAX_PAGE_LIMIT });
+    if (result === null) break;
+
+    slugs.push(...result.items.map((article) => article.slug));
+    if (!result.meta.hasNextPage) break;
+  }
+
+  return slugs;
 }

@@ -17,13 +17,15 @@ export const ROUTE_READY = {
   company: true,
   products: true,
   /** S13 */
-  production: false,
-  quality: false,
-  partners: false,
-  news: false,
-  gallery: false,
-  contact: false,
-  catalog: false,
+  production: true,
+  quality: true,
+  partners: true,
+  news: true,
+  gallery: true,
+  contact: true,
+  catalog: true,
+  privacy: true,
+  terms: true,
   /** S14 */
   becomePartner: false,
 } as const;

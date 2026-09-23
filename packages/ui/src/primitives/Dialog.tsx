@@ -4,6 +4,18 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import { type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
+export type DialogSize = 'md' | 'wide';
+
+const SIZES: Record<DialogSize, string> = {
+  md: 'w-[calc(100vw-2rem)] max-w-lg p-6',
+  /**
+   * Rasm ko'ruvchi uchun: deyarli butun ekran.
+   *
+   * Ichki bo'shliq kichikroq — bu yerda asosiy narsa rasm, ramka emas.
+   */
+  wide: 'w-[calc(100vw-1.5rem)] max-w-5xl p-4 sm:p-6',
+};
+
 export interface DialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -15,6 +27,9 @@ export interface DialogProps {
   footer?: ReactNode;
   /** Yopish tugmasining o'qiladigan nomi. */
   closeLabel: string;
+  size?: DialogSize;
+  /** Sarlavhani ko'zdan yashiradi (ekran o'quvchi baribir o'qiydi). */
+  hideTitle?: boolean;
 }
 
 /**
@@ -33,6 +48,8 @@ export function Dialog({
   children,
   footer,
   closeLabel,
+  size = 'md',
+  hideTitle = false,
 }: DialogProps) {
   return (
     <RadixDialog.Root
@@ -46,11 +63,14 @@ export function Dialog({
 
         <RadixDialog.Content
           className={cn(
-            'fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2',
-            'rounded-xl border border-[var(--color-line-strong)] bg-[var(--color-ink-800)] p-6 shadow-2xl',
+            'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
+            'rounded-xl border border-[var(--color-line-strong)] bg-[var(--color-ink-800)] shadow-2xl',
+            SIZES[size],
           )}
         >
-          <RadixDialog.Title className="text-xl font-semibold tracking-tight">
+          <RadixDialog.Title
+            className={cn(hideTitle ? 'sr-only' : 'text-xl font-semibold tracking-tight')}
+          >
             {title}
           </RadixDialog.Title>
 
@@ -64,7 +84,7 @@ export function Dialog({
             <RadixDialog.Description className="sr-only">{title}</RadixDialog.Description>
           )}
 
-          {children !== undefined && <div className="mt-5">{children}</div>}
+          {children !== undefined && <div className={hideTitle ? '' : 'mt-5'}>{children}</div>}
 
           {footer !== undefined && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
 
