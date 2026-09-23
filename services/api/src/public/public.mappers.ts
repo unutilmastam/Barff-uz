@@ -1,4 +1,17 @@
-import { type Localized } from '@barff/types';
+import {
+  type Localized,
+  type PublicCertificate,
+  type PublicDocument,
+  type PublicFile,
+  type PublicGalleryItem,
+  type PublicHomepageSection,
+  type PublicImage,
+  type PublicNewsArticle,
+  type PublicNewsSummary,
+  type PublicProduct,
+  type PublicProductionStep,
+  type PublicSeoMetadata,
+} from '@barff/types';
 
 /**
  * Ommaviy javob shakllari.
@@ -11,42 +24,11 @@ import { type Localized } from '@barff/types';
  *
  * Shuning uchun javob ANIQ tuziladi: yangi ustun qo'shilsa, u o'z-o'zidan
  * ommaviy API'ga chiqib ketmaydi.
+ *
+ * Shakllarning o'zi `@barff/types` ichida — API bilan web bitta tipni
+ * baham ko'radi, shuning uchun server javobni o'zgartirsa mijoz
+ * kompilyatsiyada yiqiladi, ishga tushganda emas.
  */
-
-export interface PublicImage {
-  id: string;
-  width: number | null;
-  height: number | null;
-  blurDataUrl: string | null;
-  /** `[{ label, width, format, url }]` — `<picture>` uchun. */
-  sources: { label: string; width: number; format: string; url: string }[];
-}
-
-export interface PublicProductVariant {
-  id: string;
-  sku: string;
-  volumeMl: number;
-  unitsPerPack: number | null;
-  price: { amount: number; currency: string } | null;
-}
-
-export interface PublicProduct {
-  id: string;
-  slug: string;
-  sku: string;
-  name: Localized;
-  description: Localized | null;
-  ingredients: Localized | null;
-  storage: Localized | null;
-  flavor: Localized | null;
-  shelfLifeDays: number | null;
-  nutrition: unknown;
-  seo: unknown;
-  category: { slug: string; name: Localized } | null;
-  variants: PublicProductVariant[];
-  images: PublicImage[];
-  documents: { id: string; title: Localized; kind: string }[];
-}
 
 /** Rasm variantlari uchun manzil quruvchi. */
 export type UrlBuilder = (key: string) => string;
@@ -91,6 +73,25 @@ export function toPublicImage(
     height: media.height ?? null,
     blurDataUrl: media.blurDataUrl ?? null,
     sources,
+  };
+}
+
+interface FileRow {
+  id: string;
+  key: string;
+  mimeType: string;
+  byteSize?: number | null;
+}
+
+/** PDF/rasm hujjatlari uchun: kalit emas, tayyor manzil qaytadi. */
+export function toPublicFile(file: FileRow | null | undefined, url: UrlBuilder): PublicFile | null {
+  if (file === null || file === undefined) return null;
+
+  return {
+    id: file.id,
+    mimeType: file.mimeType,
+    byteSize: file.byteSize ?? null,
+    url: url(file.key),
   };
 }
 
@@ -157,15 +158,6 @@ export function toPublicProduct(product: ProductRow, url: UrlBuilder): PublicPro
   };
 }
 
-export interface PublicNewsSummary {
-  id: string;
-  slug: string;
-  title: Localized;
-  excerpt: Localized | null;
-  publishedAt: string | null;
-  coverImage: PublicImage | null;
-}
-
 export function toPublicNewsSummary(
   article: {
     id: string;
@@ -199,10 +191,135 @@ export function toPublicNewsArticle(
     coverImage?: MediaRow | null;
   },
   url: UrlBuilder,
-): PublicNewsSummary & { body: Localized; seo: unknown } {
+): PublicNewsArticle {
   return {
     ...toPublicNewsSummary(article, url),
     body: article.body as Localized,
     seo: article.seo ?? null,
+  };
+}
+
+export function toPublicCertificate(
+  row: {
+    id: string;
+    title: unknown;
+    description: unknown;
+    issuer: string | null;
+    number: string | null;
+    issuedAt: Date | null;
+    expiresAt: Date | null;
+    mediaAsset?: FileRow | null;
+  },
+  url: UrlBuilder,
+): PublicCertificate {
+  return {
+    id: row.id,
+    title: row.title as Localized,
+    description: (row.description ?? null) as Localized | null,
+    issuer: row.issuer,
+    number: row.number,
+    issuedAt: row.issuedAt?.toISOString() ?? null,
+    expiresAt: row.expiresAt?.toISOString() ?? null,
+    file: toPublicFile(row.mediaAsset, url),
+  };
+}
+
+export function toPublicDocument(
+  row: {
+    id: string;
+    title: unknown;
+    description: unknown;
+    mediaAsset: FileRow;
+  },
+  url: UrlBuilder,
+): PublicDocument {
+  return {
+    id: row.id,
+    title: row.title as Localized,
+    description: (row.description ?? null) as Localized | null,
+    // Hujjatda fayl har doim bor (sxemada majburiy bog'lanish).
+    file: toPublicFile(row.mediaAsset, url) as PublicFile,
+  };
+}
+
+export function toPublicGalleryItem(
+  row: {
+    id: string;
+    caption: unknown;
+    album: string | null;
+    mediaAsset?: MediaRow | null;
+  },
+  url: UrlBuilder,
+): PublicGalleryItem {
+  return {
+    id: row.id,
+    caption: (row.caption ?? null) as Localized | null,
+    album: row.album,
+    image: toPublicImage(row.mediaAsset, url),
+  };
+}
+
+export function toPublicProductionStep(
+  row: {
+    id: string;
+    slug: string;
+    title: unknown;
+    description: unknown;
+    displayOrder: number;
+    mediaAsset?: MediaRow | null;
+  },
+  url: UrlBuilder,
+): PublicProductionStep {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title as Localized,
+    description: (row.description ?? null) as Localized | null,
+    displayOrder: row.displayOrder,
+    image: toPublicImage(row.mediaAsset, url),
+  };
+}
+
+export function toPublicHomepageSection(
+  row: {
+    id: string;
+    key: string;
+    heading: unknown;
+    subheading: unknown;
+    ctaLabel: unknown;
+    ctaHref: string | null;
+    displayOrder: number;
+    mediaAsset?: MediaRow | null;
+  },
+  url: UrlBuilder,
+): PublicHomepageSection {
+  return {
+    id: row.id,
+    key: row.key,
+    heading: (row.heading ?? null) as Localized | null,
+    subheading: (row.subheading ?? null) as Localized | null,
+    ctaLabel: (row.ctaLabel ?? null) as Localized | null,
+    ctaHref: row.ctaHref,
+    displayOrder: row.displayOrder,
+    image: toPublicImage(row.mediaAsset, url),
+  };
+}
+
+export function toPublicSeo(
+  row: {
+    path: string;
+    title: unknown;
+    description: unknown;
+    noIndex: boolean;
+    ogImage?: { key: string } | null;
+  },
+  url: UrlBuilder,
+): PublicSeoMetadata {
+  return {
+    path: row.path,
+    title: (row.title ?? null) as Localized | null,
+    description: (row.description ?? null) as Localized | null,
+    ogImageUrl: row.ogImage != null ? url(row.ogImage.key) : null,
+    noIndex: row.noIndex,
   };
 }

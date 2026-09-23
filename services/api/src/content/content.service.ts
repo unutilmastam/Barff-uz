@@ -7,7 +7,16 @@ import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { STORAGE_ADAPTER, type StorageAdapter } from '../media/storage/storage.adapter';
 import { CacheService } from '../public/cache/cache.service';
-import { toPublicNewsArticle, toPublicNewsSummary } from '../public/public.mappers';
+import {
+  toPublicCertificate,
+  toPublicDocument,
+  toPublicGalleryItem,
+  toPublicHomepageSection,
+  toPublicNewsArticle,
+  toPublicNewsSummary,
+  toPublicProductionStep,
+  toPublicSeo,
+} from '../public/public.mappers';
 import { PUBLISHED_ONLY, PUBLISHED_WHERE, publishedNewsWhere } from './content.filters';
 
 interface Actor {
@@ -214,12 +223,21 @@ export class ContentService {
   // ===========================================================================
 
   listCertificatesPublic() {
-    return this.cache.wrap('content', 'certificates', ContentService.CACHE_TTL_SECONDS, () =>
-      this.prisma.certificate.findMany({
-        where: PUBLISHED_WHERE,
-        orderBy: { displayOrder: 'asc' },
-        include: { mediaAsset: { select: { id: true, key: true, mimeType: true } } },
-      }),
+    return this.cache.wrap(
+      'content',
+      'certificates',
+      ContentService.CACHE_TTL_SECONDS,
+      async () => {
+        const rows = await this.prisma.certificate.findMany({
+          where: PUBLISHED_WHERE,
+          orderBy: { displayOrder: 'asc' },
+          include: {
+            mediaAsset: { select: { id: true, key: true, mimeType: true, byteSize: true } },
+          },
+        });
+
+        return rows.map((row) => toPublicCertificate(row, this.url));
+      },
     );
   }
 
@@ -264,12 +282,15 @@ export class ContentService {
       'content',
       `gallery:${album ?? '-'}`,
       ContentService.CACHE_TTL_SECONDS,
-      () =>
-        this.prisma.galleryItem.findMany({
+      async () => {
+        const rows = await this.prisma.galleryItem.findMany({
           where: { ...PUBLISHED_WHERE, ...(album !== undefined ? { album } : {}) },
           orderBy: { displayOrder: 'asc' },
           include: { mediaAsset: MEDIA_SELECT },
-        }),
+        });
+
+        return rows.map((row) => toPublicGalleryItem(row, this.url));
+      },
     );
   }
 
@@ -310,15 +331,17 @@ export class ContentService {
   // ===========================================================================
 
   listDocumentsPublic() {
-    return this.cache.wrap('content', 'documents', ContentService.CACHE_TTL_SECONDS, () =>
-      this.prisma.publicDocument.findMany({
+    return this.cache.wrap('content', 'documents', ContentService.CACHE_TTL_SECONDS, async () => {
+      const rows = await this.prisma.publicDocument.findMany({
         where: PUBLISHED_WHERE,
         orderBy: { displayOrder: 'asc' },
         include: {
           mediaAsset: { select: { id: true, key: true, mimeType: true, byteSize: true } },
         },
-      }),
-    );
+      });
+
+      return rows.map((row) => toPublicDocument(row, this.url));
+    });
   }
 
   listDocumentsAdmin() {
@@ -358,13 +381,15 @@ export class ContentService {
   // ===========================================================================
 
   listProductionStepsPublic() {
-    return this.cache.wrap('content', 'steps', ContentService.CACHE_TTL_SECONDS, () =>
-      this.prisma.productionStep.findMany({
+    return this.cache.wrap('content', 'steps', ContentService.CACHE_TTL_SECONDS, async () => {
+      const rows = await this.prisma.productionStep.findMany({
         where: PUBLISHED_ONLY,
         orderBy: { displayOrder: 'asc' },
         include: { mediaAsset: MEDIA_SELECT },
-      }),
-    );
+      });
+
+      return rows.map((row) => toPublicProductionStep(row, this.url));
+    });
   }
 
   listProductionStepsAdmin() {
@@ -383,13 +408,15 @@ export class ContentService {
   }
 
   listHomepageSectionsPublic() {
-    return this.cache.wrap('content', 'homepage', ContentService.CACHE_TTL_SECONDS, () =>
-      this.prisma.homepageSection.findMany({
+    return this.cache.wrap('content', 'homepage', ContentService.CACHE_TTL_SECONDS, async () => {
+      const rows = await this.prisma.homepageSection.findMany({
         where: PUBLISHED_ONLY,
         orderBy: { displayOrder: 'asc' },
         include: { mediaAsset: MEDIA_SELECT },
-      }),
-    );
+      });
+
+      return rows.map((row) => toPublicHomepageSection(row, this.url));
+    });
   }
 
   listHomepageSectionsAdmin() {
@@ -411,12 +438,14 @@ export class ContentService {
   // ===========================================================================
 
   findSeo(path: string) {
-    return this.cache.wrap('content', `seo:${path}`, ContentService.CACHE_TTL_SECONDS, () =>
-      this.prisma.seoMetadata.findUnique({
+    return this.cache.wrap('content', `seo:${path}`, ContentService.CACHE_TTL_SECONDS, async () => {
+      const row = await this.prisma.seoMetadata.findUnique({
         where: { path },
-        include: { ogImage: { select: { id: true, key: true } } },
-      }),
-    );
+        include: { ogImage: { select: { key: true } } },
+      });
+
+      return row === null ? null : toPublicSeo(row, this.url);
+    });
   }
 
   listSeoAdmin() {

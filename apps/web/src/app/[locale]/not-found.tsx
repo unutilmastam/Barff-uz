@@ -6,9 +6,17 @@ import { getMessages } from '@/i18n/dictionary';
 /**
  * 404 — til segmenti ichida.
  *
- * DIQQAT: `not-found.tsx` `params` ni OLMAYDI (Next.js uni bu faylga
- * uzatmaydi), shuning uchun til standart qiymatda qoladi. To'g'ri tilda
- * ko'rsatish S15 da, i18n to'liq qurilganda hal qilinadi.
+ * DIQQAT: bu sahifa STANDART tilda chiqadi.
+ *
+ * Sabab: `not-found.tsx` `params` ni olmaydi, so'rovdan tilni o'qish
+ * uchun esa `cookies()` kerak bo'ladi — u chaqirilishi bilan butun til
+ * shoxobchasi DINAMIK bo'lib qoladi va bosh sahifa ham, mahsulot
+ * sahifalari ham oldindan tayyorlanmay qo'yadi (buni tekshirdim: SSG
+ * belgisi va `revalidate` build jadvalidan yo'qoladi). Uch sahifani
+ * statik bo'lishdan mahrum qilish 404 matnining tilidan muhimroq.
+ *
+ * Indekslashdan himoya kerak emas: Next 404 javobiga `noindex` ni
+ * O'ZI qo'shadi (tekshirilgan).
  */
 export default async function LocaleNotFound() {
   const messages = await getMessages(DEFAULT_LOCALE);
