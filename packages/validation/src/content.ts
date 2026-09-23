@@ -118,3 +118,28 @@ export const contentListQuerySchema = paginationQuerySchema.extend({
 export const adminContentListQuerySchema = paginationQuerySchema.extend({
   status: z.enum(CONTENT_STATUSES).optional(),
 });
+
+/**
+ * Tizim sozlamasi.
+ *
+ * `value` — ixtiyoriy JSON: sozlamalarning shakli har xil (kontakt
+ * ma'lumoti obyekt, standart til satr). Shu sababli bu yerda faqat
+ * kalit va ommaviylik tekshiriladi; qiymat shaklini o'qiydigan kod
+ * o'zi tekshiradi.
+ *
+ * `isPublic` ATAYLAB standart holatda `false`: yangi sozlama
+ * tasodifan ommaviy API'ga chiqib ketmasligi kerak.
+ */
+export const systemSettingUpsertSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z0-9]+(\.[a-z0-9]+)*$/, {
+      message: "Kalit `site.contact` ko'rinishida bo'lishi kerak",
+    }),
+  value: z.unknown(),
+  description: z.string().trim().max(300).optional(),
+  isPublic: z.boolean().default(false),
+});

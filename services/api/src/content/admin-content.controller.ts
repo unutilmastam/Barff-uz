@@ -37,6 +37,7 @@ import {
   PublicDocumentCreateDto,
   PublicDocumentUpdateDto,
   SeoMetadataUpsertDto,
+  SystemSettingUpsertDto,
 } from './dto/content.dto';
 
 /**
@@ -255,6 +256,32 @@ export class AdminContentController {
   @ApiZodBody(SeoMetadataUpsertDto)
   upsertSeo(@Body() dto: SeoMetadataUpsertDto) {
     return this.content.upsertSeo(dto.path, toJson(dto) as Prisma.SeoMetadataUncheckedCreateInput);
+  }
+
+  // --- Tizim sozlamalari ------------------------------------------------------
+
+  @Get('settings')
+  @Permissions('settings.manage')
+  @ApiOperation({ summary: 'Barcha sozlamalar' })
+  listSettings() {
+    return this.content.listSettingsAdmin();
+  }
+
+  @Put('settings')
+  @Permissions('settings.manage')
+  @ApiOperation({ summary: 'Sozlamani saqlash' })
+  @ApiZodBody(SystemSettingUpsertDto)
+  upsertSetting(
+    @Body() dto: SystemSettingUpsertDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.content.upsertSetting(
+      dto.key,
+      toJson(dto) as Prisma.SystemSettingUncheckedCreateInput,
+      actor(user),
+      context(request),
+    );
   }
 }
 

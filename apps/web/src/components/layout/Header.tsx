@@ -1,31 +1,25 @@
 import Link from 'next/link';
 import { type Locale } from '@/i18n/config';
 import { type Messages } from '@/i18n/dictionary';
+import { mainNav } from '@/lib/navigation';
 import { routeReady } from '@/lib/routes';
 import { Container } from './Container';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { MobileMenu } from './MobileMenu';
 
 /**
  * Sayt sarlavhasi.
  *
- * Navigatsiyada S12 da qurilgan sahifalar bor. Qolgan bo'limlar
- * (`/production`, `/quality`, `/news`, `/contact`) S13 da qo'shilib,
- * shu ro'yxatga kiradi.
+ * Havolalar `navigation.ts` dagi YAGONA ro'yxatdan keladi — sarlavha,
+ * pastki qism va sitemap bir-biridan ajralib ketmasligi uchun. Qurilmagan
+ * sahifa ro'yxatga tushmaydi: u 404 berishi ustiga, Next uni oldindan
+ * yuklamoqchi bo'lib so'rovni osiltirib qo'yadi (`routes.ts`).
  *
- * Qurilmagan sahifaga havola QO'YILMAYDI (`routes.ts` ga qarang):
- * u 404 berishi ustiga, Next uni oldindan yuklamoqchi bo'lib
- * so'rovni osiltirib qo'yadi.
- *
- * Mobilda havolalar ALOHIDA qatorda: 360px kenglikda logotip, ikki
- * havola va til tanlagich bitta qatorga sig'masdi. Qator gorizontal
- * siljiydi, shuning uchun havolalar ko'paysa ham buzilmaydi —
- * to'liq mobil menyu S13 da keladi.
+ * Kengroq ekranda havolalar qatorda; mobilda yon menyuda — sakkizta
+ * havola 360px ga sig'masdi.
  */
 export function Header({ locale, messages }: { locale: Locale; messages: Messages }) {
-  const links = [
-    { href: `/${locale}/company`, label: messages.nav.company },
-    { href: `/${locale}/products`, label: messages.nav.products },
-  ];
+  const links = mainNav(locale, messages);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-line)] bg-[color-mix(in_oklab,var(--color-ink-900)_85%,transparent)] backdrop-blur-md">
@@ -37,7 +31,7 @@ export function Header({ locale, messages }: { locale: Locale; messages: Message
           BARFF
         </Link>
 
-        <nav aria-label={messages.nav.home} className="hidden gap-6 sm:flex">
+        <nav aria-label={messages.nav.home} className="hidden gap-5 sm:flex lg:gap-6">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -49,32 +43,25 @@ export function Header({ locale, messages }: { locale: Locale; messages: Message
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LocaleSwitcher locale={locale} label={messages.common.languageSwitcher} />
 
           {routeReady('becomePartner') && (
             <Link
               href={`/${locale}/become-partner`}
-              className="hidden rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)] sm:inline-block"
+              className="hidden rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)] lg:inline-block"
             >
               {messages.nav.becomePartner}
             </Link>
           )}
-        </div>
-      </Container>
 
-      <Container as="div" className="sm:hidden">
-        <nav aria-label={messages.nav.home} className="flex gap-5 overflow-x-auto pb-3">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="shrink-0 text-sm text-[var(--color-fg-muted)] transition-colors hover:text-[var(--color-fg)]"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+          <MobileMenu
+            links={links}
+            title={messages.nav.home}
+            openLabel={messages.common.openMenu}
+            closeLabel={messages.common.closeMenu}
+          />
+        </div>
       </Container>
     </header>
   );

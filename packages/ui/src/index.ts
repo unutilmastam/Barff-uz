@@ -4,7 +4,7 @@ export { Accordion, type AccordionItem, type AccordionProps } from './primitives
 export { Badge, type BadgeTone } from './primitives/Badge';
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './primitives/Button';
 export { Checkbox, type CheckboxProps } from './primitives/Checkbox';
-export { Dialog, type DialogProps } from './primitives/Dialog';
+export { Dialog, type DialogProps, type DialogSize } from './primitives/Dialog';
 export { Input, type InputProps } from './primitives/Input';
 export { Link, type LinkProps } from './primitives/Link';
 export { Pagination, type PaginationProps, visiblePages } from './primitives/Pagination';

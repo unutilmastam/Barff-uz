@@ -17,6 +17,7 @@ export const AUDIT_ACTIONS = {
   CONTENT_CREATED: 'content.created',
   CONTENT_UPDATED: 'content.updated',
   CONTENT_DELETED: 'content.deleted',
+  SETTINGS_UPDATED: 'settings.updated',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

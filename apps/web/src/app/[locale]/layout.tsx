@@ -62,7 +62,7 @@ export default async function LocaleLayout({
           <main id="main" className="flex-1">
             {children}
           </main>
-          <Footer messages={messages} />
+          <Footer locale={locale} messages={messages} />
         </QueryProvider>
       </body>
     </html>

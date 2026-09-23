@@ -463,6 +463,66 @@ export class ContentService {
   }
 
   // ===========================================================================
+  // TIZIM SOZLAMALARI
+  // ===========================================================================
+
+  /**
+   * Ommaviy sozlamalar.
+   *
+   * FAQAT `isPublic` belgilangan yozuvlar chiqadi va javobda faqat
+   * `key`/`value` bo'ladi — `description` ichki izoh, `updatedById`
+   * esa xodim identifikatori. Yangi sozlama standart holatda ommaviy
+   * EMAS, shuning uchun bu ro'yxatga tasodifan tushib qolmaydi.
+   */
+  listPublicSettings() {
+    return this.cache.wrap('content', 'settings', ContentService.CACHE_TTL_SECONDS, async () => {
+      const rows = await this.prisma.systemSetting.findMany({
+        where: { isPublic: true },
+        select: { key: true, value: true },
+        orderBy: { key: 'asc' },
+      });
+
+      return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+    });
+  }
+
+  listSettingsAdmin() {
+    return this.prisma.systemSetting.findMany({ orderBy: { key: 'asc' } });
+  }
+
+  async upsertSetting(
+    key: string,
+    data: Prisma.SystemSettingUncheckedCreateInput,
+    actor: Actor,
+    ctx: RequestContext,
+  ) {
+    const before = await this.prisma.systemSetting.findUnique({ where: { key } });
+
+    const row = await this.prisma.systemSetting.upsert({
+      where: { key },
+      update: data,
+      create: { ...data, key },
+    });
+
+    await this.invalidate();
+
+    // Sozlama o'zgarishi audit qilinadi (CLAUDE.md §23): u saytning
+    // ommaviy qismiga ta'sir qiladi.
+    await this.audit.record({
+      action: AUDIT_ACTIONS.SETTINGS_UPDATED,
+      entity: 'SystemSetting',
+      entityId: row.id,
+      actorId: actor.id,
+      actorEmail: actor.email,
+      before: before === null ? undefined : { isPublic: before.isPublic },
+      after: { isPublic: row.isPublic },
+      ...ctx,
+    });
+
+    return row;
+  }
+
+  // ===========================================================================
   // Yordamchilar
   // ===========================================================================
 

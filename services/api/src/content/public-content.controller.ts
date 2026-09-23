@@ -67,6 +67,12 @@ export class PublicContentController {
     return this.content.listHomepageSectionsPublic();
   }
 
+  @Get('settings')
+  @ApiOperation({ summary: 'Ommaviy sozlamalar (kontakt va h.k.)' })
+  listSettings() {
+    return this.content.listPublicSettings();
+  }
+
   @Get('seo')
   @ApiOperation({ summary: "Sahifa SEO ma'lumoti" })
   @ApiQuery({ name: 'path', required: true, example: '/products' })

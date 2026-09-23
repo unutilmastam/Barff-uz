@@ -12,6 +12,7 @@ import {
   publicDocumentCreateSchema,
   publicDocumentUpdateSchema,
   seoMetadataUpsertSchema,
+  systemSettingUpsertSchema,
 } from '@barff/validation';
 import { createZodDto } from '../../common/validation/zod-dto';
 
@@ -30,6 +31,7 @@ export class PublicDocumentUpdateDto extends createZodDto(publicDocumentUpdateSc
 export class ProductionStepUpsertDto extends createZodDto(productionStepUpsertSchema) {}
 export class HomepageSectionUpsertDto extends createZodDto(homepageSectionUpsertSchema) {}
 export class SeoMetadataUpsertDto extends createZodDto(seoMetadataUpsertSchema) {}
+export class SystemSettingUpsertDto extends createZodDto(systemSettingUpsertSchema) {}
 
 export class ContentListQueryDto extends createZodDto(contentListQuerySchema) {}
 export class AdminContentListQueryDto extends createZodDto(adminContentListQuerySchema) {}

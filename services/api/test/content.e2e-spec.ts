@@ -34,6 +34,8 @@ describe('Content (e2e)', () => {
   let driverToken = '';
   let mediaId = '';
   const prefix = `e2e-c-${Date.now()}`;
+  /** Sozlama kalitlari faqat `a.b.c` shaklida — chiziqchasiz. */
+  const settingPrefix = `e2ec${Date.now()}`;
   const cleanupSlugs: string[] = [];
 
   beforeAll(async () => {
@@ -74,6 +76,7 @@ describe('Content (e2e)', () => {
     await prisma.productionStep.deleteMany({ where: { slug: { startsWith: prefix } } });
     await prisma.homepageSection.deleteMany({ where: { key: { startsWith: prefix } } });
     await prisma.seoMetadata.deleteMany({ where: { path: { startsWith: `/${prefix}` } } });
+    await prisma.systemSetting.deleteMany({ where: { key: { startsWith: settingPrefix } } });
     await prisma.mediaAsset.deleteMany({ where: { id: mediaId } });
     await prisma.user.deleteMany({ where: { email: { in: [ADMIN.email, DRIVER.email] } } });
     await prisma.$disconnect();
@@ -202,6 +205,45 @@ describe('Content (e2e)', () => {
       }
       // Fayl manzili bor, lekin obyekt kaliti yo'q.
       expect(found).toMatchObject({ file: { mimeType: 'image/png' } });
+    });
+
+    /**
+     * Ommaviy sozlamalar ro'yxati — faqat `isPublic` belgilanganlar.
+     *
+     * Bu ayniqsa muhim: sozlamalarda ichki qoidalar (minimal buyurtma,
+     * integratsiya kalitlari) saqlanadi va ular tasodifan ochiq API'ga
+     * chiqib ketmasligi kerak.
+     */
+    it('ommaviy sozlamalarda faqat isPublic yozuvlar bor', async () => {
+      // Kalit `site.contact` ko'rinishida bo'lishi shart — chiziqcha yo'q.
+      const publicKey = `${settingPrefix}.ochiq`;
+      const privateKey = `${settingPrefix}.yopiq`;
+
+      await admin('put', '/settings')
+        .send({ key: publicKey, value: { phone: 'MOCK' }, isPublic: true })
+        .expect(200);
+      await admin('put', '/settings')
+        .send({ key: privateKey, value: { secret: 'MOCK' }, isPublic: false })
+        .expect(200);
+
+      const res = await request(app.getHttpServer()).get(`${base}/settings`).expect(200);
+
+      expect(res.body).toHaveProperty(publicKey);
+      expect(res.body).not.toHaveProperty(privateKey);
+      // Ichki izoh ham chiqmaydi — javobda faqat kalit va qiymat.
+      expect(JSON.stringify(res.body)).not.toContain('description');
+    });
+
+    it('sozlama standart holatda ommaviy EMAS', async () => {
+      const key = `${settingPrefix}.standart`;
+
+      // `isPublic` berilmadi — standart `false` bo'lishi kerak.
+      await admin('put', '/settings')
+        .send({ key, value: { a: 1 } })
+        .expect(200);
+
+      const res = await request(app.getHttpServer()).get(`${base}/settings`).expect(200);
+      expect(res.body).not.toHaveProperty(key);
     });
 
     it('ADMIN royxatida qoralamalar KORINADI', async () => {
