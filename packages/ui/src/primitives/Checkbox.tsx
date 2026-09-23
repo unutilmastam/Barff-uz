@@ -8,6 +8,14 @@ export interface CheckboxProps extends RadixCheckbox.CheckboxProps {
   label: string;
   hint?: string | undefined;
   error?: string | undefined;
+  /**
+   * Yorliqni KO'ZDAN yashiradi, lekin ekran o'quvchi uchun qoldiradi.
+   *
+   * Jadval sarlavhasidagi "hammasini tanlash" kabi holatlar uchun:
+   * ko'rinadigan yorliq ustunni to'ldirib yuborardi, lekin yorliqsiz
+   * katakcha ekran o'quvchida nomsiz "checkbox" bo'lib qolardi.
+   */
+  hideLabel?: boolean | undefined;
 }
 
 /**
@@ -17,7 +25,15 @@ export interface CheckboxProps extends RadixCheckbox.CheckboxProps {
  * xulqini o'zi to'g'ri beradi. `<div>` ustiga qurilgan qo'lbola variant
  * klaviatura bilan umuman ishlamas edi.
  */
-export function Checkbox({ label, hint, error, id, className, ...props }: CheckboxProps) {
+export function Checkbox({
+  label,
+  hint,
+  error,
+  id,
+  className,
+  hideLabel = false,
+  ...props
+}: CheckboxProps) {
   const generatedId = useId();
   const boxId = id ?? generatedId;
   const hintId = `${boxId}-hint`;
@@ -60,7 +76,7 @@ export function Checkbox({ label, hint, error, id, className, ...props }: Checkb
           </RadixCheckbox.Indicator>
         </RadixCheckbox.Root>
 
-        <label htmlFor={boxId} className="text-sm text-[var(--color-fg)]">
+        <label htmlFor={boxId} className={hideLabel ? 'sr-only' : 'text-sm text-[var(--color-fg)]'}>
           {label}
         </label>
       </div>

@@ -239,6 +239,66 @@ describe('Auth (e2e)', () => {
     });
   });
 
+  /**
+   * BRAUZER YO'LI: tana YUBORILMAYDI.
+   *
+   * Brauzerda token `HttpOnly` cookie'da yashaydi, shuning uchun
+   * `/auth/refresh` va `/auth/logout` tanasiz chaqiriladi. Qolgan
+   * testlar tanada token yuboradi — ya'ni ular bu yo'lni UMUMAN
+   * tekshirmasdi va sxema tanasiz so'rovni `400` bilan rad etardi:
+   * chiqish amalda ishlamas, sessiya ochiq qolar edi.
+   */
+  describe('cookie bilan, TANASIZ (brauzer yoli)', () => {
+    /** Javobdagi `Set-Cookie` larni so'rov sarlavhasiga aylantiradi. */
+    const toCookieHeader = (res: request.Response): string =>
+      (res.headers['set-cookie'] as unknown as string[])
+        .map((cookie) => cookie.split(';')[0])
+        .join('; ');
+
+    it('tanasiz `refresh` ISHLAYDI', async () => {
+      const loginRes = await login(ADMIN).expect(200);
+
+      const res = await request(app.getHttpServer())
+        .post(`${base}/auth/refresh`)
+        .set('Cookie', toCookieHeader(loginRes))
+        .expect(200);
+
+      expect(res.body.refreshToken).not.toBe(loginRes.body.refreshToken);
+    });
+
+    it('tanasiz `logout` ISHLAYDI va sessiyani bekor qiladi', async () => {
+      const loginRes = await login(ADMIN).expect(200);
+      const cookie = toCookieHeader(loginRes);
+
+      await request(app.getHttpServer())
+        .post(`${base}/auth/logout`)
+        .set('Cookie', cookie)
+        .expect(204);
+
+      // Chiqqandan keyin o'sha refresh token ISHLAMASLIGI kerak —
+      // aks holda "chiqdim" deb o'ylagan foydalanuvchining sessiyasi
+      // ochiq qolardi.
+      await request(app.getHttpServer())
+        .post(`${base}/auth/refresh`)
+        .set('Cookie', cookie)
+        .expect(401);
+    });
+
+    it('chiqishda cookie`lar TOZALANADI', async () => {
+      const loginRes = await login(ADMIN).expect(200);
+
+      const res = await request(app.getHttpServer())
+        .post(`${base}/auth/logout`)
+        .set('Cookie', toCookieHeader(loginRes))
+        .expect(204);
+
+      const cleared = (res.headers['set-cookie'] as unknown as string[]) ?? [];
+      // Bo'sh qiymat + o'tgan muddat = brauzer cookie'ni o'chiradi.
+      expect(cleared.some((cookie) => cookie.startsWith('barff_access=;'))).toBe(true);
+      expect(cleared.some((cookie) => cookie.startsWith('barff_refresh=;'))).toBe(true);
+    });
+  });
+
   describe('POST /auth/refresh — rotation', () => {
     it('yangi token juftligini beradi', async () => {
       const { body } = await login(ADMIN).expect(200);
