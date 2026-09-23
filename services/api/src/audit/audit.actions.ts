@@ -18,6 +18,7 @@ export const AUDIT_ACTIONS = {
   CONTENT_UPDATED: 'content.updated',
   CONTENT_DELETED: 'content.deleted',
   SETTINGS_UPDATED: 'settings.updated',
+  LEAD_STATUS_CHANGED: 'lead.status.changed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

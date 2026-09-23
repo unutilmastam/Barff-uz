@@ -6,8 +6,8 @@ import { cn } from '../lib/cn';
 
 export interface CheckboxProps extends RadixCheckbox.CheckboxProps {
   label: string;
-  hint?: string;
-  error?: string;
+  hint?: string | undefined;
+  error?: string | undefined;
 }
 
 /**

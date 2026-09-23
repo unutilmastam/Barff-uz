@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { GlassCard, Section } from '@barff/ui';
 import { PageHeader } from '@/components/common/PageHeader';
 import { EmptyState } from '@/components/common/States';
+import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
@@ -81,6 +82,24 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               </dl>
             </GlassCard>
           )}
+        </Container>
+      </Section>
+
+      {/*
+        Aloqa ma'lumotlari hali tasdiqlanmagan bo'lsa ham, tashrifchi
+        murojaat qila olishi kerak — shuning uchun forma shu yerda ham.
+        U `/become-partner` dagi bilan BITTA komponent.
+      */}
+      <Section tone="raised">
+        <Container className="max-w-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {messages.lead.title}
+          </h2>
+          <p className="mt-3 text-[var(--color-fg-muted)]">{messages.lead.intro}</p>
+
+          <div className="mt-8">
+            <LeadForm messages={messages} />
+          </div>
         </Container>
       </Section>
     </>

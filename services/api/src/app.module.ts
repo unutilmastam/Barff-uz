@@ -10,6 +10,8 @@ import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
 import { ContentModule } from './content/content.module';
+import { LeadsModule } from './leads/leads.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { CacheModule } from './public/cache/cache.module';
 import { MediaModule } from './media/media.module';
 import { ProductsModule } from './products/products.module';
@@ -46,6 +48,8 @@ import { UsersModule } from './users/users.module';
     MediaModule,
     ProductsModule,
     ContentModule,
+    NotificationsModule,
+    LeadsModule,
     HealthModule,
   ],
   providers: [

@@ -38,3 +38,8 @@ Thumbs.db
 
 # local docker volumes
 .docker-data/
+
+# Lokal Redis snapshot'i. `redis-server` uni ishchi katalogga yozadi va
+# u bir marta xatolik bilan repozitoriyga tushib ketgan — kod emas,
+# lokal kesh nusxasi.
+*.rdb

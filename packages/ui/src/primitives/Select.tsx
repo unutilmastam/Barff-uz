@@ -7,21 +7,21 @@ import { cn } from '../lib/cn';
 export interface SelectOption {
   value: string;
   label: string;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
 }
 
 export interface SelectProps {
   label: string;
   options: readonly SelectOption[];
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
-  placeholder?: string;
-  hint?: string;
-  error?: string;
-  required?: boolean;
-  disabled?: boolean;
-  name?: string;
+  value?: string | undefined;
+  defaultValue?: string | undefined;
+  onValueChange?: ((value: string) => void) | undefined;
+  placeholder?: string | undefined;
+  hint?: string | undefined;
+  error?: string | undefined;
+  required?: boolean | undefined;
+  disabled?: boolean | undefined;
+  name?: string | undefined;
 }
 
 /**
@@ -59,7 +59,18 @@ export function Select({
         )}
       </label>
 
-      <RadixSelect.Root {...props}>
+      {/*
+        Radix `undefined` qiymatli kalitni qabul qilmaydi
+        (`exactOptionalPropertyTypes`), shuning uchun berilmagan
+        xossalar umuman uzatilmaydi.
+      */}
+      <RadixSelect.Root
+        {...(props.value !== undefined ? { value: props.value } : {})}
+        {...(props.defaultValue !== undefined ? { defaultValue: props.defaultValue } : {})}
+        {...(props.onValueChange !== undefined ? { onValueChange: props.onValueChange } : {})}
+        {...(props.disabled !== undefined ? { disabled: props.disabled } : {})}
+        {...(props.name !== undefined ? { name: props.name } : {})}
+      >
         <RadixSelect.Trigger
           id={id}
           aria-describedby={describedBy.length > 0 ? describedBy : undefined}

@@ -3,12 +3,20 @@
 import { type InputHTMLAttributes, forwardRef, useId } from 'react';
 import { cn } from '../lib/cn';
 
+/**
+ * DIQQAT: ixtiyoriy matn xossalari `| undefined` bilan yozilgan.
+ *
+ * `exactOptionalPropertyTypes` yoqilgan, shuning uchun `error?: string`
+ * bo'lsa, chaqiruvchi `errors.x?.message` (ya'ni `string | undefined`)
+ * ni bera olmasdi — holbuki "xato yo'q" aynan shu qiymat bilan
+ * ifodalanadi.
+ */
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   /** Maydon ostidagi izoh. */
-  hint?: string;
+  hint?: string | undefined;
   /** Validatsiya xatosi. Berilsa, maydon xato holatiga o'tadi. */
-  error?: string;
+  error?: string | undefined;
 }
 
 /**

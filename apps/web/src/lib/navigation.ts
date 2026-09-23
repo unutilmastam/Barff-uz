@@ -26,6 +26,7 @@ const MAIN: { key: RouteKey; path: string; label: (m: Messages) => string }[] = 
 ];
 
 const SECONDARY: { key: RouteKey; path: string; label: (m: Messages) => string }[] = [
+  { key: 'becomePartner', path: 'become-partner', label: (m) => m.nav.becomePartner },
   { key: 'catalog', path: 'catalog', label: (m) => m.catalog.title },
   { key: 'privacy', path: 'privacy', label: (m) => m.footer.privacy },
   { key: 'terms', path: 'terms', label: (m) => m.footer.terms },
