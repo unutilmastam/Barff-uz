@@ -6,6 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { formatDate, text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
+import { Reveal } from '@/motion/Reveal';
 
 /** So'nggi yangiliklar. To'liq ro'yxat va maqola sahifasi — S13. */
 export function NewsSection({
@@ -41,7 +42,7 @@ export function NewsSection({
           ) : articles.length === 0 ? (
             <EmptyState message={messages.common.empty} />
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Reveal as="ul" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stagger>
               {articles.map((article) => (
                 <GlassCard
                   as="li"
@@ -81,7 +82,7 @@ export function NewsSection({
                   )}
                 </GlassCard>
               ))}
-            </ul>
+            </Reveal>
           )}
         </div>
       </Container>

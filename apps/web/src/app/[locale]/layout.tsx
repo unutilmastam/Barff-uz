@@ -4,6 +4,7 @@ import { type ReactNode } from 'react';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { QueryProvider } from '@/components/providers/QueryProvider';
+import { SmoothScroll } from '@/motion/SmoothScroll';
 import { LOCALES, isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
 import { indexingAllowed } from '@/lib/seo';
@@ -68,6 +69,13 @@ export default async function LocaleLayout({
         <a href="#main" className="skip-link">
           {messages.common.skipToContent}
         </a>
+
+        {/*
+          Yumshoq skroll faqat sichqonchali, kuchli va `reduce` so'ramagan
+          qurilmada ishga tushadi — qolgan hamma brauzerning O'Z skrollini
+          oladi (`SmoothScroll` izohiga qarang).
+        */}
+        <SmoothScroll />
 
         <QueryProvider>
           <Header locale={locale} messages={messages} />

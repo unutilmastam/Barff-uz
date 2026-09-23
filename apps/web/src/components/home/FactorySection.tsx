@@ -4,6 +4,7 @@ import { ApiImage } from '@/components/media/ApiImage';
 import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
+import { Reveal } from '@/motion/Reveal';
 
 /** Zavod va texnologiya. Rasm bo'lmasa bo'lim matn bilan ishlaydi. */
 export function FactorySection({
@@ -21,9 +22,9 @@ export function FactorySection({
   return (
     <Section>
       <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <div>
+        <Reveal>
           <SectionHeader eyebrow={messages.home.factoryEyebrow} title={title} description={body} />
-        </div>
+        </Reveal>
 
         {section?.image != null && (
           <MediaFrame ratio="landscape">

@@ -5,6 +5,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ProductCard } from '@/components/products/ProductCard';
 import { type Messages } from '@/i18n/dictionary';
+import { Reveal } from '@/motion/Reveal';
 
 /**
  * Mahsulotlar bo'limi.
@@ -44,7 +45,9 @@ export function ProductsSection({
           ) : products.length === 0 ? (
             <EmptyState message={messages.products.empty} />
           ) : (
-            <ul
+            <Reveal
+              as="ul"
+              stagger
               className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4"
               // Gorizontal ro'yxat klaviatura bilan ham siljiy olishi uchun.
               tabIndex={0}
@@ -55,7 +58,7 @@ export function ProductsSection({
                   <ProductCard product={product} locale={locale} messages={messages} />
                 </li>
               ))}
-            </ul>
+            </Reveal>
           )}
         </div>
       </Container>
