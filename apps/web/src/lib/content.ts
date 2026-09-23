@@ -9,6 +9,7 @@ import {
   type PublicNewsSummary,
   type PublicProduct,
   type PublicProductionStep,
+  type PublicSeoMetadata,
 } from '@barff/types';
 import { apiFetch } from './api-client';
 
@@ -158,4 +159,15 @@ export async function getAllNewsSlugs(locale: Locale): Promise<string[]> {
   }
 
   return slugs;
+}
+
+/**
+ * Sahifaning CMS'dagi SEO ma'lumoti.
+ *
+ * Yozuv bo'lmasa `null` qaytadi — bu XATO EMAS, shunchaki sahifa uchun
+ * alohida sozlama kiritilmagan degani va sahifaning o'z matni
+ * ishlatiladi.
+ */
+export function getSeo(locale: Locale, path: string): Promise<PublicSeoMetadata | null> {
+  return get<PublicSeoMetadata>(`/seo?path=${encodeURIComponent(path)}`, locale);
 }

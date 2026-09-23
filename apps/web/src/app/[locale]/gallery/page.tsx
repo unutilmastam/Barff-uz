@@ -6,8 +6,10 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { GalleryGrid } from '@/components/gallery/GalleryGrid';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getGallery } from '@/lib/content';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -21,11 +23,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/gallery',
     title: messages.gallery.title,
     description: messages.gallery.subtitle,
-    alternates: { canonical: `/${locale}/gallery` },
-  };
+  });
 }
 
 export default async function GalleryPage({ params }: { params: Promise<{ locale: string }> }) {

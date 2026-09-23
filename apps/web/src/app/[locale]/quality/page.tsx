@@ -6,9 +6,11 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getCertificates, getDocuments } from '@/lib/content';
 import { formatDate, text } from '@/lib/localized';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -22,11 +24,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/quality',
     title: messages.quality.title,
     description: messages.quality.intro,
-    alternates: { canonical: `/${locale}/quality` },
-  };
+  });
 }
 
 /**

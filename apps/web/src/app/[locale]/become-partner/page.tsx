@@ -5,7 +5,9 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -19,11 +21,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/become-partner',
     title: messages.lead.title,
     description: messages.lead.intro,
-    alternates: { canonical: `/${locale}/become-partner` },
-  };
+  });
 }
 
 /**

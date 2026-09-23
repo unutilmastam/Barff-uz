@@ -2,12 +2,15 @@ import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Badge, GlassCard, MediaFrame, Section } from '@barff/ui';
+import { JsonLd } from '@/components/common/JsonLd';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
 import { getAllProductSlugs, getProduct } from '@/lib/content';
 import { formatMoney, text } from '@/lib/localized';
+import { buildMetadata } from '@/lib/seo';
+import { breadcrumbJsonLd, productJsonLd } from '@/lib/structured-data';
 
 /**
  * ISR muddati (soniya).
@@ -61,19 +64,14 @@ export async function generateMetadata({
   const product = await getProduct(locale, slug);
   if (product === null) return {};
 
-  const name = text(product.name, locale, product.sku);
-  const description = text(product.description, locale);
-
-  return {
-    title: name,
-    ...(description.length > 0 ? { description } : {}),
-    alternates: { canonical: `/${locale}/products/${product.slug}` },
-    openGraph: {
-      title: name,
-      ...(description.length > 0 ? { description } : {}),
-      type: 'website',
-    },
-  };
+  return buildMetadata({
+    locale,
+    path: `/products/${product.slug}`,
+    title: text(product.name, locale, product.sku),
+    description: text(product.description, locale),
+    // Eng katta variant — ijtimoiy tarmoq kartochkasi uchun.
+    imageUrl: product.images[0]?.sources.at(-1)?.url,
+  });
 }
 
 export default async function ProductPage({
@@ -110,6 +108,15 @@ export default async function ProductPage({
 
   return (
     <Section>
+      <JsonLd data={productJsonLd(product, locale)} />
+      <JsonLd
+        data={breadcrumbJsonLd(locale, [
+          { name: messages.nav.home, path: '/' },
+          { name: messages.products.title, path: '/products' },
+          { name, path: `/products/${product.slug}` },
+        ])}
+      />
+
       <Container>
         <Link
           href={`/${locale}/products`}

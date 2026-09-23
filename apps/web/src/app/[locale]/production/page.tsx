@@ -6,9 +6,11 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getProductionSteps } from '@/lib/content';
 import { text } from '@/lib/localized';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -22,11 +24,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/production',
     title: messages.production.title,
     description: messages.production.intro,
-    alternates: { canonical: `/${locale}/production` },
-  };
+  });
 }
 
 /** Ishlab chiqarish jarayoni (CLAUDE.md §4). Bosqichlar CMS'dan keladi. */

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { LegalPage } from '@/components/common/LegalPage';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -16,12 +17,14 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/terms',
     title: messages.legal.termsTitle,
-    // Matn tayyor bo'lmagan hujjat indekslanmasligi kerak.
-    robots: { index: false, follow: true },
-    alternates: { canonical: `/${locale}/terms` },
-  };
+    description: messages.legal.pending,
+    // Matni tayyor bo'lmagan huquqiy hujjat indekslanmaydi.
+    noIndex: true,
+  });
 }
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

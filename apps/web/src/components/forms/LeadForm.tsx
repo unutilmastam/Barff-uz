@@ -207,6 +207,7 @@ export function LeadForm({ messages }: { messages: Messages }) {
           tezlik chegarasi va takrorni aniqlash ham bor.
         */}
         <div hidden aria-hidden="true">
+          {/* i18n-exempt: yashirin maydon yorlig'i, uni hech kim ko'rmaydi. */}
           <label htmlFor="barff-hp">Do not fill</label>
           <input id="barff-hp" tabIndex={-1} autoComplete="off" {...register('honeypot')} />
         </div>

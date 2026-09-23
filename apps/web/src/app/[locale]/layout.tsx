@@ -6,12 +6,23 @@ import { Header } from '@/components/layout/Header';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { LOCALES, isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
+import { indexingAllowed } from '@/lib/seo';
+import { siteUrl } from '@/lib/site';
 
 /** Uchala til ham build paytida oldindan tayyorlanadi. */
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
 }
 
+/**
+ * Sahifalar uchun ZAXIRA metadata.
+ *
+ * Har bir sahifa o'z `generateMetadata` sida `buildMetadata()` ni
+ * chaqiradi va bu yerdagi qiymatlarni almashtiradi. Bu yerda faqat
+ * ikki narsa qoladi:
+ *   - `metadataBase` — nisbiy manzillarni to'liq manzilga aylantirish;
+ *   - `title.template` — har bir sarlavhaga brend qo'shimchasi.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -23,15 +34,16 @@ export async function generateMetadata({
   const messages = await getMessages(locale);
 
   return {
-    title: messages.meta.title,
+    metadataBase: new URL(siteUrl()),
+    title: {
+      default: messages.meta.title,
+      template: '%s — BARFF',
+    },
     description: messages.meta.description,
 
-    // Placeholder kontent qidiruvga tushmasligi kerak (CLAUDE.md §19):
-    // haqiqiy kontent paydo bo'lgunicha indekslash o'chiq turadi.
-    robots:
-      process.env['NEXT_PUBLIC_ALLOW_INDEXING'] === 'true'
-        ? { index: true, follow: true }
-        : { index: false, follow: false },
+    // Kontent tayyor bo'lmaguncha sayt qidiruvga tushmaydi
+    // (CLAUDE.md §19). Sahifalar buni o'zgartira oladi.
+    robots: indexingAllowed() ? { index: true, follow: true } : { index: false, follow: false },
   };
 }
 
