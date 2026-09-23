@@ -31,6 +31,7 @@
 | Q21 | Dilerlar bitta ofis/NAT ortidan kirishadimi? Shunday bo'lsa, `AUTH_LOGIN_MAX_ATTEMPTS_PER_IP` (hozir 50) yetarlimi — bir ofisdagi bir necha xodim bir-birini bloklab qo'ymaydimi?                                                                                                                                         | S22      | ochiq |
 | Q22 | Admin uchun MFA qachon yoqilsin? Sxemada `mfaEnabled`/`mfaSecret` maydonlari tayyor, amalga oshirish esa hali yo'q (CLAUDE.md §12 buni ixtiyoriy deydi).                                                                                                                                                                  | S41      | ochiq |
 | Q23 | `/privacy` va `/terms` matnlari. Bu huquqiy majburiyat yaratuvchi hujjatlar, shuning uchun matn O'YLAB TOPILMADI — sahifalar mavjud, `noindex` va o'rindosh bilan turibdi. Matn BARFF yuridik bo'limidan kelishi kerak.                                                                                                   | S13, S19 | ochiq |
+| Q24 | Mahsulot 3D modeli va fotosurati. Bosh ekrandagi sahna hozir KODDA qurilgan mavhum shakl — bu BARFF shishasi EMAS. Haqiqiy model (`.glb`) yoki professional fotosurat kelgach almashtiriladi.                                                                                                                             | S17      | ochiq |
 
 ---
 

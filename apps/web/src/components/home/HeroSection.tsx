@@ -6,6 +6,7 @@ import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
+import { HeroVisual } from '@/motion/HeroVisual';
 
 /**
  * Bosh ekran.
@@ -33,6 +34,13 @@ export function HeroSection({
 
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+      {/*
+        Uch o'lchamli sahna (yoki uning zaxirasi) MATN ORTIDA turadi va
+        `ssr: false` bilan keyin yuklanadi — sarlavha undan oldin
+        chiziladi (CLAUDE.md §26).
+      */}
+      <HeroVisual />
+
       {section?.image != null && (
         <div aria-hidden className="absolute inset-0">
           <ApiImage

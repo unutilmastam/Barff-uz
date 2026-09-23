@@ -4,6 +4,7 @@ import {
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
+  createElement,
   useEffect,
   useRef,
 } from 'react';
@@ -100,9 +101,13 @@ export function Reveal({ children, as: Component = 'div', stagger = false, ...re
     };
   }, [enabled, stagger]);
 
-  return (
-    <Component ref={ref} {...rest}>
-      {children}
-    </Component>
-  );
+  /*
+    `createElement` ATAYLAB ishlatilgan, JSX emas.
+
+    `@react-three/fiber` global `JSX.IntrinsicElements` ni yuzlab uch
+    o'lchamli element bilan kengaytiradi; shundan keyin polimorf
+    `ElementType` uchun xossalar kesishmasi `never` bo'lib qoladi.
+    `createElement` bu hisobni chetlab o'tadi.
+  */
+  return createElement(Component, { ref, ...rest }, children);
 }

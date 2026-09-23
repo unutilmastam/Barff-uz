@@ -1,4 +1,4 @@
-import { type AnchorHTMLAttributes, type ElementType, forwardRef } from 'react';
+import { type AnchorHTMLAttributes, type ElementType, createElement, forwardRef } from 'react';
 import { cn } from '../lib/cn';
 
 export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -24,18 +24,28 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       { target: '_blank', rel: 'noopener noreferrer' }
     : {};
 
-  return (
-    <Component
-      ref={ref}
-      className={cn(
+  /*
+    `createElement` ATAYLAB ishlatilgan, JSX emas.
+
+    Sabab: `@react-three/fiber` global `JSX.IntrinsicElements` ni
+    yuzlab uch o'lchamli element bilan kengaytiradi. Shundan keyin
+    polimorf `ElementType` uchun JSX xossalarini hisoblashda TypeScript
+    barcha elementlar xossalarining kesishmasini oladi va natija
+    `never` bo'lib qoladi. `createElement` bu hisobni chetlab o'tadi,
+    komponentning ishlashi esa o'zgarmaydi.
+  */
+  return createElement(
+    Component,
+    {
+      ref,
+      className: cn(
         'rounded-sm underline-offset-4 transition-colors duration-[var(--duration-fast)]',
         'text-[var(--color-fg)] hover:text-[var(--color-brand-400)] hover:underline',
         className,
-      )}
-      {...externalProps}
-      {...props}
-    >
-      {children}
-    </Component>
+      ),
+      ...externalProps,
+      ...props,
+    },
+    children,
   );
 });
