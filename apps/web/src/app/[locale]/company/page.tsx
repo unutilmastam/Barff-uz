@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { GlassCard, Section, SectionHeader, StatBlock } from '@barff/ui';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { PENDING_VALUE } from '@/lib/mock-data';
+import { buildMetadata } from '@/lib/seo';
 
 /**
  * ISR muddati (soniya).
@@ -26,11 +28,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/company',
     title: messages.company.title,
     description: messages.company.intro,
-    alternates: { canonical: `/${locale}/company` },
-  };
+  });
 }
 
 /**

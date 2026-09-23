@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "globals": "^16.5.0"
   }
 }

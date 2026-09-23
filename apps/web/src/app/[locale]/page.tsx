@@ -1,3 +1,4 @@
+import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { FactorySection } from '@/components/home/FactorySection';
 import { HeroSection } from '@/components/home/HeroSection';
@@ -7,8 +8,11 @@ import { ProcessSection } from '@/components/home/ProcessSection';
 import { ProductsSection } from '@/components/home/ProductsSection';
 import { QualitySection } from '@/components/home/QualitySection';
 import { StatsSection } from '@/components/home/StatsSection';
+import { JsonLd } from '@/components/common/JsonLd';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
+import { buildMetadata } from '@/lib/seo';
+import { organizationJsonLd } from '@/lib/structured-data';
 import {
   getCertificates,
   getHomepageSections,
@@ -35,6 +39,26 @@ import {
  */
 export const revalidate = 300;
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+
+  const messages = await getMessages(locale);
+
+  return buildMetadata({
+    locale,
+    path: '/',
+    title: messages.meta.title,
+    description: messages.meta.description,
+    // Sarlavhada "BARFF" bor — shablon uni takrorlamasin.
+    absoluteTitle: true,
+  });
+}
+
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
@@ -55,6 +79,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
+      {/* Kompaniya ma'lumoti — faqat bosh sahifada, bir marta. */}
+      <JsonLd data={organizationJsonLd(locale, messages.meta.description)} />
+
       <HeroSection locale={locale} messages={messages} section={section('hero')} />
       <StatsSection messages={messages} />
       <FactorySection locale={locale} messages={messages} section={section('factory')} />

@@ -5,8 +5,10 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ProductCard } from '@/components/products/ProductCard';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getProducts } from '@/lib/content';
+import { buildMetadata } from '@/lib/seo';
 
 /**
  * ISR muddati (soniya).
@@ -28,11 +30,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/products',
     title: messages.products.title,
     description: messages.products.subtitle,
-    alternates: { canonical: `/${locale}/products` },
-  };
+  });
 }
 
 /** Mahsulotlar ro'yxati. Sahifalash va filtrlar — S14 (katalog). */

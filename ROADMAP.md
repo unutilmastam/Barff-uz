@@ -83,7 +83,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S12 Web: home + company + products
 - [x] S13 Web: production, quality, gallery, news, contact
 - [x] S14 Leads + B2B form + notifications
-- [ ] S15 i18n + SEO
+- [x] S15 i18n + SEO
 - [ ] S16 Motion layer (GSAP / scroll)
 - [ ] S17 3D hero (Three.js)
 - [ ] S18 Admin app shell

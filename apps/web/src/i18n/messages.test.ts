@@ -35,12 +35,48 @@ describe('tarjimalar', () => {
     }
   });
 
-  it('tarjimalar bir-biridan farq qiladi (nusxa ko’chirilmagan)', async () => {
-    const uz = await getMessages('uz');
-    const ru = await getMessages('ru');
+  /**
+   * Tarjima qilinmay qolgan qiymatlarni topadi.
+   *
+   * Yangi kalit qo'shilganda uni uchala faylga NUSXA qilib qo'yish
+   * oson — tip tekshiruvi buni ushlamaydi, chunki kalit bor va
+   * qiymat satr. Bu test esa aynan shuni ushlaydi.
+   *
+   * Ba'zi qiymatlar uchala tilda BIR XIL bo'lishi TABIIY: xalqaro
+   * so'zlar va o'lchov birliklari. Ular ro'yxatda aniq sanab
+   * o'tilgan — ya'ni istisno ko'rinib turadi.
+   */
+  it("tarjima qilinmay qolgan qiymat yo'q", async () => {
+    const identicalByDesign = new Set([
+      'meta.title',
+      'lead.phoneHint',
+      'lead.email',
+      'contact.email',
+      'common.mockBadge',
+      'legal.pendingNote',
+      'gallery.counter',
+      // `ml` — o'lchov birligi qisqartmasi, o'zbekcha va inglizcha bir xil.
+      'products.volumeUnit',
+    ]);
 
-    // Agar ruscha fayl o'zbekchadan nusxa bo'lsa, bu test ushlaydi.
-    expect(ru.home.heroTitle).not.toBe(uz.home.heroTitle);
-    expect(ru.nav.products).not.toBe(uz.nav.products);
+    const uz = await getMessages('uz');
+
+    for (const locale of ['ru', 'en'] as const) {
+      const other = await getMessages(locale);
+      const copied: string[] = [];
+
+      for (const path of keyPaths(uz)) {
+        if (identicalByDesign.has(path)) continue;
+
+        const read = (source: unknown) =>
+          path
+            .split('.')
+            .reduce<unknown>((acc, key) => (acc as Record<string, unknown>)[key], source);
+
+        if (read(uz) === read(other)) copied.push(path);
+      }
+
+      expect(copied, `${locale}: tarjima qilinmagan kalitlar`).toEqual([]);
+    }
   });
 });

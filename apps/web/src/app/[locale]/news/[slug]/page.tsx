@@ -2,12 +2,15 @@ import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MediaFrame, Section } from '@barff/ui';
+import { JsonLd } from '@/components/common/JsonLd';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
 import { getAllNewsSlugs, getNewsArticle } from '@/lib/content';
 import { formatDate, text } from '@/lib/localized';
+import { buildMetadata } from '@/lib/seo';
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const revalidate = 300;
 
@@ -35,20 +38,15 @@ export async function generateMetadata({
   const article = await getNewsArticle(locale, slug);
   if (article === null) return {};
 
-  const title = text(article.title, locale, article.slug);
-  const description = text(article.excerpt, locale);
-
-  return {
-    title,
-    ...(description.length > 0 ? { description } : {}),
-    alternates: { canonical: `/${locale}/news/${article.slug}` },
-    openGraph: {
-      title,
-      ...(description.length > 0 ? { description } : {}),
-      type: 'article',
-      ...(article.publishedAt !== null ? { publishedTime: article.publishedAt } : {}),
-    },
-  };
+  return buildMetadata({
+    locale,
+    path: `/news/${article.slug}`,
+    title: text(article.title, locale, article.slug),
+    description: text(article.excerpt, locale),
+    imageUrl: article.coverImage?.sources.at(-1)?.url,
+    type: 'article',
+    publishedTime: article.publishedAt ?? undefined,
+  });
 }
 
 export default async function NewsArticlePage({
@@ -79,6 +77,15 @@ export default async function NewsArticlePage({
 
   return (
     <Section>
+      <JsonLd data={articleJsonLd(article, locale)} />
+      <JsonLd
+        data={breadcrumbJsonLd(locale, [
+          { name: messages.nav.home, path: '/' },
+          { name: messages.news.title, path: '/news' },
+          { name: title, path: `/news/${article.slug}` },
+        ])}
+      />
+
       <Container className="max-w-3xl">
         <Link
           href={`/${locale}/news`}

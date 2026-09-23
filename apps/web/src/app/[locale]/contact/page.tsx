@@ -6,9 +6,11 @@ import { EmptyState } from '@/components/common/States';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getPublicSettings } from '@/lib/content';
 import { readContact } from '@/lib/settings';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -22,11 +24,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/contact',
     title: messages.contact.title,
     description: messages.contact.subtitle,
-    alternates: { canonical: `/${locale}/contact` },
-  };
+  });
 }
 
 /**

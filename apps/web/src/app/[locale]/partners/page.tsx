@@ -5,8 +5,10 @@ import { Button, GlassCard, Section, SectionHeader } from '@barff/ui';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { routeReady } from '@/lib/routes';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -20,11 +22,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/partners',
     title: messages.partners.title,
     description: messages.partners.intro,
-    alternates: { canonical: `/${locale}/partners` },
-  };
+  });
 }
 
 /**

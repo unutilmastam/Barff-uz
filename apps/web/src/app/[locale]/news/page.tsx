@@ -7,9 +7,11 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { isLocale } from '@/i18n/config';
+
 import { getMessages } from '@/i18n/dictionary';
 import { getNews } from '@/lib/content';
 import { formatDate, text } from '@/lib/localized';
+import { buildMetadata } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -23,11 +25,12 @@ export async function generateMetadata({
 
   const messages = await getMessages(locale);
 
-  return {
+  return buildMetadata({
+    locale,
+    path: '/news',
     title: messages.news.title,
     description: messages.news.subtitle,
-    alternates: { canonical: `/${locale}/news` },
-  };
+  });
 }
 
 /** Yangiliklar ro'yxati. Sahifalash S19 (SEO) da kengaytiriladi. */
