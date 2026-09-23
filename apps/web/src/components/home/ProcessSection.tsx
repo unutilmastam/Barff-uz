@@ -4,6 +4,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
+import { Reveal } from '@/motion/Reveal';
 
 /**
  * Ishlab chiqarish jarayoni (CLAUDE.md §4).
@@ -37,7 +38,7 @@ export function ProcessSection({
           ) : (
             // `<ol>` — bosqichlar TARTIBLI ro'yxat; ekran o'quvchi ham
             // "1-elementdan 8-gacha" deb o'qiydi.
-            <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Reveal as="ol" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger>
               {steps.map((step, index) => (
                 <GlassCard as="li" key={step.id} className="flex flex-col gap-3 p-6">
                   <span className="text-sm font-medium tabular-nums text-[var(--color-brand-400)]">
@@ -51,7 +52,7 @@ export function ProcessSection({
                   )}
                 </GlassCard>
               ))}
-            </ol>
+            </Reveal>
           )}
         </div>
       </Container>

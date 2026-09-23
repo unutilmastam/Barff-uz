@@ -4,6 +4,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { formatDate, text } from '@/lib/localized';
+import { Reveal } from '@/motion/Reveal';
 
 /**
  * Sifat va sertifikatlar.
@@ -35,7 +36,7 @@ export function QualitySection({
           ) : certificates.length === 0 ? (
             <EmptyState message={messages.home.qualityEmpty} />
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Reveal as="ul" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stagger>
               {certificates.map((certificate) => (
                 <GlassCard as="li" key={certificate.id} className="flex flex-col gap-2 p-6">
                   <h3 className="text-lg font-medium">{text(certificate.title, locale)}</h3>
@@ -53,7 +54,7 @@ export function QualitySection({
                   )}
                 </GlassCard>
               ))}
-            </ul>
+            </Reveal>
           )}
         </div>
       </Container>

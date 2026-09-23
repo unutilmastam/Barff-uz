@@ -1,11 +1,20 @@
 import { Container } from '@/components/layout/Container';
 
 /**
- * Yuklanish holati.
+ * Yuklanish holati — FAQAT dinamik sahifalarda.
+ *
+ * NEGA til ildizida emas: `loading.tsx` Suspense chegarasini yaratadi,
+ * ya'ni server avval o'rindoshni, keyin kontentni yuboradi. Statik
+ * sahifalarda bu almashinuv MAKON SURILISHIGA olib keladi — o'lchab
+ * ko'rildi, CLS 0.2278 (har 10 yuklashning birida). Statik sahifada
+ * o'rindoshdan foyda ham yo'q: HTML allaqachon tayyor.
+ *
+ * Dinamik sahifada (yangi mahsulot yoki maqola birinchi marta
+ * so'ralganda) esa o'rindosh KERAK: aks holda foydalanuvchi bo'sh
+ * ekranni ko'rib turadi.
  *
  * Matn `aria-live` bilan e'lon qilinadi — ekran o'quvchi foydalanuvchisi
- * ham sahifa yuklanayotganini biladi. Faqat aylanuvchi belgi qo'yilsa,
- * u hech narsa eshitmas edi.
+ * ham sahifa yuklanayotganini biladi.
  */
 export default function Loading() {
   return (

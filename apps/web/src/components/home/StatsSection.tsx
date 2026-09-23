@@ -2,6 +2,7 @@ import { Section, SectionHeader, StatBlock } from '@barff/ui';
 import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { PENDING_VALUE } from '@/lib/mock-data';
+import { Reveal } from '@/motion/Reveal';
 
 /**
  * Kompaniya raqamlari.
@@ -24,7 +25,11 @@ export function StatsSection({ messages }: { messages: Messages }) {
       <Container>
         <SectionHeader eyebrow={messages.home.statsEyebrow} title={messages.home.statsTitle} />
 
-        <StatBlock className="mt-12" stats={stats} unverifiedLabel={messages.common.mockBadge} />
+        {/* Ketma-ket EMAS: `StatBlock` bitta `<dl>` chizadi, ya'ni
+            bo'linadigan bola yo'q. */}
+        <Reveal className="mt-12">
+          <StatBlock stats={stats} unverifiedLabel={messages.common.mockBadge} />
+        </Reveal>
 
         <p className="mt-8 max-w-2xl text-sm text-[var(--color-fg-muted)]">
           {messages.common.mockNotice}
