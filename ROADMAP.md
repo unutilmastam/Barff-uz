@@ -99,7 +99,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S24 Dealer app shell + auth
 - [x] S25 Dealer catalog + cart
 - [x] S26 Orders domain + state machine
-- [ ] S27 Dealer orders UI + addresses + repeat order
+- [x] S27 Dealer orders UI + addresses + repeat order
 - [ ] S28 Admin order management
 - [ ] S29 Phase 2 QA — **PHASE 2 GATE**
 

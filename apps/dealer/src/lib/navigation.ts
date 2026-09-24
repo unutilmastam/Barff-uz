@@ -36,7 +36,7 @@ const GROUPS: DealerNavGroup[] = [
       { href: '/', label: 'Boshqaruv paneli', ready: true },
       { href: '/catalog', label: 'Mahsulotlar va narxlar', ready: true },
       { href: '/cart', label: 'Savat', ready: true },
-      { href: '/orders', label: 'Buyurtmalar', ready: false },
+      { href: '/orders', label: 'Buyurtmalar', ready: true },
     ],
   },
   {
