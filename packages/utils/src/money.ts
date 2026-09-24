@@ -76,11 +76,59 @@ export function sumMoney(values: readonly Money[], currency: Currency = DEFAULT_
   return values.reduce<Money>((total, value) => addMoney(total, value), money(0, currency));
 }
 
-/** Ko'rsatish uchun: 1250050 -> "12 500,50 so'm" */
-export function formatMoney(value: Money, locale = 'uz-UZ'): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: value.currency,
-    minimumFractionDigits: 2,
-  }).format(toMajor(value));
+/**
+ * Pulni ko'rsatish — NATIJA MUHITGA BOG'LIQ EMAS.
+ *
+ * `Intl` BUTUNLAY ishlatilmaydi va buni ikki bosqichda O'LCHAB
+ * aniqladim:
+ *
+ *   1. `style: 'currency'` — Node `900 soʻm`, Chromium `UZS 900`.
+ *   2. Oddiy `NumberFormat` ham — Node `18 000`, Chromium `18,000`.
+ *
+ * Ya'ni AJRATGICH ham muhitga bog'liq. Sahifa serverda chizilib
+ * brauzerda qayta chizilganda narx O'ZGARIB ko'rinardi: React uchun
+ * bu gidratsiya nomuvofiqligi, mijoz uchun esa "narx boshqacha"
+ * degan taassurot.
+ *
+ * Shuning uchun guruhlash ham, yorliq ham QO'LDA. O'zbek yozuvida
+ * mingliklar TOR AJRALMAS BO'SHLIQ bilan ajratiladi (U+202F), kasr
+ * esa vergul bilan.
+ */
+const GROUP_SEPARATOR = '\u202f';
+const DECIMAL_SEPARATOR = ',';
+
+const CURRENCY_LABELS: Record<string, string> = { UZS: "so'm" };
+
+/** Mingliklarni ajratadi: `18000` -> `18 000`. */
+function group(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, GROUP_SEPARATOR);
+}
+
+/**
+ * Ko'rsatish uchun: 1250050 -> "12 500,50 so'm".
+ *
+ * `fractionDigits` — butun so'mgacha yaxlitlash uchun `0`. Katalog va
+ * savatda tiyin ko'rsatilmaydi: u faqat HISOBDA ma'noli.
+ *
+ * DIQQAT: `locale` parametri qoldirilgan, lekin ISHLATILMAYDI —
+ * chaqiruvchilarni buzmaslik uchun. Uch tilda ham son bir xil
+ * yoziladi; farq faqat valyuta nomida bo'lardi va u hozircha bitta.
+ */
+export function formatMoney(value: Money, _locale = 'uz-UZ', fractionDigits = 2): string {
+  const negative = value.amount < 0;
+  const absolute = Math.abs(value.amount);
+
+  const major = Math.floor(absolute / MINOR_UNITS_PER_MAJOR);
+  const minor = absolute % MINOR_UNITS_PER_MAJOR;
+
+  const rounded = fractionDigits === 0 && minor >= MINOR_UNITS_PER_MAJOR / 2 ? major + 1 : major;
+
+  const whole = group(String(fractionDigits === 0 ? rounded : major));
+
+  const amount =
+    fractionDigits === 0 ? whole : `${whole}${DECIMAL_SEPARATOR}${String(minor).padStart(2, '0')}`;
+
+  const label = CURRENCY_LABELS[value.currency] ?? value.currency;
+
+  return `${negative ? '-' : ''}${amount} ${label}`;
 }

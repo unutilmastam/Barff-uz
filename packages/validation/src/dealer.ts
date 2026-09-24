@@ -197,3 +197,29 @@ export const priceQuoteSchema = z.object({
     .max(200),
   promoCode: z.string().trim().toUpperCase().max(32).optional(),
 });
+
+/** Savatga qo'shish. NARX MAYDONI YO'Q va bo'lmaydi (S25 DoD). */
+export const cartAddSchema = z.object({
+  variantId: z.uuid(),
+  quantity: z.number().int().min(1).max(1_000_000),
+});
+
+export const cartQuantitySchema = z.object({
+  /** `0` — pozitsiyani o'chiradi. */
+  quantity: z.number().int().min(0).max(1_000_000),
+});
+
+export const cartPromoSchema = z.object({
+  /** `null` — kodni olib tashlaydi. */
+  code: z.string().trim().toUpperCase().min(3).max(32).nullable(),
+});
+
+/** Diler katalogi uchun filtrlar. */
+export const dealerCatalogQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(60).default(24),
+  categoryId: z.uuid().optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  /** Hajm millilitrda — aniq moslik. */
+  volumeMl: z.coerce.number().int().min(1).max(100_000).optional(),
+});

@@ -150,6 +150,41 @@ describe('Pricing (e2e)', () => {
     plainToken = plain.token;
 
     await asAdmin('patch', `/admin/dealers/${goldDealerId}/terms`).send({ tierId }).expect(200);
+
+    /*
+      QAMROVSIZ QOIDA BU TO'PLAMNI BUZADI — va ochiq aytamiz.
+
+      Bu testlar "qoida yo'q -> bazaviy narx" deb da'vo qiladi.
+      Qamrovi bo'sh qoida esa BARCHA mahsulotga tegishli, ya'ni u
+      bazadagi bo'lsa da'vo yolg'on bo'lib qoladi.
+
+      CI'da baza toza, shuning uchun bu hech qachon chiqmaydi.
+      LOKALDA esa qo'lda sinov uchun yaratilgan bitta qoida butun
+      to'plamni "expected 85000 to be 100000" bilan yiqitadi va
+      sababni topish uchun yarim soat ketadi — aynan shunday bo'ldi.
+      Shuning uchun sabab O'ZI aytiladi.
+    */
+    const globalRules = await prisma.priceRule.findMany({
+      where: {
+        deletedAt: null,
+        isActive: true,
+        variantId: null,
+        productId: null,
+        categoryId: null,
+        dealerId: null,
+        tierId: null,
+        region: null,
+      },
+      select: { name: true },
+    });
+
+    if (globalRules.length > 0) {
+      throw new Error(
+        `Bazada qamrovsiz narx qoidasi bor: ${globalRules.map((r) => r.name).join(', ')}. ` +
+          "U BARCHA mahsulotga tegishli va bu to'plamning da'volarini buzadi. " +
+          "Uni o'chiring yoki qamrovini toraytiring.",
+      );
+    }
   });
 
   afterAll(async () => {

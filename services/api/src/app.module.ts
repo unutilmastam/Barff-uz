@@ -10,6 +10,7 @@ import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
 import { ContentModule } from './content/content.module';
+import { CartModule } from './cart/cart.module';
 import { DealersModule } from './dealers/dealers.module';
 import { LeadsModule } from './leads/leads.module';
 import { PricingModule } from './pricing/pricing.module';
@@ -54,6 +55,7 @@ import { UsersModule } from './users/users.module';
     LeadsModule,
     DealersModule,
     PricingModule,
+    CartModule,
     HealthModule,
   ],
   providers: [

@@ -34,8 +34,8 @@ const GROUPS: DealerNavGroup[] = [
     label: 'Savdo',
     items: [
       { href: '/', label: 'Boshqaruv paneli', ready: true },
-      { href: '/catalog', label: 'Mahsulotlar va narxlar', ready: false },
-      { href: '/cart', label: 'Savat', ready: false },
+      { href: '/catalog', label: 'Mahsulotlar va narxlar', ready: true },
+      { href: '/cart', label: 'Savat', ready: true },
       { href: '/orders', label: 'Buyurtmalar', ready: false },
     ],
   },

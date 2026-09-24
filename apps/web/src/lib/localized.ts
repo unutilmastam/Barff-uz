@@ -1,4 +1,5 @@
 import { LOCALES, type Locale, type Localized } from '@barff/types';
+import { formatMoney as sharedFormatMoney } from '@barff/utils';
 
 /**
  * Bazadagi ko'p tilli matndan joriy tildagisini oladi.
@@ -31,11 +32,15 @@ export function text(value: Localized | null | undefined, locale: Locale, fallba
 export function formatMoney(amount: number, currency: string, locale: Locale): string {
   const tag = locale === 'uz' ? 'uz-UZ' : locale === 'ru' ? 'ru-RU' : 'en-US';
 
-  return new Intl.NumberFormat(tag, {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amount / 100);
+  /*
+    O'Z HISOBI EMAS, `@barff/utils` dagi YAGONA funksiya.
+
+    Avval bu yerda `Intl` ning `style: 'currency'` i ishlatilardi va
+    u MUHITGA BOG'LIQ natija berardi (o'lchangan): Node `900 soʻm`,
+    Chromium `UZS 900`. Sahifa serverda chizilib, brauzerda qayta
+    chizilganda narx O'ZGARIB ko'rinardi.
+  */
+  return sharedFormatMoney({ amount, currency: currency as 'UZS' }, tag, 0);
 }
 
 /** Sana — faqat kun aniqligida; vaqt ommaviy sahifada kerak emas. */

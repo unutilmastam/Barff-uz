@@ -97,7 +97,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S22 Dealers domain + registration/approval
 - [x] S23 Pricing engine
 - [x] S24 Dealer app shell + auth
-- [ ] S25 Dealer catalog + cart
+- [x] S25 Dealer catalog + cart
 - [ ] S26 Orders domain + state machine
 - [ ] S27 Dealer orders UI + addresses + repeat order
 - [ ] S28 Admin order management
