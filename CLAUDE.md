@@ -9,10 +9,14 @@ Products: - Public website: `barff.uz` - Dealer portal:
 `partner.barff.uz` - Admin CMS: `admin.barff.uz` - Driver PWA:
 `delivery.barff.uz` - Backend API: `api.barff.uz`
 
-Reference visual direction: - cinematic dark interface - BARFF green
-accents - premium product bottles - factory photography/video -
-glass/translucent cards - large typography - smooth scroll - tasteful
-3D - GSAP/Three.js motion - excellent mobile version
+Reference visual direction: - light, editorial interface - neutral
+palette, colour from the product itself - premium product bottles -
+factory photography/video - hairline borders - very large typography -
+smooth scroll - GSAP motion - excellent mobile version
+
+See §16 and §17: this replaces an earlier dark, Three.js-led direction
+at the client's request. The dark interface survives as the secondary
+theme.
 
 Never invent real company facts. Production capacity, employees,
 certifications, export countries, addresses and product specifications
@@ -24,8 +28,11 @@ Frontend: - Next.js + React + TypeScript - Tailwind CSS - shadcn/ui
 where useful - TanStack Query - React Hook Form + Zod - Zustand only
 when needed
 
-Visual: - Three.js + React Three Fiber + Drei - GSAP - optional Lenis -
-respect `prefers-reduced-motion`
+Visual: - GSAP (+ ScrollTrigger, SplitText) - Lenis - respect
+`prefers-reduced-motion`
+
+No WebGL. The hero is a flat illustrated composition, not a 3D scene
+(§17).
 
 Backend: - NestJS + TypeScript - REST API - Swagger/OpenAPI - modular
 monolith first; do NOT start with unnecessary microservices
@@ -278,16 +285,29 @@ Rules:
 -   The choice is applied before first paint (blocking inline script);
     a flash of the wrong theme is a defect.
 
-## 17. 3D and motion
+## 17. Motion
 
-Use: - hero bottle scene - subtle floating motion - fruit/liquid
-particles - parallax - section reveals - product transitions -
-interactive cards - microinteractions
+Use: - hero bottle composition with floating fruit - subtle floating
+motion - parallax - section reveals - split-text reveals - pinned
+horizontal product showcase - magnetic buttons - image reveals -
+microinteractions
 
-Performance rules: - dynamic import heavy 3D - lazy-load assets -
-compress textures - use AVIF/WebP - video poster/fallback - simplify
-effects on mobile - support reduced motion - never make animation the
-only way to understand content
+**No Three.js.** The earlier 3D hero was replaced by the restored
+flat composition (`git a86f349`); WebGL is not part of this design.
+
+Motion constants live in one place (`apps/web/src/motion/config.ts`)
+and mirror the CSS duration/easing tokens; a test guards the pair.
+Recipes live in `motion/recipes.ts`.
+
+Performance rules: - `motion/recipes.ts` imports GSAP statically and is
+therefore only ever reached through `await import()`, so GSAP stays out
+of the initial bundle - lazy-load assets - use AVIF/WebP - video
+poster/fallback - simplify effects on mobile - support reduced motion -
+never make animation the only way to understand content
+
+Lenis and ScrollTrigger must stay synced (single `gsap.ticker` rAF,
+`ScrollTrigger.update` on Lenis scroll, `lagSmoothing(0)`); two
+independent loops double-count scroll.
 
 ## 18. i18n
 
