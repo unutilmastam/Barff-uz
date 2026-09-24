@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DEALER_STATUSES, ORDER_STATUSES } from '@barff/types';
-import { emailSchema, passwordSchema, phoneSchema } from './primitives';
+import { emailSchema, passwordSchema, paginationQuerySchema, phoneSchema } from './primitives';
 import { BUSINESS_TYPES } from './lead';
 
 /**
@@ -241,4 +241,21 @@ export const orderSubmitSchema = z.object({
 export const orderStatusUpdateSchema = z.object({
   status: z.enum(ORDER_STATUSES),
   note: z.string().trim().max(2000).optional(),
+});
+
+/** Admin buyurtma ro'yxati filtrlari (S28). */
+export const adminOrderQuerySchema = paginationQuerySchema.extend({
+  status: z.enum(ORDER_STATUSES).optional(),
+  dealerId: z.uuid().optional(),
+  region: z.string().trim().min(2).max(120).optional(),
+  /** Sana oralig'i — `createdAt` bo'yicha, ikkalasi ham ixtiyoriy. */
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  /** Buyurtma raqami bo'yicha qidiruv. */
+  search: z.string().trim().min(2).max(64).optional(),
+});
+
+/** Xodimlar izohi — DILERGA KO'RSATILMAYDI. */
+export const orderInternalNoteSchema = z.object({
+  internalNote: z.string().trim().max(4000),
 });

@@ -1206,8 +1206,15 @@ model Order {
   /// Mo'ljal, qavat, kirish.
   shippingNotes   String?
 
-  /// Diler izohi.
+  /// Diler izohi — diler yozadi va u KO'RADI.
   note String?
+
+  /// Xodimlar izohi — DILERGA KO'RSATILMAYDI.
+  ///
+  /// Dilerga qaytariladigan maydonlar ro'yxati (`ORDER_SELECT`) da
+  /// bu maydon ATAYLAB yo'q. Sabab dilerlar domenidagi bilan bir xil
+  /// (S22): ichki eslatma mijozga chiqib ketmasligi kerak.
+  internalNote String?
 
   /// Buyurtma paytidagi aksiya kodi — tahlil va nizolar uchun.
   promoCode String?

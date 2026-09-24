@@ -271,14 +271,24 @@ export class OrdersService {
     return { ...order, duplicate: false };
   }
 
-  /** Buyurtmani ko'radigan xodimlar. */
+  /**
+   * Buyurtmani ko'radigan xodimlar.
+   *
+   * `orders.view` — `orders.manage` EMAS. Yangi buyurtmadan sotuvchi
+   * ham, ombor ham xabardor bo'lishi kerak; `orders.manage` faqat
+   * adminda va u ikkalasini ham chetda qoldirardi.
+   *
+   * Ortiqcha xabardor qilish zararsiz (bildirishnoma ilova ichida),
+   * kam xabardor qilish esa buyurtmaning e'tibordan chetda
+   * qolishiga olib keladi.
+   */
   private async notificationTargets(): Promise<{ recipientIds?: string[] }> {
     const staff = await this.prisma.user.findMany({
       where: {
         isActive: true,
         deletedAt: null,
         roles: {
-          some: { role: { permissions: { some: { permission: { code: 'orders.manage' } } } } },
+          some: { role: { permissions: { some: { permission: { code: 'orders.view' } } } } },
         },
       },
       select: { id: true },

@@ -63,9 +63,31 @@ ps -o pid,lstart,cmd -p $(pgrep -f 'dist/main.js')
 ```
 
 Ishga tushish vaqti oxirgi `build` dan OLDIN bo'lsa — bu eski
-jarayon. Uni PID bo'yicha o'ldiring. Va har doim MARSHRUT bilan
-tasdiqlang: `404` — eski build, `401` — yangi build (endpoint bor,
-token yo'q).
+jarayon. Uni PID bo'yicha o'ldiring:
+
+```bash
+pgrep -f "dist/main.js" | xargs -r kill
+```
+
+**`401` YANGI BUILD DEGANI EMAS.** Men shunday o'yladim va yana
+adashdim. `GET /admin/orders/dealers` tokensiz `401` qaytardi va
+men "marshrut bor, demak build yangi" deb xulosa qildim. Aslida
+`:id` marshruti `dealers` so'zini ham qabul qiladi, autentifikatsiya
+esa validatsiyadan OLDIN ishlaydi — ya'ni ESKI build ham `401`
+beradi.
+
+Natijada admin panel oq ekranga aylandi
+("Cannot read properties of undefined") va men uni KOD xatosi deb
+o'yladim. Aslida server eski javob shaklini qaytarayotgan edi.
+
+ISHONCHLI TEKSHIRUV — javobning O'ZIGA qarang, statusga emas:
+
+```bash
+curl -s "$API/admin/orders/$ID" -H "Authorization: Bearer $TOKEN" \
+  | python3 -c "import sys,json; print(list(json.load(sys.stdin)['dealer'].keys()))"
+```
+
+Kutilgan maydon yo'q bo'lsa — jarayon eski, kod emas.
 
 Tekshirish — brauzer emas, port: sahifa HTML dagi CSS nomi `200`
 qaytarishi kerak.

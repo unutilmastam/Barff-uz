@@ -100,7 +100,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S25 Dealer catalog + cart
 - [x] S26 Orders domain + state machine
 - [x] S27 Dealer orders UI + addresses + repeat order
-- [ ] S28 Admin order management
+- [x] S28 Admin order management
 - [ ] S29 Phase 2 QA — **PHASE 2 GATE**
 
 **Phase 3**

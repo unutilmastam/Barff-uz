@@ -74,6 +74,7 @@ const GROUPS: AdminNavGroup[] = [
     label: 'Savdo',
     items: [
       { href: '/leads', label: 'Arizalar', permission: 'leads.view', ready: true },
+      { href: '/orders', label: 'Buyurtmalar', permission: 'orders.view', ready: true },
       { href: '/pricing', label: 'Narx qoidalari', permission: 'prices.view', ready: true },
       { href: '/dealers', label: 'Dilerlar', permission: 'dealers.view', ready: false },
     ],
