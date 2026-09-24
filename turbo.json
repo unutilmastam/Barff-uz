@@ -12,6 +12,18 @@
   // natijasiga ta'sir qilmaydi, shuning uchun kesh kalitiga kirmasligi kerak.
   "globalPassThroughEnv": [
     "CI",
+
+    // Tarmoq muhiti. `next/font/google` shriftlarni QURISH PAYTIDA
+    // yuklab oladi, ya'ni build tarmoqqa bog'liq. Proksi orqali
+    // ishlaydigan muhitda (masalan agent konteyneri) sertifikat
+    // ro'yxatisiz bu "self-signed certificate in certificate chain"
+    // bilan yiqiladi — va sabab turbo o'zgaruvchini olib
+    // tashlaganida ekanini topish oson emas.
+    "NODE_EXTRA_CA_CERTS",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY",
+
     "LOG_LEVEL",
     "DATABASE_URL",
     "DATABASE_SHADOW_URL",

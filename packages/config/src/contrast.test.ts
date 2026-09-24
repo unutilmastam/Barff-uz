@@ -66,8 +66,6 @@ export function contrastRatio(foreground: string, background: string): number {
 
 /** Oddiy matn uchun AA chegarasi. */
 const AA_NORMAL = 4.5;
-/** Yirik matn (18.66px+ qalin yoki 24px+) uchun AA chegarasi. */
-const AA_LARGE = 3;
 /** Grafik element va fokus halqasi uchun (WCAG 1.4.11). */
 const AA_NON_TEXT = 3;
 
@@ -143,13 +141,6 @@ describe.each(SCHEMES)('%s ko’rinish', (scheme) => {
         expect(contrastRatio(t(name), t('color-ink-700')), name).toBeGreaterThanOrEqual(AA_NORMAL);
       }
     });
-
-    it('brand-400 qora fonda yirik matn uchun yetarli', () => {
-      // Xom palitra tekshiruvi — u ko'rinishga bog'liq emas.
-      expect(contrastRatio(token('color-brand-400', 'dark'), '#050607')).toBeGreaterThanOrEqual(
-        AA_LARGE,
-      );
-    });
   });
 });
 
@@ -162,8 +153,16 @@ describe('qarorlarni qayd etish', () => {
     );
   });
 
-  it("yorug'da aksent fonida OQ matn AA dan o'tmaydi — matn QORA qoladi", () => {
-    // `accent-on` nega ikkala ko'rinishda ham qora ekanining sababi.
-    expect(contrastRatio('#ffffff', token('color-accent', 'light'))).toBeLessThan(AA_NORMAL);
+  it('avgustdagi mahsulot ranglari MATN uchun yaroqsiz — ular BEZAK', () => {
+    /*
+      Tiklangan qurilishda mahsulot sarlavhasi o'z rangida chizilardi
+      (`#F4761F` — 2.82:1). Bu AA dan ham, yirik matn chegarasidan ham
+      past: sarlavha o'qilmaydi. Shuning uchun portda mahsulot rangi
+      FAQAT bezak uchun (fon, chiziq, yorug'lik), sarlavha esa `fg`
+      rangida qoladi. Bu test o'sha qarorni qayd etadi.
+    */
+    for (const colour of ['#F4761F', '#3AA6E0', '#7CB342']) {
+      expect(contrastRatio(colour, token('color-ink-900', 'light')), colour).toBeLessThan(3);
+    }
   });
 });

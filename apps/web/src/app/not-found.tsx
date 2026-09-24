@@ -1,3 +1,4 @@
+import { fontVariables } from '@/app/fonts';
 import { THEME_INIT_SCRIPT } from '@barff/ui';
 import Link from 'next/link';
 import { DEFAULT_LOCALE } from '@/i18n/config';
@@ -14,7 +15,7 @@ export default async function RootNotFound() {
   const messages = await getMessages(DEFAULT_LOCALE);
 
   return (
-    <html lang={DEFAULT_LOCALE}>
+    <html lang={DEFAULT_LOCALE} className={fontVariables}>
       {/* Ko'rinish chizilishdan oldin — `[locale]/layout.tsx` dagidek. */}
       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       <body className="flex min-h-dvh items-center bg-[var(--color-ink-900)] text-[var(--color-fg)]">

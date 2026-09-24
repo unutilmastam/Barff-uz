@@ -234,29 +234,41 @@ Use pnpm + Turborepo when justified.
 
 ## 16. Design system
 
-Visual language: - deep black/charcoal layered backgrounds - BARFF green
-accent - premium whitespace - large modern typography -
-glass/translucent surfaces - thin borders - restrained gradients -
-premium bottle/product photography - factory imagery - subtle
-particles/liquid visuals
+Visual language: - **light, editorial interface** - white page, near-black
+type - very large display typography - hairline borders instead of
+shadows - premium whitespace - premium bottle/product photography -
+factory imagery - subtle particles/liquid visuals
+
+This direction was restored from the 2026-08-26 build (git `a86f349`)
+at the client's request; the dark-first direction it replaces is kept
+as the secondary theme, not removed.
+
+**The palette is neutral on purpose.** Black, white and grey only —
+colour comes from product imagery, not from the interface. BARFF's
+brand colours have not been supplied yet (`docs/OPEN-QUESTIONS.md`,
+Q2), and painting the whole site in an invented green was a guess.
+When the real HEX values arrive, only the accent tokens change.
 
 Avoid: - generic templates - excessive rounded cards - excessive
 gradients - visual clutter - animation that harms usability
 
 ### Light and dark
 
-The dark interface above is the **default and the brand direction**. A
-light theme also exists and is a first-class variant, not an
+The light interface above is the **default and the brand direction**.
+A dark theme also exists and is a first-class variant, not an
 afterthought: both are required to pass the same checks.
 
 Rules:
 
 -   Colour tokens live in one place (`packages/config/tailwind/theme.css`)
     and carry both values via `light-dark()`. Never define a colour twice.
--   Never use a raw palette colour (`brand-400`, `brand-500`) directly in
-    a component. Use the semantic tokens — `accent`, `accent-hover`,
-    `accent-on`, `accent-text`, `focus`, `danger-on`. A single raw colour
-    cannot satisfy contrast on both backgrounds.
+-   Never use a raw colour value in a component. Use the semantic tokens
+    — `accent`, `accent-hover`, `accent-on`, `accent-text`, `focus`,
+    `danger-on`. A single raw colour cannot satisfy contrast on both
+    backgrounds.
+-   A product's own colour is **decoration only** — backdrop, rule,
+    glow. Never a text colour: the restored build set product titles in
+    their own colour and reached only 2.82:1.
 -   The background scale (`ink-900` … `ink-600`) means **distance from
     the page base**, not a literal colour. It inverts between themes.
 -   Contrast is verified for **both themes** in `contrast.test.ts`, and

@@ -45,7 +45,7 @@ export function HeroVisual() {
         ekran bir xil ko'rinadi — "bo'sh joydan sakrab paydo bo'lish"
         effekti yo'q.
       */}
-      <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_40%,color-mix(in_oklab,var(--color-brand-600)_22%,transparent),transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_40%,color-mix(in_oklab,var(--color-fg)_6%,transparent),transparent_70%)]" />
 
       {show && (
         <div className="absolute inset-0">

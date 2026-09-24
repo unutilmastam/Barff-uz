@@ -1,26 +1,26 @@
 /*
  * BARFF dizayn tizimi — Tailwind v4 (CSS-first) uchun umumiy tokenlar.
- * CLAUDE.md §16: BARFF yashil akssenti, ingichka chegaralar, shisha
- * (glass) yuzalar, katta tipografika.
  *
- * Ishlatish (S06 dan boshlab, har bir ilovaning global CSS faylida):
+ * Ishlatish (har bir ilovaning global CSS faylida):
  *   @import 'tailwindcss';
  *   @import '@barff/config/tailwind/theme.css';
  *
- * DIQQAT: aksent yashilning aniq qiymati BARFF brendbukidan olinishi kerak.
- * Hozirgi qiymat — REPLACE_WITH_REAL_DATA (docs/OPEN-QUESTIONS.md, Q2).
+ * ================== VIZUAL YO'NALISH ==================
+ *
+ * Yo'nalish 2026-08-26 dagi qurilishdan tiklandi (git: `a86f349`):
+ * oq fon, juda katta tipografika, ingichka chegaralar, NEYTRAL palitra.
+ *
+ * NEGA NEYTRAL: brend ranglari hali BARFF dan kelmagan
+ * (`docs/OPEN-QUESTIONS.md`, Q2). Avgustdagi qurilish ham shu sababdan
+ * qora/oq/kulrangda qolgan va rangni FAQAT mahsulot illyustratsiyasi
+ * bergan. O'ylab topilgan yashil aksent shu bilan olib tashlandi —
+ * tasdiqlanmagan brend rangi bilan butun saytni bo'yash noto'g'ri.
  *
  * ================== IKKI KO'RINISH ==================
  *
- * Standart ko'rinish — QORONG'I (CLAUDE.md §16). Yorug' ko'rinish ham
- * bor va u `light-dark()` orqali beriladi: har bir token BIR MARTA
- * yoziladi va ikkala qiymatni o'zida saqlaydi.
- *
- * Nega `light-dark()`, nega ikkita alohida blok emas: ikki blokda har
- * bir token IKKI joyda yozilardi va vaqt o'tib ular bir-biridan
- * ajralib ketardi — biri yangilanib, ikkinchisi eskirib qolardi.
- *
- * Qaysi qiymat ishlashini `color-scheme` hal qiladi (pastda).
+ * Standart — YORUG'. Qorong'i ko'rinish ham teng huquqli variant.
+ * Har bir rang BIR MARTA yoziladi va ikkala qiymatni `light-dark()`
+ * ichida saqlaydi; qaysi biri ishlashini `color-scheme` hal qiladi.
  */
 
 @theme {
@@ -28,104 +28,104 @@
    * Fon qatlamlari.
    *
    * Raqam — KO'Z DAN UZOQLIK, rangning o'zi emas: 900 sahifa asosi,
-   * 600 eng oldinga chiqqan sirt. Shuning uchun qorong'ida raqam
-   * kichraygan sari OCHROQ, yorug'da esa TO'QROQ bo'ladi.
+   * 600 eng oldinga chiqqan sirt. Yorug'da raqam kichraygan sari
+   * TO'QROQ, qorong'ida OCHROQ bo'ladi.
    */
-  --color-ink-900: light-dark(#f2f5f4, #050607);
-  --color-ink-800: light-dark(#ffffff, #0a0c0e);
-  --color-ink-700: light-dark(#ffffff, #111417);
-  --color-ink-600: light-dark(#e6eae9, #191d21);
+  --color-ink-900: light-dark(#ffffff, #050607);
+  --color-ink-800: light-dark(#fafafa, #0a0c0e);
+  --color-ink-700: light-dark(#f4f4f4, #111417);
+  --color-ink-600: light-dark(#ececec, #191d21);
 
-  /* Matn */
-  --color-fg: light-dark(#0c0e0f, #f4f6f5);
-  --color-fg-muted: light-dark(#4c5451, #9aa3a0);
-  /*
-   * Eng past kontrastli matn rangi. Qiymat WCAG AA (4.5:1) chegarasiga
-   * qarab tanlangan: qorong'idagi eng birinchi #626a68 atigi 3.65:1
-   * berardi va axe testi uni haqli ravishda rad etdi.
-   *
-   * Keyingi qiymat (#7a827f) eng OCHIQ sirtda (`ink-600`) 4.30:1 ga
-   * tushib qolardi. Buni yorug' ko'rinish qo'shilganda kengaytirilgan
-   * test topdi — eski test `ink-600` ni umuman tekshirmagan, chunki u
-   * paytda bu token hech qayerda ishlatilmasdi.
-   *
-   * Bu yerdagi har qanday o'zgarish `contrast.test.ts` dan IKKALA
-   * ko'rinishda va BARCHA fon qatlamlarida o'tishi shart.
-   */
-  --color-fg-subtle: light-dark(#5f6764, #878f8c);
+  /* Matn — uchala daraja ham AA dan BARCHA fon qatlamlarida o'tadi. */
+  --color-fg: light-dark(#0a0a0a, #f4f6f5);
+  --color-fg-muted: light-dark(#5a5a5a, #9aa3a0);
+  --color-fg-subtle: light-dark(#6b6b6b, #878f8c);
 
   /*
-   * BARFF yashil — REPLACE_WITH_REAL_DATA.
+   * Aksent — NEYTRAL (avgustdagi `--color-primary: #0a0a0a`).
    *
-   * Bu XOM palitra va u ko'rinishga BOG'LIQ EMAS. Ko'rinishga qarab
-   * o'zgaradigani — pastdagi MA'NOVIY tokenlar.
+   * Asosiy tugma: yorug'da qora fon + oq matn, qorong'ida teskari.
+   * Brend rangi kelgach (Q2) faqat shu uch token almashtiriladi.
    */
-  --color-brand-50: #eafaf0;
-  --color-brand-200: #a8e8c2;
-  --color-brand-400: #3fcc7c;
-  --color-brand-500: #16b45f;
-  --color-brand-600: #0e8f4a;
-  --color-brand-700: #0a6c38;
+  --color-accent: light-dark(#0a0a0a, #f4f6f5);
+  --color-accent-hover: light-dark(#2f2f2f, #d5dad8);
+  --color-accent-on: light-dark(#ffffff, #050607);
+  /* Sahifa fonidagi aksent MATN (yorliq, raqam, havola). */
+  --color-accent-text: light-dark(#0a0a0a, #f4f6f5);
+  /* Fokus halqasi — fon bilan kamida 3:1. */
+  --color-focus: light-dark(#0a0a0a, #f4f6f5);
 
   /*
-   * MA'NOVIY aksent tokenlari.
+   * Holat ranglari.
    *
-   * Nega xom palitra to'g'ridan-to'g'ri ishlatilmaydi: `brand-400`
-   * qorong'i fonda matn sifatida ajoyib ko'rinadi (9.79:1), oq fonda
-   * esa atigi 1.96:1 beradi — ya'ni o'qib bo'lmaydi. Bir xil xom rang
-   * ikkala ko'rinishda ishlay olmaydi, shuning uchun "aksent matn" va
-   * "aksent yuza" AJRATILGAN.
-   */
-  --color-accent: #16b45f;
-  --color-accent-hover: #3fcc7c;
-  /* Aksent yuzadagi matn. Yashil o'rta to'qlikda — matn HAR DOIM qora. */
-  --color-accent-on: #050607;
-  /* Sahifa fonidagi aksent MATN. */
-  --color-accent-text: light-dark(#0a6c38, #3fcc7c);
-  /* Fokus halqasi — fon bilan kamida 3:1 bo'lishi shart. */
-  --color-focus: light-dark(#0a6c38, #3fcc7c);
-
-  /*
-   * Holat ranglari (order/delivery/lead statuslari uchun).
-   *
-   * Yorug' variantlar TO'QROQ: `#d9a21b` oq fonda 2.17:1 beradi va
-   * ogohlantirish matni o'qilmay qolardi.
+   * Yorug' variantlar TO'QROQ: ochiq rang oq fonda o'qilmaydi
+   * (`#d9a21b` atigi 2.17:1 berardi).
    */
   --color-success: light-dark(#0d7a3f, #16b45f);
   --color-warning: light-dark(#8a6200, #d9a21b);
-  /*
-   * Qorong'idagi qizil OCHIQROQ qilindi: oldingi #d94b3f kartochka
-   * fonida (`ink-700`) 4.43:1 berardi — ya'ni kartochka ichidagi xato
-   * xabari AA dan o'tmasdi. Sahifa fonida u 4.86:1 bergani uchun eski
-   * test buni ko'rmagan.
-   */
   --color-danger: light-dark(#c0392b, #e4665a);
   --color-info: light-dark(#1668b3, #3b8fd9);
-  /* Xavf yuzasidagi matn: qorong'ida to'q, yorug'da oq. */
   --color-danger-on: light-dark(#ffffff, #050607);
 
   /*
-   * Ingichka chegaralar va shisha yuzalar.
+   * Chegaralar va yuzalar.
    *
-   * Qorong'ida yuza OQ parda bilan ko'tariladi, yorug'da esa aksincha —
-   * oq parda oq sahifada ko'rinmasdi, shuning uchun sahifa asosi
-   * biroz kulrang (`ink-900`) va shisha deyarli toza oq.
+   * Avgustdagi qurilishda chuqurlikni SOYA emas, INGICHKA CHIZIQ
+   * beradi — shuning uchun kartochka foni deyarli sahifa foniga teng
+   * va uni faqat chegara ajratadi.
    */
-  --color-line: light-dark(#0b0d0e1f, #ffffff14);
-  --color-line-strong: light-dark(#0b0d0e33, #ffffff29);
-  --color-glass: light-dark(#ffffffd9, #ffffff0a);
+  --color-line: light-dark(#e4e4e4, #ffffff14);
+  --color-line-strong: light-dark(#cfcfcf, #ffffff29);
+  --color-glass: light-dark(#fafafa, #ffffff0a);
 
-  /* Tipografika: aniq shriftlar S06 da ilovaga ulanadi (next/font). */
+  /* --- Tipografika --------------------------------------------------- */
   --font-sans:
     var(--font-barff-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: var(--font-barff-display), var(--font-barff-sans), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', monospace;
 
-  /* Harakat — CLAUDE.md §17 */
-  --ease-barff: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 180ms;
-  --duration-base: 320ms;
-  --duration-slow: 720ms;
+  /*
+   * O'lcham shkalasi — avgustdagi qurilishdan.
+   *
+   * `clamp()` bilan: mobilda ham, 2560px ekranda ham alohida tuzatish
+   * kerak emas. Satr balandligi 1 dan KICHIK — bu katta sarlavhalar
+   * uchun ataylab, aks holda satrlar orasida bo'shliq ochilib ketadi.
+   */
+  --text-hero: clamp(3rem, 10vw, 12rem);
+  --text-hero--line-height: 0.88;
+  --text-hero--letter-spacing: -0.03em;
+
+  --text-section: clamp(2.25rem, 7vw, 9rem);
+  --text-section--line-height: 0.92;
+  --text-section--letter-spacing: -0.025em;
+
+  --text-title: clamp(1.75rem, 4vw, 3.5rem);
+  --text-title--line-height: 1.05;
+  --text-title--letter-spacing: -0.02em;
+
+  --text-lead: clamp(1rem, 1.15vw, 1.375rem);
+  --text-lead--line-height: 1.55;
+
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.08em;
+
+  /* --- Shakl va maydon ------------------------------------------------ */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 40px;
+
+  --container-page: 1600px;
+  --spacing-gutter: 20px;
+
+  /* --- Harakat (CLAUDE.md §17) ---------------------------------------- */
+  --ease-barff: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --duration-fast: 300ms;
+  --duration-base: 550ms;
+  --duration-slow: 1000ms;
+  --duration-hero: 1500ms;
 }
 
 /*
@@ -135,18 +135,16 @@
  * olishini hal qiladi VA brauzerning o'z elementlarini (skrollbar,
  * forma boshqaruvlari, avtoto'ldirish foni) mos ranglarga o'tkazadi.
  *
- * Standart holat `dark` — ya'ni hech narsa tanlanmagan va tizim
- * afzalligi ham bilinmagan paytda sayt CLAUDE.md §16 dagidek
- * qorong'i chiqadi.
+ * Standart holat `light` — vizual yo'nalish shundan boshlanadi.
  */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Tizim YORUG'ni so'rasa va foydalanuvchi aniq tanlov qilmagan bo'lsa. */
-@media (prefers-color-scheme: light) {
+/* Tizim QORONG'Ini so'rasa va foydalanuvchi aniq tanlov qilmagan bo'lsa. */
+@media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    color-scheme: light;
+    color-scheme: dark;
   }
 }
 
