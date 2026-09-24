@@ -1,7 +1,7 @@
 /*
  * BARFF dizayn tizimi — Tailwind v4 (CSS-first) uchun umumiy tokenlar.
- * CLAUDE.md §16: chuqur qora/ko'mir fon qatlamlari, BARFF yashil akssenti,
- * ingichka chegaralar, shisha (glass) yuzalar, katta tipografika.
+ * CLAUDE.md §16: BARFF yashil akssenti, ingichka chegaralar, shisha
+ * (glass) yuzalar, katta tipografika.
  *
  * Ishlatish (S06 dan boshlab, har bir ilovaning global CSS faylida):
  *   @import 'tailwindcss';
@@ -9,27 +9,57 @@
  *
  * DIQQAT: aksent yashilning aniq qiymati BARFF brendbukidan olinishi kerak.
  * Hozirgi qiymat — REPLACE_WITH_REAL_DATA (docs/OPEN-QUESTIONS.md, Q2).
+ *
+ * ================== IKKI KO'RINISH ==================
+ *
+ * Standart ko'rinish — QORONG'I (CLAUDE.md §16). Yorug' ko'rinish ham
+ * bor va u `light-dark()` orqali beriladi: har bir token BIR MARTA
+ * yoziladi va ikkala qiymatni o'zida saqlaydi.
+ *
+ * Nega `light-dark()`, nega ikkita alohida blok emas: ikki blokda har
+ * bir token IKKI joyda yozilardi va vaqt o'tib ular bir-biridan
+ * ajralib ketardi — biri yangilanib, ikkinchisi eskirib qolardi.
+ *
+ * Qaysi qiymat ishlashini `color-scheme` hal qiladi (pastda).
  */
 
 @theme {
-  /* Fon qatlamlari: 900 eng chuqur, 600 eng ochiq sirt. */
-  --color-ink-900: #050607;
-  --color-ink-800: #0a0c0e;
-  --color-ink-700: #111417;
-  --color-ink-600: #191d21;
+  /*
+   * Fon qatlamlari.
+   *
+   * Raqam — KO'Z DAN UZOQLIK, rangning o'zi emas: 900 sahifa asosi,
+   * 600 eng oldinga chiqqan sirt. Shuning uchun qorong'ida raqam
+   * kichraygan sari OCHROQ, yorug'da esa TO'QROQ bo'ladi.
+   */
+  --color-ink-900: light-dark(#f2f5f4, #050607);
+  --color-ink-800: light-dark(#ffffff, #0a0c0e);
+  --color-ink-700: light-dark(#ffffff, #111417);
+  --color-ink-600: light-dark(#e6eae9, #191d21);
 
   /* Matn */
-  --color-fg: #f4f6f5;
-  --color-fg-muted: #9aa3a0;
+  --color-fg: light-dark(#0c0e0f, #f4f6f5);
+  --color-fg-muted: light-dark(#4c5451, #9aa3a0);
   /*
    * Eng past kontrastli matn rangi. Qiymat WCAG AA (4.5:1) chegarasiga
-   * qarab tanlangan: oldingi #626a68 atigi 3.65:1 berardi va axe testi
-   * uni haqli ravishda rad etdi. Bu yerdagi har qanday o'zgarish
-   * `contrast.test.ts` dan o'tishi shart.
+   * qarab tanlangan: qorong'idagi eng birinchi #626a68 atigi 3.65:1
+   * berardi va axe testi uni haqli ravishda rad etdi.
+   *
+   * Keyingi qiymat (#7a827f) eng OCHIQ sirtda (`ink-600`) 4.30:1 ga
+   * tushib qolardi. Buni yorug' ko'rinish qo'shilganda kengaytirilgan
+   * test topdi — eski test `ink-600` ni umuman tekshirmagan, chunki u
+   * paytda bu token hech qayerda ishlatilmasdi.
+   *
+   * Bu yerdagi har qanday o'zgarish `contrast.test.ts` dan IKKALA
+   * ko'rinishda va BARCHA fon qatlamlarida o'tishi shart.
    */
-  --color-fg-subtle: #7a827f;
+  --color-fg-subtle: light-dark(#5f6764, #878f8c);
 
-  /* BARFF yashil — REPLACE_WITH_REAL_DATA */
+  /*
+   * BARFF yashil — REPLACE_WITH_REAL_DATA.
+   *
+   * Bu XOM palitra va u ko'rinishga BOG'LIQ EMAS. Ko'rinishga qarab
+   * o'zgaradigani — pastdagi MA'NOVIY tokenlar.
+   */
   --color-brand-50: #eafaf0;
   --color-brand-200: #a8e8c2;
   --color-brand-400: #3fcc7c;
@@ -37,16 +67,53 @@
   --color-brand-600: #0e8f4a;
   --color-brand-700: #0a6c38;
 
-  /* Holat ranglari (order/delivery/lead statuslari uchun) */
-  --color-success: #16b45f;
-  --color-warning: #d9a21b;
-  --color-danger: #d94b3f;
-  --color-info: #3b8fd9;
+  /*
+   * MA'NOVIY aksent tokenlari.
+   *
+   * Nega xom palitra to'g'ridan-to'g'ri ishlatilmaydi: `brand-400`
+   * qorong'i fonda matn sifatida ajoyib ko'rinadi (9.79:1), oq fonda
+   * esa atigi 1.96:1 beradi — ya'ni o'qib bo'lmaydi. Bir xil xom rang
+   * ikkala ko'rinishda ishlay olmaydi, shuning uchun "aksent matn" va
+   * "aksent yuza" AJRATILGAN.
+   */
+  --color-accent: #16b45f;
+  --color-accent-hover: #3fcc7c;
+  /* Aksent yuzadagi matn. Yashil o'rta to'qlikda — matn HAR DOIM qora. */
+  --color-accent-on: #050607;
+  /* Sahifa fonidagi aksent MATN. */
+  --color-accent-text: light-dark(#0a6c38, #3fcc7c);
+  /* Fokus halqasi — fon bilan kamida 3:1 bo'lishi shart. */
+  --color-focus: light-dark(#0a6c38, #3fcc7c);
 
-  /* Ingichka chegaralar va shisha yuzalar */
-  --color-line: #ffffff14;
-  --color-line-strong: #ffffff29;
-  --color-glass: #ffffff0a;
+  /*
+   * Holat ranglari (order/delivery/lead statuslari uchun).
+   *
+   * Yorug' variantlar TO'QROQ: `#d9a21b` oq fonda 2.17:1 beradi va
+   * ogohlantirish matni o'qilmay qolardi.
+   */
+  --color-success: light-dark(#0d7a3f, #16b45f);
+  --color-warning: light-dark(#8a6200, #d9a21b);
+  /*
+   * Qorong'idagi qizil OCHIQROQ qilindi: oldingi #d94b3f kartochka
+   * fonida (`ink-700`) 4.43:1 berardi — ya'ni kartochka ichidagi xato
+   * xabari AA dan o'tmasdi. Sahifa fonida u 4.86:1 bergani uchun eski
+   * test buni ko'rmagan.
+   */
+  --color-danger: light-dark(#c0392b, #e4665a);
+  --color-info: light-dark(#1668b3, #3b8fd9);
+  /* Xavf yuzasidagi matn: qorong'ida to'q, yorug'da oq. */
+  --color-danger-on: light-dark(#ffffff, #050607);
+
+  /*
+   * Ingichka chegaralar va shisha yuzalar.
+   *
+   * Qorong'ida yuza OQ parda bilan ko'tariladi, yorug'da esa aksincha —
+   * oq parda oq sahifada ko'rinmasdi, shuning uchun sahifa asosi
+   * biroz kulrang (`ink-900`) va shisha deyarli toza oq.
+   */
+  --color-line: light-dark(#0b0d0e1f, #ffffff14);
+  --color-line-strong: light-dark(#0b0d0e33, #ffffff29);
+  --color-glass: light-dark(#ffffffd9, #ffffff0a);
 
   /* Tipografika: aniq shriftlar S06 da ilovaga ulanadi (next/font). */
   --font-sans:
@@ -59,6 +126,37 @@
   --duration-fast: 180ms;
   --duration-base: 320ms;
   --duration-slow: 720ms;
+}
+
+/*
+ * KO'RINISHNI TANLASH.
+ *
+ * `color-scheme` ikki ish qiladi: `light-dark()` qaysi qiymatni
+ * olishini hal qiladi VA brauzerning o'z elementlarini (skrollbar,
+ * forma boshqaruvlari, avtoto'ldirish foni) mos ranglarga o'tkazadi.
+ *
+ * Standart holat `dark` — ya'ni hech narsa tanlanmagan va tizim
+ * afzalligi ham bilinmagan paytda sayt CLAUDE.md §16 dagidek
+ * qorong'i chiqadi.
+ */
+:root {
+  color-scheme: dark;
+}
+
+/* Tizim YORUG'ni so'rasa va foydalanuvchi aniq tanlov qilmagan bo'lsa. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+  }
+}
+
+/* Foydalanuvchining ANIQ tanlovi — tizim afzalligidan ustun. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 /*

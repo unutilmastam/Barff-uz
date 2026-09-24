@@ -49,7 +49,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ local
   return (
     <Section>
       <Container>
-        <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)] uppercase">
+        <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
           {messages.products.subtitle}
         </p>
 

@@ -164,7 +164,7 @@ export default async function ProductPage({
 
           <div>
             {product.category !== null && (
-              <p className="text-sm tracking-widest text-[var(--color-brand-400)] uppercase">
+              <p className="text-sm tracking-widest text-[var(--color-accent-text)] uppercase">
                 {text(product.category.name, locale)}
               </p>
             )}

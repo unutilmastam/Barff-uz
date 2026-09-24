@@ -35,7 +35,7 @@ export function FileLink({
         </span>
       </span>
 
-      <span className="shrink-0 text-sm text-[var(--color-brand-400)]">{actionLabel}</span>
+      <span className="shrink-0 text-sm text-[var(--color-accent-text)]">{actionLabel}</span>
     </a>
   );
 }

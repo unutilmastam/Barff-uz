@@ -102,7 +102,7 @@ export function MediaPicker({
                 const file = event.target.files?.[0];
                 if (file !== undefined) upload.mutate(file);
               }}
-              className="text-sm text-[var(--color-fg-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-brand-500)] file:px-3 file:py-1.5 file:text-[var(--color-ink-900)]"
+              className="text-sm text-[var(--color-fg-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-accent)] file:px-3 file:py-1.5 file:text-[var(--color-accent-on)]"
             />
           </label>
 

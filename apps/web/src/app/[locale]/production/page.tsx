@@ -65,7 +65,7 @@ export default async function ProductionPage({ params }: { params: Promise<{ loc
                   key={step.id}
                   className="grid gap-6 p-6 sm:grid-cols-[auto_1fr] sm:gap-8 sm:p-8 lg:grid-cols-[auto_1fr_320px]"
                 >
-                  <span className="text-2xl font-semibold tabular-nums text-[var(--color-brand-400)]">
+                  <span className="text-2xl font-semibold tabular-nums text-[var(--color-accent-text)]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
 

@@ -1,3 +1,4 @@
+import { THEME_INIT_SCRIPT } from '@barff/ui';
 import Link from 'next/link';
 import { DEFAULT_LOCALE } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
@@ -14,9 +15,11 @@ export default async function RootNotFound() {
 
   return (
     <html lang={DEFAULT_LOCALE}>
+      {/* Ko'rinish chizilishdan oldin — `[locale]/layout.tsx` dagidek. */}
+      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       <body className="flex min-h-dvh items-center bg-[var(--color-ink-900)] text-[var(--color-fg)]">
         <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-10">
-          <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)]">404</p>
+          <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)]">404</p>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
             {messages.errors.notFoundTitle}
           </h1>
@@ -26,7 +29,7 @@ export default async function RootNotFound() {
           <div className="mt-8">
             <Link
               href={`/${DEFAULT_LOCALE}`}
-              className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)]"
+              className="rounded-full bg-[var(--color-accent)] px-6 py-3 font-medium text-[var(--color-accent-on)] transition-colors hover:bg-[var(--color-accent-hover)]"
             >
               {messages.errors.notFoundCta}
             </Link>

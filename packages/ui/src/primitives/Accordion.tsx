@@ -33,7 +33,7 @@ export function Accordion({ items, mode = 'single', className }: AccordionProps)
           className={cn(
             'group flex w-full items-center justify-between gap-4 py-4 text-left',
             'text-base font-medium text-[var(--color-fg)] transition-colors',
-            'hover:text-[var(--color-brand-400)]',
+            'hover:text-[var(--color-accent-text)]',
           )}
         >
           {item.title}

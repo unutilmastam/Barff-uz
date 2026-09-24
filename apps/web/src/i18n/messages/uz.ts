@@ -216,6 +216,12 @@ export const uz = {
     unavailableBody: "Ma'lumotni yuklab bo'lmadi. Sahifani biroz keyinroq yangilang.",
     empty: "Hozircha ma'lumot yo'q",
     skipToContent: 'Asosiy kontentga o’tish',
+    theme: {
+      label: 'Ko’rinish',
+      system: 'Tizim',
+      light: 'Yorug’',
+      dark: 'Qorong’i',
+    },
     languageSwitcher: 'Tilni tanlash',
     openMenu: 'Menyuni ochish',
     closeMenu: 'Menyuni yopish',

@@ -15,7 +15,7 @@ export default async function LoginPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)] uppercase">
+        <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
           BARFF
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Boshqaruv paneli</h1>

@@ -121,7 +121,7 @@ export function Select({
                     'cursor-pointer select-none rounded-md px-3 py-2 text-sm outline-none',
                     'text-[var(--color-fg-muted)]',
                     'data-[highlighted]:bg-[var(--color-glass)] data-[highlighted]:text-[var(--color-fg)]',
-                    'data-[state=checked]:text-[var(--color-brand-400)]',
+                    'data-[state=checked]:text-[var(--color-accent-text)]',
                     'data-[disabled]:opacity-40',
                   )}
                 >

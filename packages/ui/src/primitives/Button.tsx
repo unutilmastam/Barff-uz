@@ -8,17 +8,29 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  // Asosiy amal: yashil fon, qora matn. Kontrast testi bilan qoplangan.
+  /*
+    Asosiy amal: yashil fon, qora matn.
+
+    Matn rangi `accent-on` — u IKKALA ko'rinishda ham qora, chunki
+    yashil (`#16b45f`) o'rta to'qlikda va oq matn unda atigi 2.72:1
+    beradi. Ya'ni bu yerda `ink-900` ISHLAMAYDI: yorug' ko'rinishda u
+    deyarli oqqa aylanadi va tugma o'qilmay qolardi.
+  */
   primary:
-    'bg-[var(--color-brand-500)] text-[var(--color-ink-900)] hover:bg-[var(--color-brand-400)]',
+    'bg-[var(--color-accent)] text-[var(--color-accent-on)] hover:bg-[var(--color-accent-hover)]',
   // Ikkilamchi: ingichka chegara, shaffof fon (CLAUDE.md §16).
   secondary:
     'border border-[var(--color-line-strong)] text-[var(--color-fg)] hover:bg-[var(--color-glass)]',
   ghost: 'text-[var(--color-fg-muted)] hover:bg-[var(--color-glass)] hover:text-[var(--color-fg)]',
-  // Matn QORA, oq emas: oq matn bilan kontrast 3.85:1 bo'lib, AA dan
-  // o'tmasdi. Qora matn bilan 4.86:1 — shu bilan birga `primary` bilan
-  // bir xil naqsh (rangli fon + qora matn) saqlanadi.
-  danger: 'bg-[var(--color-danger)] text-[var(--color-ink-900)] hover:opacity-90',
+  /*
+    Xavfli amal.
+
+    Matn rangi ko'rinishga QARAB o'zgaradi (`danger-on`): qorong'ida
+    fon ochiq qizil (`#d94b3f`) va matn qora bo'ladi, yorug'da esa fon
+    to'q qizil (`#c0392b`) va matn oq. Bitta rang ikkalasida ham AA
+    dan o'ta olmasdi — qorong'idagi oq matn atigi 3.85:1 berardi.
+  */
+  danger: 'bg-[var(--color-danger)] text-[var(--color-danger-on)] hover:opacity-90',
 };
 
 const SIZES: Record<ButtonSize, string> = {

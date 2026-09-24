@@ -18,7 +18,7 @@ export function PageHeader({
 }) {
   return (
     <Container as="div" className="pt-20 pb-12 sm:pt-28">
-      <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)] uppercase">
+      <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
         {eyebrow}
       </p>
 

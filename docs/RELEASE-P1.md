@@ -98,17 +98,17 @@ bo'lmaydi.
 
 ### 3.4 Qulaylik (`CLAUDE.md` §29)
 
-| Tekshiruv                        | Qamrov                  | Natija                       |
-| -------------------------------- | ----------------------- | ---------------------------- |
-| axe-core (WCAG 2.1 A + AA)       | 15 marshrut × 2 o'lcham | 0 buzilish                   |
-| Gorizontal skroll (360px)        | 15 marshrut             | 0 px                         |
-| Bitta `<h1>`                     | 15 marshrut             | ✅                           |
-| O'tkazib yuborish havolasi       | UZ / RU / EN            | ✅ birinchi Tab              |
-| Klaviatura bilan yurish          | 5 marshrut              | 27–36 element, tiqilish yo'q |
-| Har bir fokus ko'rinadi          | 5 marshrut              | 0 ta ko'rinmas               |
-| Fokus oldingi bo'limga qaytmaydi | 5 marshrut              | 0 ta                         |
-| Har bir rasmda `alt`             | 5 marshrut              | ✅                           |
-| `html lang` to'g'ri              | UZ / RU / EN            | ✅                           |
+| Tekshiruv                        | Qamrov                                | Natija                       |
+| -------------------------------- | ------------------------------------- | ---------------------------- |
+| axe-core (WCAG 2.1 A + AA)       | 15 marshrut × 2 o'lcham × 2 ko'rinish | 0 buzilish                   |
+| Gorizontal skroll (360px)        | 15 marshrut                           | 0 px                         |
+| Bitta `<h1>`                     | 15 marshrut                           | ✅                           |
+| O'tkazib yuborish havolasi       | UZ / RU / EN                          | ✅ birinchi Tab              |
+| Klaviatura bilan yurish          | 5 marshrut                            | 27–36 element, tiqilish yo'q |
+| Har bir fokus ko'rinadi          | 5 marshrut                            | 0 ta ko'rinmas               |
+| Fokus oldingi bo'limga qaytmaydi | 5 marshrut                            | 0 ta                         |
+| Har bir rasmda `alt`             | 5 marshrut                            | ✅                           |
+| `html lang` to'g'ri              | UZ / RU / EN                          | ✅                           |
 
 ### 3.5 Sifat darvozalari
 
@@ -133,6 +133,16 @@ Monorepo bo'ylab (`turbo`):
 - Media turi imzo baytlari bo'yicha aniqlanadi, SVG rad etiladi (S08).
 - Soxta reyting, sharh yoki sertifikat tuzilgan ma'lumotlarga
   QO'SHILMAYDI va bu test bilan qoplangan (S15).
+
+---
+
+### 3.7 Darvozadan KEYIN qo'shilgani
+
+**Yorug' ko'rinish (S21A).** Sayt dastlab faqat qorong'i edi
+(`CLAUDE.md` §16). Buyurtmachi so'rovi bilan yorug' ko'rinish qo'shildi
+va u endi teng huquqli variant: har bir sahifa ikkala ko'rinishda
+tekshiriladi. Yo'l-yo'lakay MAVJUD qorong'i ko'rinishda ikkita kontrast
+kamchiligi topilib tuzatildi (`docs/CHANGELOG-STEPS.md`, S21A qatori).
 
 ---
 

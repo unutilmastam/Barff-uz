@@ -1,6 +1,7 @@
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { type ReactNode } from 'react';
+import { THEME_INIT_SCRIPT } from '@barff/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { QueryProvider } from '@/components/providers/QueryProvider';
@@ -65,6 +66,18 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      {/*
+        Ko'rinish sahifa CHIZILISHIDAN OLDIN qo'llanadi.
+
+        Sayt statik qurilgani uchun server foydalanuvchining tanlovini
+        BILMAYDI — u brauzer xotirasida. Agar tanlov React yuklangach
+        qo'llansa, yorug' rejimdagi foydalanuvchi har safar bir lahza
+        qorong'i ekranni ko'rardi. Sinxron skript shu sakrashni yo'q
+        qiladi.
+
+        Matn o'zgarmas satr, foydalanuvchi ma'lumoti aralashmaydi.
+      */}
+      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       <body className="flex min-h-dvh flex-col">
         <a href="#main" className="skip-link">
           {messages.common.skipToContent}

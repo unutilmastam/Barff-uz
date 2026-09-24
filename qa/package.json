@@ -9,7 +9,8 @@
     "perf": "node perf.mjs",
     "a11y": "node a11y-axe.mjs",
     "a11y:keyboard": "node a11y-keyboard.mjs",
-    "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node perf.mjs && node e2e-phase1.mjs"
+    "theme": "node theme.mjs",
+    "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node theme.mjs && node perf.mjs && node e2e-phase1.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

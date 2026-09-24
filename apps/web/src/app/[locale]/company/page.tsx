@@ -60,7 +60,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ locale
     <>
       <Section>
         <Container>
-          <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)] uppercase">
+          <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
             {messages.company.subtitle}
           </p>
 

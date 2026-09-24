@@ -115,7 +115,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     return (
       <div role="alert" className="flex flex-col gap-3">
         <p className="font-medium">Ariza topilmadi</p>
-        <Link href="/leads" className="text-sm text-[var(--color-brand-400)] underline">
+        <Link href="/leads" className="text-sm text-[var(--color-accent-text)] underline">
           Arizalar ro‘yxatiga qaytish
         </Link>
       </div>
