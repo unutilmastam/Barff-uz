@@ -9,7 +9,7 @@
 | #   | Savol                                                                                                                                                                                                                                                                                                                     | Qadam    | Holat      |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- |
 | Q1  | `barff.uz` dagi hozirgi `index.html` ("tez orada") qachon va qanday almashtirilsin? Yangi sayt qo'shimcha domenga (staging) chiqadimi?                                                                                                                                                                                    | S06, S21 | ochiq      |
-| Q2  | Brend ranglari — "BARFF green" ning aniq HEX qiymatlari va qo'shimcha palitra                                                                                                                                                                                                                                             | S07      | ochiq      |
+| Q2  | Brend ranglari. **QISMAN JAVOB:** logotip keldi va ranglar undan O'LCHAB olindi — to'q yashil `#003c18`, barg yashili `#0c7830`. Palitra shularga o'tkazildi. RASMIY HEX qiymatlari brendbukdan tasdiqlanishi kerak; logotipning **SVG yoki shaffof fonli** nusxasi ham kerak (hozirgisi oq fonli raster).                | S07      | qisman     |
 | Q3  | Logotip (SVG, och va to'q fon uchun variantlari)                                                                                                                                                                                                                                                                          | S07      | ochiq      |
 | Q4  | Shrift litsenziyasi — qaysi display/body shriftlar sotib olingan yoki ruxsat etilgan                                                                                                                                                                                                                                      | S07      | ochiq      |
 | Q5  | Mahsulot fotosuratlari (shaffof fon, yuqori sifat) va 3D model (agar bor bo'lsa)                                                                                                                                                                                                                                          | S09, S17 | ochiq      |
@@ -41,11 +41,29 @@ BARFF barcha ma'lumotni bir safar yuborishini aytdi. Quyida aynan nima
 kerakligi — shu ro'yxat bo'yicha yuborilsa, hech narsa qayta
 so'ralmaydi.
 
-### 1. Brend (Q2)
+### 1. Brend (Q2) — QISMAN KELDI
 
-- Yashil rangning aniq **HEX** qiymati (va bo'lsa, qo'shimcha palitra)
-- Logotip: **SVG** (afzal) yoki yuqori aniqlikdagi PNG, shaffof fonda
-- Shrift talabi bo'lsa — hozir Manrope + Inter ishlatilyapti
+Logotip keldi. Ranglar undan o'lchab olindi va palitraga qo'yildi:
+
+| Rang         | Qiymat    | Qayerda                                          |
+| ------------ | --------- | ------------------------------------------------ |
+| To'q yashil  | `#003c18` | Harflar, figuralar — yorug' ko'rinishdagi aksent |
+| Barg yashili | `#0c7830` | Barg va yoy                                      |
+| Ochiq yashil | `#3cb161` | Qorong'i ko'rinish uchun hisoblangan variant     |
+
+Hali kerak:
+
+- **Logotipning SVG yoki shaffof fonli nusxasi.** Hozirgisi oq fonli
+  raster: qorong'i ko'rinishda oq quti bo'lib chiqadi. Avtomatik
+  shaffoflashtirish sinab ko'rildi va ISHLAMADI — ko'ylak, galstuk va
+  `B`/`A`/`R` harflarining ichi ham teshilib qoldi.
+- **Rasmiy HEX qiymatlari** brendbukdan (o'lchangani taxminiy emas,
+  lekin siqilgan rasmdan olingani uchun bir-ikki birlik farq qilishi
+  mumkin).
+- Shrift talabi bo'lsa — hozir Manrope + Inter.
+
+**Tasdiqlangan fakt:** shior — "NATURAL BEVERAGES", va brend nomi
+`BARFF®` (ro'yxatdan o'tgan belgi bilan).
 
 ### 2. Mahsulot fotosuratlari (Q24)
 

@@ -10,11 +10,10 @@
  * Yo'nalish 2026-08-26 dagi qurilishdan tiklandi (git: `a86f349`):
  * oq fon, juda katta tipografika, ingichka chegaralar, NEYTRAL palitra.
  *
- * NEGA NEYTRAL: brend ranglari hali BARFF dan kelmagan
- * (`docs/OPEN-QUESTIONS.md`, Q2). Avgustdagi qurilish ham shu sababdan
- * qora/oq/kulrangda qolgan va rangni FAQAT mahsulot illyustratsiyasi
- * bergan. O'ylab topilgan yashil aksent shu bilan olib tashlandi —
- * tasdiqlanmagan brend rangi bilan butun saytni bo'yash noto'g'ri.
+ * FON NEYTRAL, AKSENT BREND YASHILI. Sahifa oq/qora/kulrangda
+ * qoladi va rang ikki joydan keladi: mahsulot rasmidan va aksent
+ * tokenlaridan. Aksent qiymatlari BARFF logotipidan o'lchab olingan
+ * (Q2) — bu avvalgi o'ylab topilgan yashilning o'rnini bosdi.
  *
  * ================== IKKI KO'RINISH ==================
  *
@@ -42,18 +41,24 @@
   --color-fg-subtle: light-dark(#6b6b6b, #878f8c);
 
   /*
-   * Aksent — NEYTRAL (avgustdagi `--color-primary: #0a0a0a`).
+   * BARFF YASHILI — aksent.
    *
-   * Asosiy tugma: yorug'da qora fon + oq matn, qorong'ida teskari.
-   * Brend rangi kelgach (Q2) faqat shu uch token almashtiriladi.
+   * Qiymatlar brend logotipidan O'LCHAB olingan (taxmin emas):
+   * harflar va figuralar `#003c18`, barg va yoy `#0c7830` atrofida.
+   *
+   * QORONG'IDA BOSHQA QIYMAT. To'q brend yashili qora fonda atigi
+   * 1.6:1 beradi — ya'ni umuman o'qilmaydi. Shuning uchun qorong'i
+   * ko'rinish uchun bir xil tusdagi OCHROQ variant olingan (7.39:1).
+   * Bitta rang ikkala fonda ishlay olmaydi.
    */
-  --color-accent: light-dark(#0a0a0a, #f4f6f5);
-  --color-accent-hover: light-dark(#2f2f2f, #d5dad8);
+  --color-accent: light-dark(#003c18, #3cb161);
+  --color-accent-hover: light-dark(#005424, #4ac26f);
+  /* Aksent yuzadagi matn: yorug'da oq (12.65:1), qorong'ida qora (7.39:1). */
   --color-accent-on: light-dark(#ffffff, #050607);
   /* Sahifa fonidagi aksent MATN (yorliq, raqam, havola). */
-  --color-accent-text: light-dark(#0a0a0a, #f4f6f5);
+  --color-accent-text: light-dark(#003c18, #3cb161);
   /* Fokus halqasi — fon bilan kamida 3:1. */
-  --color-focus: light-dark(#0a0a0a, #f4f6f5);
+  --color-focus: light-dark(#003c18, #3cb161);
 
   /*
    * Holat ranglari.
