@@ -33,9 +33,12 @@ export interface TextRevealProps {
  * `aria-hidden` bo'ladi va yoniga faqat ekran o'quvchi uchun to'liq
  * matn nusxasi qo'yiladi.
  *
- * DIQQAT: konteynerga `aria-label` QO'YILMAYDI. `<span>` kabi rolsiz
- * elementda u ARIA qoidasi bo'yicha taqiqlangan va axe uni haqli
- * ravishda rad etadi (o'lchab aniqlangan).
+ * DIQQAT: `aria: 'none'` MAJBURIY. GSAP SplitText standart holatda
+ * (`aria: 'auto'`) konteynerga O'ZI `aria-label` qo'yadi, `<span>`
+ * kabi rolsiz elementda esa u ARIA qoidasi bo'yicha TAQIQLANGAN va
+ * axe uni haqli ravishda rad etadi. Buni faqat brauzerdagi tekshiruv
+ * ko'rsatdi: birinchi urinishda men o'z `setAttribute` chaqirig'imni
+ * olib tashladim, lekin xato qolaverdi — manba GSAP ekan.
  *
  * `2026-08-26` qurilishidan tiklandi (`components/animation/SplitText.tsx`
  * va `TextReveal.tsx` bitta komponentga birlashtirildi — ular faqat
@@ -75,6 +78,8 @@ export function TextReveal({
         const split = new SplitText(root, {
           type,
           mask: type,
+          // Yuqoridagi izohga qarang — qulaylikni O'ZIMIZ boshqaramiz.
+          aria: 'none',
           // Oyna kengligi o'zgarganda qatorlar qayta hisoblanadi.
           autoSplit: type === 'lines',
           onSplit: (self) => {

@@ -46,7 +46,25 @@ qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
 xotirasida. `e2e-phase1.mjs` javob statusini ham chop etadi, shuning
 uchun bu holat "ilova ishlamayapti" bilan adashtirilmaydi.
 
-**3. `e2e` har yurganda bitta sinov arizasi QOLDIRADI.** Yaratgan
+**3. Turbo keshi `.next` ni QISMAN tiklashi mumkin.** Bir marta
+oldindan chizilgan HTML eski, `static/chunks` esa yangi bo'lib qoldi:
+sahifa mavjud bo'lmagan chunk nomini so'rab, har bir sahifada `400`
+berdi. axe o'zi 0 buzilish ko'rsatdi, ya'ni xato qulaylikda emas
+edi — lekin konsol xatolari butun to'plamni qizil qildi. Shubha
+tug'ilsa:
+
+```bash
+rm -rf apps/web/.next apps/admin/.next && pnpm build --force
+```
+
+Tekshirish: serverdagi chunk nomi diskdagiga mos kelishi kerak.
+
+```bash
+curl -s http://127.0.0.1:3001/uz | grep -o 'chunks/webpack-[a-z0-9]*\.js' | head -1
+ls apps/web/.next/static/chunks/ | grep webpack
+```
+
+**4. `e2e` har yurganda bitta sinov arizasi QOLDIRADI.** Yaratgan
 yangiligini u o'zi o'chiradi, arizani esa o'chira olmaydi: arizani
 o'chirish endpointi ATAYLAB yo'q — ariza biznes yozuvi va u faqat
 holat o'zgarishi bilan yuritiladi (S14, S20). Shuning uchun lokal
