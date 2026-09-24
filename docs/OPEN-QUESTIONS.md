@@ -188,6 +188,30 @@ va veb-server ularni beradi.
 Javoblarga qarab: yetarli bo'lsa shu yerda joylashtiramiz, yetmasa —
 o'sha provayderdan kichik VPS.
 
+#### QO'LLANMA TAYYOR
+
+Joylash qadamlari `docs/DEPLOY-CPANEL.md` da, to'plam esa
+`pnpm package:cpanel` bilan yig'iladi.
+
+Quyidagilar TAXMIN emas — shu repoda haqiqatda yurgizib tekshirildi:
+
+- Next `standalone` serveri to'plamdan ko'tariladi va CSS/JS `200`
+  qaytaradi;
+- API `production` rejimida **Redis'siz** va **S3'siz** ko'tariladi
+  (fayl tizimi adapteri tanlanadi);
+- admin kirishi `200` va ikkala cookie qaytaradi, ya'ni refresh
+  token'lar PostgreSQL da ishlaydi;
+- mahsulotlar API'dan kelib sahifada chiqadi.
+
+Shu tekshiruvda ikkita HAQIQIY nuqson topildi va tuzatildi:
+
+1. Bo'sh muhit o'zgaruvchisi ilovani ko'taril**tir**masdi. cPanel
+   e'lon qilingan har bir o'zgaruvchini uzatadi, qiymat kiritilmagan
+   bo'lsa ham — `REDIS_URL=''` "Invalid URL" bilan yiqitardi, garchi
+   maydon ATAYLAB bo'sh qoldirilgan bo'lsa ham.
+2. `NEXT_PUBLIC_*` turbo'da e'lon qilinmagani uchun sayt API
+   manzilisiz qurilardi.
+
 ---
 
 ## Javob olingan savollar

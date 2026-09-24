@@ -141,9 +141,32 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+/**
+ * BO'SH satr — BERILMAGAN bilan bir xil.
+ *
+ * NEGA KERAK: ba'zi joylash muhitlari (cPanel `Setup Node.js App`,
+ * systemd unit fayllari, Docker `--env-file`) e'lon qilingan HAR BIR
+ * o'zgaruvchini uzatadi — qiymat kiritilmagan bo'lsa ham, bo'sh satr
+ * sifatida. `z.optional()` esa faqat `undefined` ni o'tkazadi, ya'ni
+ * bo'sh `REDIS_URL` "Invalid URL" bilan ilovani KO'TARILTIRMAY qo'yadi.
+ *
+ * Bu o'lchab aniqlangan: cPanel to'plami aynan shu xato bilan yiqildi,
+ * va xabar sababni ko'rsatmaydi — foydalanuvchi maydonni ATAYLAB bo'sh
+ * qoldirgan edi (u muhitda Redis yo'q).
+ *
+ * Bo'sh satr hech bir o'zgaruvchi uchun MA'NOLI qiymat emas, shuning
+ * uchun almashtirish butun obyektga qo'llanadi. Majburiy o'zgaruvchilar
+ * baribir tekshiriladi: ular uchun natija "berilmagan" xatosi bo'ladi.
+ */
+function dropEmpty(raw: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(raw).filter(([, value]) => !(typeof value === 'string' && value.trim() === '')),
+  );
+}
+
 /** `ConfigModule.validate` uchun. Xatoda o'qishga yaroqli xabar beradi. */
 export function validateEnv(raw: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(raw);
+  const result = envSchema.safeParse(dropEmpty(raw));
 
   if (!result.success) {
     const lines = result.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);

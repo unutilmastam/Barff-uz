@@ -11,6 +11,11 @@ out/
 .turbo/
 *.tsbuildinfo
 
+# cPanel joylash to'plami (`scripts/package-cpanel.mjs`). Qurilma
+# natijasi — manba emas, va ichida yuzlab megabayt `node_modules` bo'lishi
+# mumkin.
+dist-cpanel/
+
 # env — HECH QACHON commit qilinmaydi (CLAUDE.md §12)
 .env
 .env.*
