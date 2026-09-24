@@ -24,6 +24,26 @@ import {
   isImage,
   type DetectedMime,
 } from './processing/file-signature';
+import { FilesystemStorage } from './storage/filesystem.storage';
+
+/**
+ * Imzolangan havola orqali BERILISHI mumkin bo'lgan turlar.
+ *
+ * Oq ro'yxat: quvur boshqa hech qanday tur yaratmaydi, va bu yerga
+ * kutilmagan kengaytma tushsa fayl umuman berilmaydi.
+ */
+const SERVABLE_TYPES: Record<string, string | undefined> = {
+  avif: 'image/avif',
+  webp: 'image/webp',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  pdf: 'application/pdf',
+};
+
+function extensionOf(key: string): string {
+  return key.slice(key.lastIndexOf('.') + 1).toLowerCase();
+}
 import { STORAGE_ADAPTER, type StorageAdapter } from './storage/storage.adapter';
 
 export interface UploadInput {
@@ -288,6 +308,58 @@ export class MediaService {
    * belgilar saqlash tuzilmasidan chiqib ketishga urinish bo'lishi mumkin.
    * Kengaytma ham aniqlangan turdan olinadi.
    */
+  /**
+   * Imzolangan havola bo'yicha faylni o'qiydi.
+   *
+   * Imzo FAYL TIZIMI adapteri tomonidan tekshiriladi — faqat o'sha
+   * adapter imzolagan bo'lishi mumkin. Boshqa adapter ishlatilayotgan
+   * bo'lsa (S3), bu yo'l umuman ochilmaydi: S3 o'z imzolangan
+   * havolasini beradi va fayl bu serverdan o'tmaydi.
+   */
+  async readSigned(
+    key: string,
+    expiresAt: number,
+    signature: string,
+  ): Promise<{ body: Buffer; contentType: string }> {
+    if (!(this.storage instanceof FilesystemStorage)) {
+      throw new NotFoundException({ message: 'Topilmadi', code: 'NOT_FOUND' });
+    }
+
+    if (!this.storage.verify(key, expiresAt, signature)) {
+      /*
+        Muddati o'tgan va imzosi noto'g'ri havola BIR XIL javob oladi.
+        Farqlansa, hujumchi imzoni tanlayotganini bilib olardi.
+      */
+      throw new NotFoundException({ message: 'Topilmadi', code: 'NOT_FOUND' });
+    }
+
+    /*
+      Tur avval BAZADAN olinadi. Topilmasa — bu VARIANT kaliti
+      (`.../640.avif`): variantlar JSON massivda saqlanadi, ya'ni
+      `key` bo'yicha qidirib bo'lmaydi. O'shanda kengaytmadan
+      aniqlanadi.
+
+      Kengaytmaga ishonish bu yerda XAVFSIZ: kalitni quvurning o'zi
+      yasagan va u HMAC bilan imzolangan, ya'ni foydalanuvchi uni
+      tanlay olmaydi. (CLAUDE.md §20 dagi "kengaytmaga ishonma"
+      qoidasi YUKLASHGA tegishli — u yerda nomni foydalanuvchi
+      beradi.) Ro'yxatda yo'q kengaytma umuman berilmaydi.
+    */
+    const asset = await this.prisma.mediaAsset.findFirst({
+      where: { key, deletedAt: null },
+      select: { mimeType: true },
+    });
+
+    const contentType = asset?.mimeType ?? SERVABLE_TYPES[extensionOf(key)];
+    if (contentType === undefined) {
+      throw new NotFoundException({ message: 'Topilmadi', code: 'NOT_FOUND' });
+    }
+
+    const body = await this.storage.get(key);
+
+    return { body, contentType };
+  }
+
   private buildKey(id: string, mime: DetectedMime, visibility: MediaVisibility): string {
     return `${this.keyPrefix(visibility)}/${id}/original.${extensionFor(mime)}`;
   }

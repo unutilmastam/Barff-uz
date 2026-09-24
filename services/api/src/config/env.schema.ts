@@ -121,6 +121,20 @@ export const envSchema = z.object({
   /** Imzolangan havola amal qilish muddati (soniya). */
   MEDIA_SIGNED_URL_TTL: z.coerce.number().int().min(30).default(300),
 
+  /*
+    FAYL TIZIMIDA SAQLASH — S3 bo'lmagan muhit uchun (cPanel, Q18).
+    Uchalasi BIRGA beriladi; biri yetishmasa adapter tanlanmaydi.
+  */
+  /** Fayllar saqlanadigan katalog (mutlaq yo'l). */
+  MEDIA_ROOT: z.string().min(1).optional(),
+  /** Ommaviy fayllar beriladigan manzil, masalan `https://barff.uz/media`. */
+  MEDIA_PUBLIC_URL: z.url().optional(),
+  /**
+   * Imzolangan havolalar uchun sir. S3 imzosining o'rnini bosadi,
+   * shuning uchun JWT sirlari kabi uzun bo'lishi shart.
+   */
+  MEDIA_SIGNING_SECRET: z.string().min(32).optional(),
+
   /** Swagger standart holatda production'da o'chiq. */
   SWAGGER_ENABLED: booleanish.optional(),
 });

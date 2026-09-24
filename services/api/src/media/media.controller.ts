@@ -22,10 +22,13 @@ import { type RequestWithUser } from '../auth/auth.request';
 import { type RequestContext } from '../auth/auth.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { type AuthenticatedUser } from '../auth/auth.types';
 import { AppConfig } from '../config/app.config';
 import { MediaListQueryDto, MediaUploadDto } from './dto/media.dto';
 import { MediaService } from './media.service';
+import { type Response } from 'express';
+import { Res } from '@nestjs/common';
 
 @ApiTags('media')
 @Controller('media')
@@ -93,6 +96,38 @@ export class MediaController {
   @ApiResponse({ status: 404, type: ApiErrorDto, description: 'Topilmadi' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.media.findById(id);
+  }
+
+  /**
+   * Imzolangan havola bo'yicha faylni beradi (fayl tizimida saqlash).
+   *
+   * OCHIQ ENDPOINT, lekin himoyasiz EMAS: ruxsat havolaning O'ZIDA —
+   * kalit va muddat HMAC bilan imzolangan. Bu S3 ning imzolangan
+   * havolasining o'rnini bosadi.
+   *
+   * NEGA KERAK: maxfiy rasm `<img src>` ichida yuklanganda brauzer
+   * `Authorization` sarlavhasini qo'sha olmaydi, ya'ni ruxsat
+   * manzilning ichida bo'lishi shart.
+   *
+   * MARSHRUT TARTIBI: bu `@Get(':id')` dan OLDIN turishi SHART, aks
+   * holda Nest `file` so'zini `:id` deb qabul qiladi (S20 da xuddi
+   * shunday xato bo'lgan).
+   */
+  @Get('file')
+  @Public()
+  @ApiOperation({ summary: "Imzolangan havola bo'yicha fayl" })
+  async serveSigned(
+    @Query('key') key: string,
+    @Query('exp') exp: string,
+    @Query('sig') sig: string,
+    @Res() response: Response,
+  ): Promise<void> {
+    const file = await this.media.readSigned(key, Number(exp), sig);
+
+    response.setHeader('Content-Type', file.contentType);
+    // Havola muddatlik — oraliq keshlar uni saqlab qolmasligi kerak.
+    response.setHeader('Cache-Control', 'private, no-store');
+    response.send(file.body);
   }
 
   @Get(':id/url')

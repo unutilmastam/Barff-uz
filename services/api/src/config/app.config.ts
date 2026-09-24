@@ -106,6 +106,29 @@ export class AppConfig {
   }
 
   /** S3 to'liq sozlanganmi. */
+  /**
+   * Fayl tizimida saqlash sozlanganmi.
+   *
+   * Uchala qiymat BIRGA bo'lishi shart: yo'lsiz fayl yoziladigan joy
+   * yo'q, ommaviy manzilsiz rasm ko'rinmaydi, sirsiz maxfiy havolani
+   * imzolab bo'lmaydi.
+   */
+  get hasFilesystemStorage(): boolean {
+    return (
+      this.config.get('MEDIA_ROOT', { infer: true }) !== undefined &&
+      this.config.get('MEDIA_PUBLIC_URL', { infer: true }) !== undefined &&
+      this.config.get('MEDIA_SIGNING_SECRET', { infer: true }) !== undefined
+    );
+  }
+
+  get mediaStorage(): { root: string; publicUrl: string; signingSecret: string } {
+    return {
+      root: this.get('MEDIA_ROOT') ?? '',
+      publicUrl: this.get('MEDIA_PUBLIC_URL') ?? '',
+      signingSecret: this.get('MEDIA_SIGNING_SECRET') ?? '',
+    };
+  }
+
   get hasS3(): boolean {
     return (
       this.config.get('S3_BUCKET', { infer: true }) !== undefined &&
