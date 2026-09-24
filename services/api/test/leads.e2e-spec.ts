@@ -86,6 +86,7 @@ describe('Leads (e2e)', () => {
 
     await prisma.leadEvent.deleteMany({ where: { leadId: { in: ids } } });
     await prisma.notification.deleteMany({ where: { event: 'lead.created' } });
+    await prisma.auditLog.deleteMany({ where: { entity: 'Lead', entityId: { in: ids } } });
     await prisma.lead.deleteMany({ where: { id: { in: ids } } });
     await prisma.user.deleteMany({ where: { email: ADMIN.email } });
     await prisma.$disconnect();
@@ -239,6 +240,147 @@ describe('Leads (e2e)', () => {
 
       // `NEW` dan to'g'ridan-to'g'ri `CONVERTED` ga sakrab bo'lmaydi.
       await admin('patch', `/${lead.id}/status`).send({ status: 'CONVERTED' }).expect(400);
+    });
+
+    /**
+     * O'TISH QOIDALARI SERVERDA (DoD).
+     *
+     * Admin panel faqat ruxsat etilgan tugmalarni ko'rsatadi, lekin
+     * bu kosmetika: API to'g'ridan-to'g'ri chaqirilsa ham noto'g'ri
+     * o'tish rad etilishi kerak.
+     */
+    it.each([
+      ['NEW', 'QUALIFIED'],
+      ['NEW', 'NEGOTIATION'],
+      ['NEW', 'CONVERTED'],
+    ])('$0 dan $1 ga SAKRAB bolmaydi', async (_from, to) => {
+      const body = payload();
+      await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+      const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+      const res = await admin('patch', `/${lead.id}/status`).send({ status: to }).expect(400);
+      expect(res.body.code).toBe('LEAD_STATUS_INVALID_TRANSITION');
+    });
+
+    it('YOPILGAN ariza qayta ochilmaydi', async () => {
+      const body = payload();
+      await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+      const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+      // NEW -> CONTACTED -> REJECTED
+      await admin('patch', `/${lead.id}/status`).send({ status: 'CONTACTED' }).expect(200);
+      await admin('patch', `/${lead.id}/status`).send({ status: 'REJECTED' }).expect(200);
+
+      // Rad etilgan ariza qayta ochilmaydi — yangi murojaat yangi ariza.
+      await admin('patch', `/${lead.id}/status`).send({ status: 'CONTACTED' }).expect(400);
+    });
+
+    it('HAR BIR otish audit qilinadi', async () => {
+      const body = payload();
+      await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+      const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+      await admin('patch', `/${lead.id}/status`)
+        .send({ status: 'CONTACTED', note: "Qo'ng'iroq qilindi" })
+        .expect(200);
+
+      const audit = await prisma.auditLog.findFirst({
+        where: { entity: 'Lead', entityId: lead.id, action: 'lead.status.changed' },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      expect(audit).not.toBeNull();
+      expect(audit?.actorEmail).toBe(ADMIN.email);
+      // Oldingi va yangi holat yozilishi kerak — kim nimani
+      // o'zgartirganini keyin aniqlash uchun (CLAUDE.md §23).
+      expect(audit?.before).toMatchObject({ status: 'NEW' });
+      expect(audit?.after).toMatchObject({ status: 'CONTACTED' });
+    });
+
+    it('izoh tarixda saqlanadi', async () => {
+      const body = payload();
+      await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+      const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+      await admin('patch', `/${lead.id}/status`)
+        .send({ status: 'CONTACTED', note: 'Mijoz javob bermadi' })
+        .expect(200);
+
+      const detail = await admin('get', `/${lead.id}`).expect(200);
+      const events = detail.body.events as { toStatus: string; note: string | null }[];
+
+      expect(events.at(-1)?.note).toBe('Mijoz javob bermadi');
+    });
+
+    describe('xodimga biriktirish', () => {
+      it('ruxsati BOR xodimga biriktiriladi', async () => {
+        const body = payload();
+        await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+        const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+        const assignees = await admin('get', '/assignees').expect(200);
+        const assignee = (assignees.body as { id: string }[])[0];
+        expect(assignee).toBeDefined();
+
+        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId: assignee?.id }).expect(200);
+
+        const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id } });
+        expect(after.assignedToId).toBe(assignee?.id);
+      });
+
+      it('ruxsati YOQ xodimga biriktirib bolmaydi', async () => {
+        const body = payload();
+        await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+        const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+        // Ariza ko'ra olmaydigan odamga biriktirilsa, u javobsiz qolardi.
+        const driverRole = await prisma.role.findUniqueOrThrow({ where: { code: 'DRIVER' } });
+        const driver = await prisma.user.create({
+          data: {
+            email: `${prefix}-drv@barff.uz`,
+            fullName: 'Haydovchi',
+            passwordHash: 'x',
+            roles: { create: { roleId: driverRole.id } },
+          },
+        });
+
+        const res = await admin('patch', `/${lead.id}/assignee`)
+          .send({ assigneeId: driver.id })
+          .expect(400);
+
+        expect(res.body.code).toBe('LEAD_ASSIGNEE_INVALID');
+
+        await prisma.userRole.deleteMany({ where: { userId: driver.id } });
+        await prisma.user.delete({ where: { id: driver.id } });
+      });
+
+      it('biriktirish AUDIT qilinadi', async () => {
+        const body = payload();
+        await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+        const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+        const assignees = await admin('get', '/assignees').expect(200);
+        const assignee = (assignees.body as { id: string }[])[0];
+
+        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId: assignee?.id }).expect(200);
+
+        const audit = await prisma.auditLog.findFirst({
+          where: { entity: 'Lead', entityId: lead.id, action: 'lead.assigned' },
+        });
+
+        expect(audit).not.toBeNull();
+      });
+
+      it('biriktirishni OLIB TASHLASH mumkin', async () => {
+        const body = payload();
+        await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
+        const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
+
+        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId: null }).expect(200);
+
+        const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id } });
+        expect(after.assignedToId).toBeNull();
+      });
     });
 
     it('autentifikatsiyasiz royxat KORINMAYDI', async () => {
