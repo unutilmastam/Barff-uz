@@ -6,17 +6,22 @@ import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
-import { HeroVisual } from '@/motion/HeroVisual';
+import { HeroComposition } from '@/motion/HeroComposition';
+import { HeroField } from '@/motion/HeroField';
+import { Magnetic } from '@/motion/Magnetic';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Bosh ekran.
  *
- * LCP elementi — SARLAVHA, effekt emas (ROADMAP S12). Shuning uchun
- * matn serverda chiziladi va hech narsani kutmaydi; fon rasmi
- * bo'lsa ham u matnning ORTIDA, alohida qatlamda turadi.
+ * LCP elementi — SARLAVHA, effekt emas. Shuning uchun matn serverda
+ * chiziladi va hech narsani kutmaydi; kompozitsiya esa yonida,
+ * alohida ustunda turadi.
  *
- * 3D sahna S17 da shu bo'lim ichiga qo'shiladi — o'shanda ham matn
- * birinchi bo'lib ko'rinishi shart.
+ * Tartib 2026-08-26 qurilishidan: chapda yorliq → sarlavha → matn →
+ * CTA, o'ngda shisha kompozitsiyasi. Sarlavha `TextReveal` bilan
+ * qatorma-qator ko'tariladi, lekin harakat o'chiq bo'lsa ham u
+ * JOYIDA turadi.
  */
 export function HeroSection({
   locale,
@@ -35,12 +40,12 @@ export function HeroSection({
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
       {/*
-        Uch o'lchamli sahna (yoki uning zaxirasi) MATN ORTIDA turadi va
-        `ssr: false` bilan keyin yuklanadi — sarlavha undan oldin
-        chiziladi (CLAUDE.md §26).
+        WebGL zarracha maydoni — KONTENT ORTIDA va butunlay bezak.
+        `three` dinamik yuklanadi va faqat kuchli, keng ekranli,
+        WebGL'li qurilmada ishga tushadi; qolgan hamma joyda hero
+        tekis kompozitsiya bilan to'liq ishlaydi.
       */}
-      <HeroVisual />
-
+      <HeroField />
       {section?.image != null && (
         <div aria-hidden className="absolute inset-0">
           <ApiImage
@@ -55,29 +60,38 @@ export function HeroSection({
         </div>
       )}
 
-      <Container as="div" className="relative flex min-h-[70vh] flex-col justify-center py-20">
-        <div className="max-w-3xl">
-          {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
-          <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-            {title}
-          </h1>
+      <Container
+        as="div"
+        className="relative grid min-h-[86vh] items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16"
+      >
+        <div>
+          <p className="eyebrow text-[var(--color-fg-subtle)]">BARFF</p>
 
-          <p className="mt-6 max-w-xl text-lg text-[var(--color-fg-muted)] sm:text-xl">
-            {subtitle}
-          </p>
+          {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
+          <TextReveal as="h1" immediate className="display-1 mt-4 block">
+            {title}
+          </TextReveal>
+
+          <p className="lead mt-6 max-w-[42ch]">{subtitle}</p>
 
           <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href={ctaHref}>{ctaLabel}</Link>
-            </Button>
+            <Magnetic>
+              <Button asChild size="lg">
+                <Link href={ctaHref}>{ctaLabel}</Link>
+              </Button>
+            </Magnetic>
 
             {routeReady('becomePartner') && (
-              <Button asChild size="lg" variant="secondary">
-                <Link href={`/${locale}/become-partner`}>{messages.home.heroSecondaryCta}</Link>
-              </Button>
+              <Magnetic>
+                <Button asChild size="lg" variant="secondary">
+                  <Link href={`/${locale}/become-partner`}>{messages.home.heroSecondaryCta}</Link>
+                </Button>
+              </Magnetic>
             )}
           </div>
         </div>
+
+        <HeroComposition bottleAlt={messages.home.heroBottleAlt} />
       </Container>
     </section>
   );

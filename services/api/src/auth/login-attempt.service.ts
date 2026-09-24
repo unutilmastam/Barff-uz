@@ -1,64 +1,98 @@
 import { Injectable } from '@nestjs/common';
 import { AppConfig } from '../config/app.config';
-import { RedisService } from '../redis/redis.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 /**
- * Kirish urinishlarini cheklash.
+ * Kirish urinishlarini cheklash (PostgreSQL).
  *
  * Hisoblagich IKKI kalit bo'yicha yuritiladi:
  *  - email — bitta akkauntni parol tanlash orqali sindirishdan himoya;
  *  - IP    — bitta manbadan ko'p akkauntni sinab ko'rishdan himoya.
  *
  * S02 dagi umumiy rate limiter so'rovlar SONINI cheklaydi; bu esa aynan
- * MUVAFFAQIYATSIZ kirishlarni hisoblaydi, shuning uchun to'g'ri parol bilan
- * kirayotgan foydalanuvchi bloklanmaydi.
+ * MUVAFFAQIYATSIZ kirishlarni hisoblaydi, shuning uchun to'g'ri parol
+ * bilan kirayotgan foydalanuvchi bloklanmaydi.
+ *
+ * NEGA BAZADA: bu xavfsizlik holati, kesh emas —
+ * `refresh-token.store.ts` dagi izohga qarang. Redis'da `INCR` +
+ * `EXPIRE` edi; bazada muddat o'zi o'chmaydi, shuning uchun o'qishda
+ * `expiresAt` tekshiriladi va yozishda eski qatorlar tozalanadi.
  */
 @Injectable()
 export class LoginAttemptService {
   constructor(
-    private readonly redis: RedisService,
+    private readonly prisma: PrismaService,
     private readonly config: AppConfig,
   ) {}
 
   private emailKey(email: string): string {
-    return `auth:fail:email:${email.toLowerCase()}`;
+    return `email:${email.toLowerCase()}`;
   }
 
   private ipKey(ip: string): string {
-    return `auth:fail:ip:${ip}`;
+    return `ip:${ip}`;
   }
 
   async isLocked(email: string, ip: string): Promise<boolean> {
     const { maxAttempts, maxAttemptsPerIp } = this.config.loginThrottle;
 
-    const [byEmail, byIp] = await this.redis.client.mget(this.emailKey(email), this.ipKey(ip));
+    const rows = await this.prisma.loginAttempt.findMany({
+      where: {
+        key: { in: [this.emailKey(email), this.ipKey(ip)] },
+        // Muddati o'tgan hisoblagich kuchini yo'qotadi.
+        expiresAt: { gt: new Date() },
+      },
+      select: { key: true, count: true },
+    });
 
-    return Number(byEmail ?? 0) >= maxAttempts || Number(byIp ?? 0) >= maxAttemptsPerIp;
+    const byEmail = rows.find((row) => row.key === this.emailKey(email))?.count ?? 0;
+    const byIp = rows.find((row) => row.key === this.ipKey(ip))?.count ?? 0;
+
+    return byEmail >= maxAttempts || byIp >= maxAttemptsPerIp;
   }
 
   /** Testlar va administrator aralashuvi uchun: IP hisoblagichini tozalaydi. */
   async resetIp(ip: string): Promise<void> {
-    await this.redis.client.del(this.ipKey(ip));
+    await this.prisma.loginAttempt.deleteMany({ where: { key: this.ipKey(ip) } });
   }
 
-  /** Muvaffaqiyatsiz urinishni qayd etadi va joriy sonini qaytaradi. */
+  /** Muvaffaqiyatsiz urinishni qayd etadi va email bo'yicha joriy sonini qaytaradi. */
   async registerFailure(email: string, ip: string): Promise<number> {
     const { lockSeconds } = this.config.loginThrottle;
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + lockSeconds * 1000);
 
-    const results = await this.redis.client
-      .multi()
-      .incr(this.emailKey(email))
-      .expire(this.emailKey(email), lockSeconds)
-      .incr(this.ipKey(ip))
-      .expire(this.ipKey(ip), lockSeconds)
-      .exec();
+    // Muddati o'tgan qatorlarni tozalash — Redis'dagi `EX` ning o'rniga.
+    await this.prisma.loginAttempt.deleteMany({ where: { expiresAt: { lt: now } } });
 
-    const emailCount = results?.[0]?.[1];
-    return typeof emailCount === 'number' ? emailCount : 0;
+    const [emailRow] = await this.prisma.$transaction([
+      this.bump(this.emailKey(email), expiresAt),
+      this.bump(this.ipKey(ip), expiresAt),
+    ]);
+
+    return emailRow.count;
   }
 
   /** Muvaffaqiyatli kirishdan keyin hisoblagichlar tozalanadi. */
   async reset(email: string, ip: string): Promise<void> {
-    await this.redis.client.del(this.emailKey(email), this.ipKey(ip));
+    await this.prisma.loginAttempt.deleteMany({
+      where: { key: { in: [this.emailKey(email), this.ipKey(ip)] } },
+    });
+  }
+
+  /**
+   * Hisoblagichni bittaga oshiradi va muddatini yangilaydi.
+   *
+   * Muddat HAR urinishda qayta qo'yiladi (surilma oyna) — Redis'dagi
+   * `INCR` + `EXPIRE` juftligi aynan shunday ishlagan: tinmay urinayotgan
+   * hujumchi blokdan chiqa olmaydi.
+   */
+  private bump(key: string, expiresAt: Date) {
+    return this.prisma.loginAttempt.upsert({
+      where: { key },
+      create: { key, count: 1, expiresAt },
+      update: { count: { increment: 1 }, expiresAt },
+      select: { count: true },
+    });
   }
 }

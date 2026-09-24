@@ -11,9 +11,11 @@ import { DURATION, REVEAL_DISTANCE, REVEAL_START, STAGGER } from './config';
  */
 describe('harakat sozlamalari', () => {
   it('davomiyliklar CSS token qiymatlariga teng', () => {
-    expect(DURATION.fast * 1000).toBe(180);
-    expect(DURATION.base * 1000).toBe(320);
-    expect(DURATION.slow * 1000).toBe(720);
+    // `theme.css`: --duration-fast/base/slow/hero
+    expect(DURATION.fast * 1000).toBe(300);
+    expect(DURATION.base * 1000).toBe(550);
+    expect(DURATION.slow * 1000).toBe(1000);
+    expect(DURATION.hero * 1000).toBe(1500);
   });
 
   it('ochilish ekranning pastki qismida boshlanadi', () => {

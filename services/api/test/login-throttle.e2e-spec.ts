@@ -6,7 +6,7 @@ import { PrismaClient } from '@barff/db';
 import { AppModule } from '../src/app.module';
 import { PasswordService } from '../src/auth/password.service';
 import { AppConfig } from '../src/config/app.config';
-import { RedisService } from '../src/redis/redis.service';
+import { LoginAttemptService } from '../src/auth/login-attempt.service';
 import { GLOBAL_PREFIX } from '../src/swagger';
 
 const prisma = new PrismaClient();
@@ -22,7 +22,16 @@ const USER = { email: 'e2e-throttle@barff.uz', password: 'E2E-Throttle-Parol-202
  */
 describe('Login throttling (e2e)', () => {
   let app: INestApplication;
-  let redis: RedisService;
+  /*
+    Hisoblagich XOTIRASIGA to'g'ridan-to'g'ri tegilmaydi.
+
+    Avval test Redis kalitlarini o'zi o'chirardi. Xotira PostgreSQL ga
+    ko'chgach o'sha kalitlar hech narsani tozalamay qo'ydi va
+    hisoblagich yurgizishlar orasida to'planib, test birinchi
+    urinishdayoq `403` ola boshladi. Endi tozalash SERVIS orqali —
+    test qayerda saqlanishini bilmaydi.
+  */
+  let attempts: LoginAttemptService;
   /**
    * Limit MUHIT O'ZGARUVCHISIDAN emas, ilovaning o'zidan o'qiladi.
    * `ConfigModule` qiymatlarni modul import qilinganda keshlaydi, ya'ni
@@ -36,7 +45,7 @@ describe('Login throttling (e2e)', () => {
     app.setGlobalPrefix(GLOBAL_PREFIX);
     await app.init();
 
-    redis = app.get(RedisService);
+    attempts = app.get(LoginAttemptService);
     maxAttempts = app.get(AppConfig).loginThrottle.maxAttempts;
 
     const passwords = new PasswordService();
@@ -54,7 +63,7 @@ describe('Login throttling (e2e)', () => {
   });
 
   afterAll(async () => {
-    await redis.client.del(`auth:fail:email:${USER.email}`);
+    await attempts.reset(USER.email, '127.0.0.1');
     await prisma.auditLog.deleteMany({ where: { actorEmail: USER.email } });
     await prisma.user.deleteMany({ where: { email: USER.email } });
     await prisma.$disconnect();
@@ -63,9 +72,9 @@ describe('Login throttling (e2e)', () => {
 
   /** Boshqa test fayllari qoldirgan hisoblagichlar aralashmasligi uchun. */
   const resetCounters = async (): Promise<void> => {
-    await redis.client.del(`auth:fail:email:${USER.email}`);
+    // IP bir nechta ko'rinishda kelishi mumkin (IPv4, IPv6, mapped).
     for (const ip of ['::ffff:127.0.0.1', '::1', '127.0.0.1']) {
-      await redis.client.del(`auth:fail:ip:${ip}`);
+      await attempts.reset(USER.email, ip);
     }
   };
 
@@ -99,6 +108,6 @@ describe('Login throttling (e2e)', () => {
 
     await request(app.getHttpServer()).post(`${base}/auth/login`).send(USER).expect(200);
 
-    expect(await redis.client.get(`auth:fail:email:${USER.email}`)).toBeNull();
+    expect(await attempts.isLocked(USER.email, '127.0.0.1')).toBe(false);
   });
 });

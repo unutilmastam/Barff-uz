@@ -20,6 +20,9 @@ export default tseslint.config(
       'index.html',
       // Generatsiya qilingan Prisma klienti tekshirilmaydi.
       'packages/db/generated/**',
+      // cPanel joylash to'plami — qurish natijasi, manba emas
+      // (`scripts/package-cpanel.mjs`).
+      'dist-cpanel/**',
     ],
   },
   js.configs.recommended,
@@ -53,6 +56,12 @@ export default tseslint.config(
     */
     files: ['qa/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: { 'no-console': 'off' },
+  },
+  {
+    // `scripts/` — Node CLI: chiqish kanali konsol, globallari Node.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
     rules: { 'no-console': 'off' },
   },
   prettier,

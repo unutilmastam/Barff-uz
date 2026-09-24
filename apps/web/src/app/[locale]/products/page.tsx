@@ -1,6 +1,7 @@
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Section } from '@barff/ui';
+import { PageHeader } from '@/components/common/PageHeader';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ProductCard } from '@/components/products/ProductCard';
@@ -47,17 +48,11 @@ export default async function ProductsPage({ params }: { params: Promise<{ local
   const page = await getProducts(locale, { limit: 24 });
 
   return (
-    <Section>
-      <Container>
-        <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
-          {messages.products.subtitle}
-        </p>
+    <>
+      <PageHeader eyebrow={messages.products.subtitle} title={messages.products.title} />
 
-        <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          {messages.products.title}
-        </h1>
-
-        <div className="mt-12">
+      <Section>
+        <Container>
           {page === null ? (
             <ErrorState
               title={messages.common.unavailableTitle}
@@ -74,8 +69,8 @@ export default async function ProductsPage({ params }: { params: Promise<{ local
               ))}
             </ul>
           )}
-        </div>
-      </Container>
-    </Section>
+        </Container>
+      </Section>
+    </>
   );
 }

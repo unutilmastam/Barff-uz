@@ -5,6 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { Reveal } from '@/motion/Reveal';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Ishlab chiqarish jarayoni (CLAUDE.md §4).
@@ -25,7 +26,10 @@ export function ProcessSection({
   return (
     <Section tone="raised">
       <Container>
-        <SectionHeader eyebrow={messages.home.processEyebrow} title={messages.home.processTitle} />
+        <SectionHeader
+          eyebrow={messages.home.processEyebrow}
+          title={<TextReveal as="span">{messages.home.processTitle}</TextReveal>}
+        />
 
         <div className="mt-12">
           {steps === null ? (
@@ -44,7 +48,7 @@ export function ProcessSection({
                   <span className="text-sm font-medium tabular-nums text-[var(--color-accent-text)]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="text-lg font-medium">{text(step.title, locale, step.slug)}</h3>
+                  <h3 className="display-4">{text(step.title, locale, step.slug)}</h3>
                   {step.description !== null && (
                     <p className="text-sm text-[var(--color-fg-muted)]">
                       {text(step.description, locale)}

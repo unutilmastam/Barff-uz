@@ -50,7 +50,13 @@ export const envSchema = z.object({
   API_TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
 
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
-  REDIS_URL: z.url({ protocol: /^rediss?$/ }),
+  /**
+   * IXTIYORIY. Redis endi FAQAT kesh uchun (xavfsizlik holati S21G da
+   * PostgreSQL ga ko'chirildi). Berilmasa ilova ishlaydi — har so'rov
+   * bazaga tushadi, ya'ni sekinroq, lekin to'g'ri. Joylash muhitida
+   * (cPanel) Redis yo'q (`docs/OPEN-QUESTIONS.md` Q18).
+   */
+  REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
 
   /**
    * JWT sirlari. Access va refresh uchun ALOHIDA sirlar ishlatiladi: bitta sir
@@ -115,15 +121,52 @@ export const envSchema = z.object({
   /** Imzolangan havola amal qilish muddati (soniya). */
   MEDIA_SIGNED_URL_TTL: z.coerce.number().int().min(30).default(300),
 
+  /*
+    FAYL TIZIMIDA SAQLASH — S3 bo'lmagan muhit uchun (cPanel, Q18).
+    Uchalasi BIRGA beriladi; biri yetishmasa adapter tanlanmaydi.
+  */
+  /** Fayllar saqlanadigan katalog (mutlaq yo'l). */
+  MEDIA_ROOT: z.string().min(1).optional(),
+  /** Ommaviy fayllar beriladigan manzil, masalan `https://barff.uz/media`. */
+  MEDIA_PUBLIC_URL: z.url().optional(),
+  /**
+   * Imzolangan havolalar uchun sir. S3 imzosining o'rnini bosadi,
+   * shuning uchun JWT sirlari kabi uzun bo'lishi shart.
+   */
+  MEDIA_SIGNING_SECRET: z.string().min(32).optional(),
+
   /** Swagger standart holatda production'da o'chiq. */
   SWAGGER_ENABLED: booleanish.optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
 
+/**
+ * BO'SH satr — BERILMAGAN bilan bir xil.
+ *
+ * NEGA KERAK: ba'zi joylash muhitlari (cPanel `Setup Node.js App`,
+ * systemd unit fayllari, Docker `--env-file`) e'lon qilingan HAR BIR
+ * o'zgaruvchini uzatadi — qiymat kiritilmagan bo'lsa ham, bo'sh satr
+ * sifatida. `z.optional()` esa faqat `undefined` ni o'tkazadi, ya'ni
+ * bo'sh `REDIS_URL` "Invalid URL" bilan ilovani KO'TARILTIRMAY qo'yadi.
+ *
+ * Bu o'lchab aniqlangan: cPanel to'plami aynan shu xato bilan yiqildi,
+ * va xabar sababni ko'rsatmaydi — foydalanuvchi maydonni ATAYLAB bo'sh
+ * qoldirgan edi (u muhitda Redis yo'q).
+ *
+ * Bo'sh satr hech bir o'zgaruvchi uchun MA'NOLI qiymat emas, shuning
+ * uchun almashtirish butun obyektga qo'llanadi. Majburiy o'zgaruvchilar
+ * baribir tekshiriladi: ular uchun natija "berilmagan" xatosi bo'ladi.
+ */
+function dropEmpty(raw: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(raw).filter(([, value]) => !(typeof value === 'string' && value.trim() === '')),
+  );
+}
+
 /** `ConfigModule.validate` uchun. Xatoda o'qishga yaroqli xabar beradi. */
 export function validateEnv(raw: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(raw);
+  const result = envSchema.safeParse(dropEmpty(raw));
 
   if (!result.success) {
     const lines = result.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);

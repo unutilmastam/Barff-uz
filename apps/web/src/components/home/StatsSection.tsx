@@ -3,6 +3,7 @@ import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { PENDING_VALUE } from '@/lib/mock-data';
 import { Reveal } from '@/motion/Reveal';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Kompaniya raqamlari.
@@ -23,7 +24,10 @@ export function StatsSection({ messages }: { messages: Messages }) {
   return (
     <Section tone="raised">
       <Container>
-        <SectionHeader eyebrow={messages.home.statsEyebrow} title={messages.home.statsTitle} />
+        <SectionHeader
+          eyebrow={messages.home.statsEyebrow}
+          title={<TextReveal as="span">{messages.home.statsTitle}</TextReveal>}
+        />
 
         {/* Ketma-ket EMAS: `StatBlock` bitta `<dl>` chizadi, ya'ni
             bo'linadigan bola yo'q. */}

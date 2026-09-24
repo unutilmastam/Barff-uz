@@ -45,7 +45,7 @@ export class UsersService {
     const key = this.cacheKey(userId);
 
     if (ttl > 0) {
-      const cached = await this.redis.client.get(key).catch(() => null);
+      const cached = await this.redis.get(key);
       if (cached !== null) {
         return JSON.parse(cached) as AuthenticatedUser;
       }
@@ -61,9 +61,7 @@ export class UsersService {
     const authenticated = toAuthenticatedUser(user);
 
     if (ttl > 0) {
-      await this.redis.client
-        .set(key, JSON.stringify(authenticated), 'EX', ttl)
-        .catch(() => undefined);
+      await this.redis.set(key, JSON.stringify(authenticated), ttl);
     }
 
     return authenticated;
@@ -71,7 +69,7 @@ export class UsersService {
 
   /** Rol/holat o'zgarganda chaqiriladi — keyingi so'rov yangi huquqlarni oladi. */
   async invalidate(userId: string): Promise<void> {
-    await this.redis.client.del(this.cacheKey(userId)).catch(() => undefined);
+    await this.redis.del(this.cacheKey(userId));
   }
 
   async markLoggedIn(userId: string): Promise<void> {

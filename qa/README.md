@@ -30,7 +30,7 @@ Shuningdek PostgreSQL va Redis (`docker compose up -d`).
 Brauzer yo'li `CHROMIUM_PATH` dan olinadi; berilmasa Playwright o'z
 brauzerini ishlatadi.
 
-## IKKI TUZOQ (ikkalasi ham o'lchab aniqlangan)
+## TUZOQLAR (hammasi o'lchab aniqlangan)
 
 **1. Qayta qurgandan keyin serverni ham qayta ishga tushiring.**
 `next build` dan keyin eski `next start` jarayoni HTML ichida ESKI
@@ -40,13 +40,49 @@ chalg'itadi: `curl` sahifani TO'G'RI ko'rsatadi (server HTML joyida),
 brauzerda esa forma UMUMAN yo'q. Bu "ilova buzilgan" degan noto'g'ri
 xulosaga olib keldi.
 
+`pkill -f "next start"` bu jarayonni O'LDIRMAYDI: Next ishga
+tushgach o'z nomini `next-server (v15.x)` ga o'zgartiradi, ya'ni
+`next start` qatori endi jarayonlar ro'yxatida yo'q. Eski server
+portni ushlab turadi, yangisi `EADDRINUSE` bilan jim yiqiladi va
+tekshiruv ESKI build'ni ko'radi. To'g'ri buyruq:
+
+```bash
+pkill -f next-server
+```
+
+Tekshirish — brauzer emas, port: sahifa HTML dagi CSS nomi `200`
+qaytarishi kerak.
+
+```bash
+CSS=$(curl -s http://localhost:3001/uz | grep -o '/_next/static/css/[a-z0-9]*\.css' | head -1)
+curl -s -o /dev/null -w "%{http_code}\n" "http://localhost:3001$CSS"
+```
+
 **2. `POST /leads` soatiga 5 ta.** Bu spamga qarshi TO'G'RI cheklov
 (S14), lekin sinovni takroran yurgizganda `429` beradi. API jarayonini
 qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
 xotirasida. `e2e-phase1.mjs` javob statusini ham chop etadi, shuning
 uchun bu holat "ilova ishlamayapti" bilan adashtirilmaydi.
 
-**3. `e2e` har yurganda bitta sinov arizasi QOLDIRADI.** Yaratgan
+**3. Turbo keshi `.next` ni QISMAN tiklashi mumkin.** Bir marta
+oldindan chizilgan HTML eski, `static/chunks` esa yangi bo'lib qoldi:
+sahifa mavjud bo'lmagan chunk nomini so'rab, har bir sahifada `400`
+berdi. axe o'zi 0 buzilish ko'rsatdi, ya'ni xato qulaylikda emas
+edi — lekin konsol xatolari butun to'plamni qizil qildi. Shubha
+tug'ilsa:
+
+```bash
+rm -rf apps/web/.next apps/admin/.next && pnpm build --force
+```
+
+Tekshirish: serverdagi chunk nomi diskdagiga mos kelishi kerak.
+
+```bash
+curl -s http://127.0.0.1:3001/uz | grep -o 'chunks/webpack-[a-z0-9]*\.js' | head -1
+ls apps/web/.next/static/chunks/ | grep webpack
+```
+
+**4. `e2e` har yurganda bitta sinov arizasi QOLDIRADI.** Yaratgan
 yangiligini u o'zi o'chiradi, arizani esa o'chira olmaydi: arizani
 o'chirish endpointi ATAYLAB yo'q — ariza biznes yozuvi va u faqat
 holat o'zgarishi bilan yuritiladi (S14, S20). Shuning uchun lokal

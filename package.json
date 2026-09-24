@@ -21,7 +21,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "package:cpanel": "node scripts/package-cpanel.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

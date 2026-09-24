@@ -21,6 +21,7 @@ export const ru: Messages = {
     heroTitle: 'Капля природы',
     heroSubtitle: 'Современное производство, строгий контроль качества.',
     heroCta: 'Смотреть продукцию',
+    heroBottleAlt: 'Бутылка BARFF — временный макет',
     heroSecondaryCta: 'Стать партнёром',
 
     statsEyebrow: 'В цифрах',

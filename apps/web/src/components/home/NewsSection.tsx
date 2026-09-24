@@ -7,6 +7,7 @@ import { type Messages } from '@/i18n/dictionary';
 import { formatDate, text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
 import { Reveal } from '@/motion/Reveal';
+import { TextReveal } from '@/motion/TextReveal';
 
 /** So'nggi yangiliklar. To'liq ro'yxat va maqola sahifasi — S13. */
 export function NewsSection({
@@ -23,7 +24,7 @@ export function NewsSection({
       <Container>
         <SectionHeader
           eyebrow={messages.home.newsEyebrow}
-          title={messages.home.newsTitle}
+          title={<TextReveal as="span">{messages.home.newsTitle}</TextReveal>}
           action={
             routeReady('news') ? (
               <Button asChild variant="secondary">
@@ -62,7 +63,7 @@ export function NewsSection({
 
                   {/* Maqola sahifasi S13 da quriladi — u paydo bo'lgunicha
                       sarlavha havola EMAS, oddiy matn. */}
-                  <h3 className="text-lg font-medium">
+                  <h3 className="display-4">
                     {routeReady('news') ? (
                       <Link
                         href={`/${locale}/news/${article.slug}`}

@@ -91,6 +91,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S20 Admin leads pipeline
 - [x] S21 Phase 1 QA + staging deploy — **PHASE 1 GATE** (QA o'tdi; staging joylash Q18 ga bog'liq — `docs/RELEASE-P1.md`)
 - [x] S21A Light theme (rejadan tashqari — buyurtmachi so'rovi)
+- [x] S21B Avgust dizayni, harakat tizimi, brend va cPanel (rejadan tashqari — buyurtmachi so'rovi)
 
 **Phase 2**
 - [ ] S22 Dealers domain + registration/approval
@@ -458,6 +459,36 @@ Tasks
 DoD: har bir sahifa ikkala ko'rinishda AA dan o'tadi; noto'g'ri ko'rinish
 bir lahzaga ham ko'rinmaydi; xotira bloklangan brauzerda sayt ishlaydi.
 Commit: `feat(S21A): light theme`
+
+---
+
+## S21B — Avgust dizayni, harakat, brend va cPanel (rejadan tashqari)
+
+**Depends on:** S21A
+
+Buyurtmachi 2026-08-26 dagi qurilishdagi (git `a86f349`) yorug',
+nashriy ko'rinishni va uning animatsiyalarini qaytarishni so'radi,
+so'ng logotipdan brend rangini va `hostmaster.uz` cPanel hostingida
+ishlashni.
+
+Tasks
+
+- Restore the light editorial direction: tokens, display typography,
+  hairline borders (`CLAUDE.md` §16 rewritten).
+- Restore the motion system: one source of constants, GSAP recipes,
+  Lenis↔ScrollTrigger sync, split-text reveals, magnetic buttons,
+  pinned horizontal showcase, kinetic marquee.
+- Flat illustrated hero; Three.js stays as an **ambient** layer only
+  and never draws the product (`CLAUDE.md` §17).
+- Adopt the brand green measured from the supplied logo; accents stay
+  semantic so both themes keep AA.
+- Apply the typography to every inner page through shared classes.
+- Remove the host dependencies: auth state to PostgreSQL, filesystem
+  storage adapter, `pnpm package:cpanel` bundle and a deployment guide.
+
+DoD: ikkala ko'rinishda AA; harakat o'chiq bo'lsa kontent to'liq
+ko'rinadi; to'plam Redis'siz va S3'siz ROSTDAN ko'tariladi.
+Commit: `feat(S21B): restore the august visual direction — tokens and type`
 
 ---
 

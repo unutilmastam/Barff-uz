@@ -4,7 +4,12 @@ import { cn } from '../lib/cn';
 export interface SectionHeaderProps {
   /** Kichik ustki yozuv (masalan "Mahsulotlar"). */
   eyebrow?: string;
-  title: string;
+  /**
+   * `ReactNode`, `string` emas: sarlavha `TextReveal` kabi animatsiya
+   * o'ramiga o'ralishi mumkin. Matn baribir `<h2>` ichida qoladi, ya'ni
+   * hujjat tuzilmasi o'zgarmaydi.
+   */
+  title: ReactNode;
   description?: string;
   /** Sarlavha darajasi. Sahifada `<h1>` bitta bo'lishi uchun sozlanadi. */
   as?: 'h2' | 'h3';
@@ -31,19 +36,11 @@ export function SectionHeader({
       )}
     >
       <div className={cn('max-w-2xl', align === 'center' && 'mx-auto')}>
-        {eyebrow !== undefined && (
-          <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
-            {eyebrow}
-          </p>
-        )}
+        {eyebrow !== undefined && <p className="eyebrow">{eyebrow}</p>}
 
-        <Heading className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-          {title}
-        </Heading>
+        <Heading className="display-3 mt-3 block">{title}</Heading>
 
-        {description !== undefined && (
-          <p className="mt-4 text-pretty text-[var(--color-fg-muted)] sm:text-lg">{description}</p>
-        )}
+        {description !== undefined && <p className="lead mt-4">{description}</p>}
       </div>
 
       {action !== undefined && <div className="shrink-0">{action}</div>}

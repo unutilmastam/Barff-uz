@@ -20,6 +20,7 @@ export const en: Messages = {
     heroTitle: 'A drop of nature',
     heroSubtitle: 'Modern production, strict quality control.',
     heroCta: 'View products',
+    heroBottleAlt: 'BARFF bottle — placeholder mock-up',
     heroSecondaryCta: 'Become a partner',
 
     statsEyebrow: 'In numbers',

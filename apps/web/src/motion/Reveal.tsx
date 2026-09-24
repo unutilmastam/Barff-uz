@@ -8,7 +8,7 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { DURATION, EASE, REVEAL_DISTANCE, REVEAL_START, STAGGER } from './config';
+import { REVEAL_DISTANCE, REVEAL_START, STAGGER } from './config';
 import { useMotionEnabled } from './useMotionEnabled';
 
 /**
@@ -50,14 +50,14 @@ export function Reveal({ children, as: Component = 'div', stagger = false, ...re
     // shuning uchun asosiy bundle'ni og'irlashtirmasligi kerak
     // (CLAUDE.md §17).
     void (async () => {
-      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
-        import('gsap'),
-        import('gsap/ScrollTrigger'),
-      ]);
+      /*
+        Retseptlar YAGONA manbada (`recipes.ts`): davomiylik va egri
+        chiziq har komponentda qayta yozilsa, sayt bo'ylab harakat bir
+        ritmda bo'lmay qoladi. Modul og'ir, shuning uchun dinamik.
+      */
+      const { gsap, fadeUp } = await import('./recipes');
 
       if (cancelled) return;
-
-      gsap.registerPlugin(ScrollTrigger);
 
       /*
         Animatsiya ROSTDAN ishga tushganini belgilaydi.
@@ -72,26 +72,20 @@ export function Reveal({ children, as: Component = 'div', stagger = false, ...re
       const targets = stagger ? Array.from(element.children) : [element];
       if (targets.length === 0) return;
 
-      const tween = gsap.from(targets, {
-        opacity: 0,
-        y: REVEAL_DISTANCE,
-        duration: DURATION.slow,
-        ease: EASE,
-        ...(stagger ? { stagger: STAGGER } : {}),
-        scrollTrigger: {
+      const context = gsap.context(() => {
+        fadeUp(targets, {
           trigger: element,
           start: REVEAL_START,
-          // Bir marta ochiladi: har skrollda qayta o'ynash chalg'itadi.
-          once: true,
-        },
-      });
+          distance: REVEAL_DISTANCE,
+          ...(stagger ? { stagger: STAGGER } : { stagger: 0 }),
+        });
+      }, element);
 
       cleanup = () => {
         delete element.dataset['reveal'];
-        tween.scrollTrigger?.kill();
-        tween.kill();
-        // Animatsiya to'xtatilganda kontent KO'RINADIGAN holatda qoladi.
-        gsap.set(targets, { clearProps: 'opacity,transform' });
+        // Kontekst bekor qilinganda tween, ScrollTrigger va inline
+        // stillar tozalanadi — kontent KO'RINADIGAN holatda qoladi.
+        context.revert();
       };
     })();
 

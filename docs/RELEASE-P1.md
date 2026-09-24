@@ -190,6 +190,27 @@ haqiqiy mahsulot ro'yxati bilan almashtirilishi kerak.
 AWS kirish huquqi (Q18) kelgach bajariladigan ishlar. Quvur S05 da
 yozilgan, bu yerda faqat ketma-ketlik.
 
+### 6.0 Qaysi muhitga
+
+BARFF da `barff.uz` domeni va hostmaster.uz dagi cPanel hosting bor.
+Odatdagi cPanel ulushli hosting faqat PHP va MySQL beradi — bu
+platforma esa uchta Node.js ilovasi, PostgreSQL va Redis talab
+qiladi, ya'ni u yerda ishlamaydi.
+
+Tekshiriladigan beshta narsa va uch yo'l `docs/OPEN-QUESTIONS.md`
+§10 da. Qisqasi:
+
+| Muhit                                 | Ishlaydimi | Izoh                                                 |
+| ------------------------------------- | ---------- | ---------------------------------------------------- |
+| cPanel, faqat PHP/MySQL               | ❌         | Node ham, PostgreSQL ham yo'q                        |
+| cPanel + Node.js App + PostgreSQL     | ⚠️         | Sinab ko'rish kerak; Redis bo'lmasa kesh o'chiriladi |
+| VPS (2 yadro / 4 GB) + Docker Compose | ✅         | Eng arzon to'liq yechim; domen o'z joyida qoladi     |
+| AWS ECS (CLAUDE.md §13)               | ✅         | O'sish uchun; hozirgi bosqichga qimmat               |
+
+Quyidagi §6.1–6.4 **AWS yo'li** uchun. VPS yo'li uchun ro'yxat
+qisqaroq: Docker, `docker-compose.yml`, Cloudflare DNS va sirlar
+serverdagi `.env` faylida.
+
 ### 6.1 Kerakli infratuzilma
 
 - RDS PostgreSQL 16 (**xususiy tarmoqda**, `CLAUDE.md` §12)

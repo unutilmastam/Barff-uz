@@ -7,7 +7,7 @@ import { AppModule } from '../src/app.module';
 import { AUDIT_ACTIONS } from '../src/audit/audit.actions';
 import { PasswordService } from '../src/auth/password.service';
 import { JsonLogger } from '../src/common/logger/json.logger';
-import { RedisService } from '../src/redis/redis.service';
+import { LoginAttemptService } from '../src/auth/login-attempt.service';
 import { GLOBAL_PREFIX } from '../src/swagger';
 
 const prisma = new PrismaClient();
@@ -62,10 +62,10 @@ describe('Auth logging (e2e)', () => {
 
   /** Boshqa testlar qoldirgan urinish hisoblagichlari aralashmasligi uchun. */
   async function resetCounters(): Promise<void> {
-    const redis = app.get(RedisService);
-    await redis.client.del(`auth:fail:email:${USER.email}`);
+    const attempts = app.get(LoginAttemptService);
+    // IP bir nechta ko'rinishda kelishi mumkin (IPv4, IPv6, mapped).
     for (const ip of ['::ffff:127.0.0.1', '::1', '127.0.0.1']) {
-      await redis.client.del(`auth:fail:ip:${ip}`);
+      await attempts.reset(USER.email, ip);
     }
   }
 

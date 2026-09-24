@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
+import { ImageReveal } from '@/motion/ImageReveal';
 import { isLocale } from '@/i18n/config';
 
 import { getMessages } from '@/i18n/dictionary';
@@ -68,12 +69,14 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
                       ratio="wide"
                       className="rounded-none border-0 border-b border-[var(--color-line)]"
                     >
-                      <ApiImage
-                        image={article.coverImage}
-                        alt={text(article.title, locale, article.slug)}
-                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 400px"
-                        className="h-full w-full object-cover"
-                      />
+                      <ImageReveal className="h-full w-full">
+                        <ApiImage
+                          image={article.coverImage}
+                          alt={text(article.title, locale, article.slug)}
+                          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 400px"
+                          className="h-full w-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-barff)] group-hover:scale-[1.04]"
+                        />
+                      </ImageReveal>
                     </MediaFrame>
                   )}
 
@@ -87,7 +90,7 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
                       </time>
                     )}
 
-                    <h2 className="text-lg font-medium">
+                    <h2 className="display-4">
                       <Link
                         href={`/${locale}/news/${article.slug}`}
                         className="after:absolute after:inset-0 after:content-['']"

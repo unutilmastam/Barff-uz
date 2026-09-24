@@ -24,9 +24,7 @@ export default async function LocaleNotFound() {
   return (
     <Container as="section" className="flex min-h-[60vh] flex-col justify-center py-20">
       <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)]">404</p>
-      <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-        {messages.errors.notFoundTitle}
-      </h1>
+      <h1 className="display-3 mt-4">{messages.errors.notFoundTitle}</h1>
       <p className="mt-4 max-w-lg text-[var(--color-fg-muted)]">{messages.errors.notFoundBody}</p>
 
       <div className="mt-8">

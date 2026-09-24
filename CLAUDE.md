@@ -9,10 +9,14 @@ Products: - Public website: `barff.uz` - Dealer portal:
 `partner.barff.uz` - Admin CMS: `admin.barff.uz` - Driver PWA:
 `delivery.barff.uz` - Backend API: `api.barff.uz`
 
-Reference visual direction: - cinematic dark interface - BARFF green
-accents - premium product bottles - factory photography/video -
-glass/translucent cards - large typography - smooth scroll - tasteful
-3D - GSAP/Three.js motion - excellent mobile version
+Reference visual direction: - light, editorial interface - neutral
+palette, colour from the product itself - premium product bottles -
+factory photography/video - hairline borders - very large typography -
+smooth scroll - GSAP motion - excellent mobile version
+
+See §16 and §17: this replaces an earlier dark, Three.js-led direction
+at the client's request. The dark interface survives as the secondary
+theme.
 
 Never invent real company facts. Production capacity, employees,
 certifications, export countries, addresses and product specifications
@@ -24,8 +28,11 @@ Frontend: - Next.js + React + TypeScript - Tailwind CSS - shadcn/ui
 where useful - TanStack Query - React Hook Form + Zod - Zustand only
 when needed
 
-Visual: - Three.js + React Three Fiber + Drei - GSAP - optional Lenis -
-respect `prefers-reduced-motion`
+Visual: - GSAP (+ ScrollTrigger, SplitText) - Lenis - Three.js for an
+ambient WebGL layer - respect `prefers-reduced-motion`
+
+The hero product is a flat illustrated composition; WebGL adds depth
+behind it but never draws the product itself (§17).
 
 Backend: - NestJS + TypeScript - REST API - Swagger/OpenAPI - modular
 monolith first; do NOT start with unnecessary microservices
@@ -234,29 +241,41 @@ Use pnpm + Turborepo when justified.
 
 ## 16. Design system
 
-Visual language: - deep black/charcoal layered backgrounds - BARFF green
-accent - premium whitespace - large modern typography -
-glass/translucent surfaces - thin borders - restrained gradients -
-premium bottle/product photography - factory imagery - subtle
-particles/liquid visuals
+Visual language: - **light, editorial interface** - white page, near-black
+type - very large display typography - hairline borders instead of
+shadows - premium whitespace - premium bottle/product photography -
+factory imagery - subtle particles/liquid visuals
+
+This direction was restored from the 2026-08-26 build (git `a86f349`)
+at the client's request; the dark-first direction it replaces is kept
+as the secondary theme, not removed.
+
+**The palette is neutral on purpose.** Black, white and grey only —
+colour comes from product imagery, not from the interface. BARFF's
+brand colours have not been supplied yet (`docs/OPEN-QUESTIONS.md`,
+Q2), and painting the whole site in an invented green was a guess.
+When the real HEX values arrive, only the accent tokens change.
 
 Avoid: - generic templates - excessive rounded cards - excessive
 gradients - visual clutter - animation that harms usability
 
 ### Light and dark
 
-The dark interface above is the **default and the brand direction**. A
-light theme also exists and is a first-class variant, not an
+The light interface above is the **default and the brand direction**.
+A dark theme also exists and is a first-class variant, not an
 afterthought: both are required to pass the same checks.
 
 Rules:
 
 -   Colour tokens live in one place (`packages/config/tailwind/theme.css`)
     and carry both values via `light-dark()`. Never define a colour twice.
--   Never use a raw palette colour (`brand-400`, `brand-500`) directly in
-    a component. Use the semantic tokens — `accent`, `accent-hover`,
-    `accent-on`, `accent-text`, `focus`, `danger-on`. A single raw colour
-    cannot satisfy contrast on both backgrounds.
+-   Never use a raw colour value in a component. Use the semantic tokens
+    — `accent`, `accent-hover`, `accent-on`, `accent-text`, `focus`,
+    `danger-on`. A single raw colour cannot satisfy contrast on both
+    backgrounds.
+-   A product's own colour is **decoration only** — backdrop, rule,
+    glow. Never a text colour: the restored build set product titles in
+    their own colour and reached only 2.82:1.
 -   The background scale (`ink-900` … `ink-600`) means **distance from
     the page base**, not a literal colour. It inverts between themes.
 -   Contrast is verified for **both themes** in `contrast.test.ts`, and
@@ -266,16 +285,41 @@ Rules:
 -   The choice is applied before first paint (blocking inline script);
     a flash of the wrong theme is a defect.
 
-## 17. 3D and motion
+## 17. Motion
 
-Use: - hero bottle scene - subtle floating motion - fruit/liquid
-particles - parallax - section reveals - product transitions -
-interactive cards - microinteractions
+Use: - hero bottle composition with floating fruit - subtle floating
+motion - parallax - section reveals - split-text reveals - pinned
+horizontal product showcase - magnetic buttons - image reveals -
+microinteractions
 
-Performance rules: - dynamic import heavy 3D - lazy-load assets -
-compress textures - use AVIF/WebP - video poster/fallback - simplify
-effects on mobile - support reduced motion - never make animation the
-only way to understand content
+**WebGL never draws the product.** The earlier 3D hero was a bottle
+built in code — an invented shape, not BARFF's. It is replaced by the
+restored flat illustration (`git a86f349`). Three.js survives as an
+*ambient* layer only (`motion/HeroField.tsx`): a particle field behind
+the composition, which makes no product claim. Two different bottles
+on one screen, and a product that changes shape with the device, were
+the reasons.
+
+When the real model arrives (Q24), that layer is where a true product
+scene goes.
+
+The WebGL layer runs only when motion is enabled, WebGL is present and
+the viewport is wide; `three` is dynamically imported. Everywhere else
+the hero is complete without it.
+
+Motion constants live in one place (`apps/web/src/motion/config.ts`)
+and mirror the CSS duration/easing tokens; a test guards the pair.
+Recipes live in `motion/recipes.ts`.
+
+Performance rules: - `motion/recipes.ts` imports GSAP statically and is
+therefore only ever reached through `await import()`, so GSAP stays out
+of the initial bundle - lazy-load assets - use AVIF/WebP - video
+poster/fallback - simplify effects on mobile - support reduced motion -
+never make animation the only way to understand content
+
+Lenis and ScrollTrigger must stay synced (single `gsap.ticker` rAF,
+`ScrollTrigger.update` on Lenis scroll, `lagSmoothing(0)`); two
+independent loops double-count scroll.
 
 ## 18. i18n
 

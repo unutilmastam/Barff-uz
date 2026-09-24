@@ -16,8 +16,26 @@ describe('validateEnv', () => {
     expect(env.API_CORS_ORIGINS).toEqual([]);
   });
 
-  it('REDIS_URL yoq bolsa toxtaydi', () => {
-    expect(() => validateEnv({ ...base, REDIS_URL: undefined })).toThrow(/REDIS_URL/);
+  /**
+   * REDIS_URL ENDI IXTIYORIY.
+   *
+   * Avval u majburiy edi va bu to'g'ri edi: Redis'da xavfsizlik holati
+   * (refresh token'lar, kirish urinishlari) saqlanardi, ya'ni usiz
+   * ilova himoyasiz ishlardi.
+   *
+   * S21G da o'sha holat PostgreSQL ga ko'chirildi. Endi Redis'da faqat
+   * KESH bor — usiz ilova sekinroq, lekin TO'G'RI ishlaydi. Shuning
+   * uchun majburiylik olib tashlandi; bu xavfsizlik tekshiruvini olib
+   * tashlash emas, chunki olib tashlanadigan narsa qolmadi.
+   */
+  it('REDIS_URL yoq bolsa ham ishga tushadi — u faqat kesh', () => {
+    const env = validateEnv({ ...base, REDIS_URL: undefined });
+    expect(env.REDIS_URL).toBeUndefined();
+  });
+
+  it('notogri REDIS_URL ni baribir rad etadi', () => {
+    // Ixtiyoriy bo'lishi "xohlagan narsani yozish mumkin" degani emas.
+    expect(() => validateEnv({ ...base, REDIS_URL: 'http://localhost' })).toThrow(/REDIS_URL/);
   });
 
   it('DATABASE_URL yoq bolsa toxtaydi', () => {
@@ -69,5 +87,41 @@ describe('validateEnv', () => {
   it('SWAGGER_ENABLED ni booleanga aylantiradi', () => {
     expect(validateEnv({ ...base, SWAGGER_ENABLED: 'false' }).SWAGGER_ENABLED).toBe(false);
     expect(validateEnv({ ...base, SWAGGER_ENABLED: '1' }).SWAGGER_ENABLED).toBe(true);
+  });
+
+  /**
+   * BO'SH SATR — BERILMAGAN BILAN BIR XIL.
+   *
+   * cPanel `Setup Node.js App` e'lon qilingan har bir o'zgaruvchini
+   * uzatadi, qiymat kiritilmagan bo'lsa ham. Bu test aynan shu holatni
+   * ushlaydi: `REDIS_URL=''` bilan to'plam "Invalid URL" deb yiqilgan,
+   * garchi foydalanuvchi maydonni ATAYLAB bo'sh qoldirgan bo'lsa ham.
+   */
+  it("bo'sh satrli ixtiyoriy o'zgaruvchi berilmagan deb qaraladi", () => {
+    const env = validateEnv({
+      ...base,
+      REDIS_URL: '',
+      S3_BUCKET: '',
+      S3_ENDPOINT: '',
+      MEDIA_PUBLIC_URL: '',
+      COOKIE_DOMAIN: '',
+    });
+
+    expect(env.REDIS_URL).toBeUndefined();
+    expect(env.S3_BUCKET).toBeUndefined();
+    expect(env.MEDIA_PUBLIC_URL).toBeUndefined();
+  });
+
+  it("bo'sh satr standart qiymatni BLOKLAMAYDI", () => {
+    // `API_PORT` bo'sh kelsa, standart 3000 amal qilishi kerak —
+    // "Expected number, received string" emas.
+    const env = validateEnv({ ...base, API_PORT: '', LOG_LEVEL: '' });
+
+    expect(env.API_PORT).toBe(3000);
+    expect(env.LOG_LEVEL).toBe('info');
+  });
+
+  it("MAJBURIY o'zgaruvchi bo'sh bo'lsa baribir xato beradi", () => {
+    expect(() => validateEnv({ ...base, DATABASE_URL: '' })).toThrow(/DATABASE_URL/);
   });
 });
