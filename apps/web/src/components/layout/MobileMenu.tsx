@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Sheet } from '@barff/ui';
+import { Sheet, type ThemeToggleLabels, ThemeToggle } from '@barff/ui';
 import { type NavLink } from '@/lib/navigation';
 
 /**
@@ -21,11 +21,13 @@ export function MobileMenu({
   openLabel,
   closeLabel,
   title,
+  themeLabels,
 }: {
   links: NavLink[];
   openLabel: string;
   closeLabel: string;
   title: string;
+  themeLabels: ThemeToggleLabels;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -65,7 +67,7 @@ export function MobileMenu({
               <Link
                 href={link.href}
                 // Teginish maydoni kamida 44px — mobil uchun tavsiya.
-                className="flex min-h-11 items-center border-b border-[var(--color-line)] py-3 text-lg transition-colors hover:text-[var(--color-brand-400)]"
+                className="flex min-h-11 items-center border-b border-[var(--color-line)] py-3 text-lg transition-colors hover:text-[var(--color-accent-text)]"
                 aria-current={pathname === link.href ? 'page' : undefined}
               >
                 {link.label}
@@ -74,6 +76,11 @@ export function MobileMenu({
           ))}
         </ul>
       </nav>
+
+      {/* Sarlavhada joy yo'q — kichik ekranda ko'rinish shu yerdan almashadi. */}
+      <div className="mt-6">
+        <ThemeToggle labels={themeLabels} />
+      </div>
     </Sheet>
   );
 }

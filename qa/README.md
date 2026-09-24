@@ -48,13 +48,14 @@ uchun bu holat "ilova ishlamayapti" bilan adashtirilmaydi.
 
 ## Skriptlar
 
-| Skript                  | Nimani o'lchaydi                                                                    |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| `npm run e2e`           | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda |
-| `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                  |
-| `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham, gorizontal skroll, `<h1>`          |
-| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`            |
-| `npm run all`           | Hammasi ketma-ket                                                                   |
+| Skript                  | Nimani o'lchaydi                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `npm run e2e`           | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
+| `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
+| `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
+| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |
+| `npm run theme`         | Ko'rinish almashtirgichi: tanlov, eslab qolish, FOUC, xotira bloklangan holat                |
+| `npm run all`           | Hammasi ketma-ket                                                                            |
 
 `npm run a11y -- <katalog>` ekran nusxalarini ham saqlaydi.
 

@@ -40,7 +40,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       ref,
       className: cn(
         'rounded-sm underline-offset-4 transition-colors duration-[var(--duration-fast)]',
-        'text-[var(--color-fg)] hover:text-[var(--color-brand-400)] hover:underline',
+        'text-[var(--color-fg)] hover:text-[var(--color-accent-text)] hover:underline',
         className,
       ),
       ...externalProps,

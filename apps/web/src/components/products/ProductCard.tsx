@@ -48,7 +48,7 @@ export function ProductCard({
 
       <div className="flex flex-1 flex-col gap-2 p-5">
         {product.category !== null && (
-          <p className="text-xs tracking-widest text-[var(--color-brand-400)] uppercase">
+          <p className="text-xs tracking-widest text-[var(--color-accent-text)] uppercase">
             {text(product.category.name, locale)}
           </p>
         )}

@@ -34,9 +34,41 @@ const routes = [
   '/ru',
   '/en/products',
 ];
+/*
+  IKKALA KO'RINISH ham tekshiriladi.
+
+  `colorScheme` — brauzerning `prefers-color-scheme` afzalligi, ya'ni
+  bu foydalanuvchi hech narsa tanlamagan holat. Foydalanuvchining ANIQ
+  tanlovi (`data-theme`) alohida, `theme.mjs` da tekshiriladi.
+
+  Yorug' ko'rinish qo'shilganda buni kengaytirmaslik kontrast
+  buzilishini butunlay ko'rinmas qilib qo'yardi: axe faqat ekranda
+  HISOBLANGAN ranglarni o'lchaydi.
+*/
 const viewports = [
-  { name: '360', opts: { viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true } },
-  { name: 'desktop', opts: { viewport: { width: 1440, height: 900 } } },
+  {
+    name: 'qorongi-360',
+    opts: {
+      viewport: { width: 360, height: 780 },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: 'dark',
+    },
+  },
+  {
+    name: 'qorongi-desktop',
+    opts: { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' },
+  },
+  {
+    name: 'yorug-360',
+    opts: {
+      viewport: { width: 360, height: 780 },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: 'light',
+    },
+  },
+  { name: 'yorug-desktop', opts: { viewport: { width: 1440, height: 900 }, colorScheme: 'light' } },
 ];
 
 const browser = await chromium.launch({ ...launchOptions(), args: ['--no-sandbox'] });
@@ -94,8 +126,11 @@ for (const { name, opts } of viewports) {
     for (const e of realErrors.slice(0, 3)) console.log(`      konsol: ${e}`);
     if (bad) failures += 1;
 
-    if (name === '360' && OUT) {
-      await page.screenshot({ path: `${OUT}/360${route.replace(/\//g, '_')}.png`, fullPage: true });
+    if (name.endsWith('-360') && OUT) {
+      await page.screenshot({
+        path: `${OUT}/${name}${route.replace(/\//g, '_')}.png`,
+        fullPage: true,
+      });
     }
     await page.close();
   }

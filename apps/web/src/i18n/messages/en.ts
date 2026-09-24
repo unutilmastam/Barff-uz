@@ -208,6 +208,12 @@ export const en: Messages = {
     unavailableBody: 'The data could not be loaded. Please refresh the page shortly.',
     empty: 'Nothing here yet',
     skipToContent: 'Skip to content',
+    theme: {
+      label: 'Appearance',
+      system: 'System',
+      light: 'Light',
+      dark: 'Dark',
+    },
     languageSwitcher: 'Select language',
     openMenu: 'Open menu',
     closeMenu: 'Close menu',

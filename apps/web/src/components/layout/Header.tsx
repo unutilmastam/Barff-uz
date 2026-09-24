@@ -3,6 +3,7 @@ import { type Locale } from '@/i18n/config';
 import { type Messages } from '@/i18n/dictionary';
 import { mainNav } from '@/lib/navigation';
 import { routeReady } from '@/lib/routes';
+import { ThemeToggle } from '@barff/ui';
 import { Container } from './Container';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { MobileMenu } from './MobileMenu';
@@ -44,12 +45,19 @@ export function Header({ locale, messages }: { locale: Locale; messages: Message
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/*
+            Almashtirgich 360px da sarlavhaga SIG'MAYDI (logotip + til +
+            menyu tugmasi allaqachon bor), shuning uchun kichik ekranda u
+            mobil menyu ichida turadi.
+          */}
+          <ThemeToggle labels={messages.common.theme} className="hidden sm:inline-flex" />
+
           <LocaleSwitcher locale={locale} label={messages.common.languageSwitcher} />
 
           {routeReady('becomePartner') && (
             <Link
               href={`/${locale}/become-partner`}
-              className="hidden rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)] lg:inline-block"
+              className="hidden rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-[var(--color-accent-on)] transition-colors hover:bg-[var(--color-accent-hover)] lg:inline-block"
             >
               {messages.nav.becomePartner}
             </Link>
@@ -60,6 +68,7 @@ export function Header({ locale, messages }: { locale: Locale; messages: Message
             title={messages.nav.home}
             openLabel={messages.common.openMenu}
             closeLabel={messages.common.closeMenu}
+            themeLabels={messages.common.theme}
           />
         </div>
       </Container>

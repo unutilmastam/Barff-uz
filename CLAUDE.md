@@ -243,6 +243,29 @@ particles/liquid visuals
 Avoid: - generic templates - excessive rounded cards - excessive
 gradients - visual clutter - animation that harms usability
 
+### Light and dark
+
+The dark interface above is the **default and the brand direction**. A
+light theme also exists and is a first-class variant, not an
+afterthought: both are required to pass the same checks.
+
+Rules:
+
+-   Colour tokens live in one place (`packages/config/tailwind/theme.css`)
+    and carry both values via `light-dark()`. Never define a colour twice.
+-   Never use a raw palette colour (`brand-400`, `brand-500`) directly in
+    a component. Use the semantic tokens — `accent`, `accent-hover`,
+    `accent-on`, `accent-text`, `focus`, `danger-on`. A single raw colour
+    cannot satisfy contrast on both backgrounds.
+-   The background scale (`ink-900` … `ink-600`) means **distance from
+    the page base**, not a literal colour. It inverts between themes.
+-   Contrast is verified for **both themes** in `contrast.test.ts`, and
+    accessibility sweeps run each page in both.
+-   Three states, not two: `system`, `light`, `dark`. The user must be
+    able to return to the system preference.
+-   The choice is applied before first paint (blocking inline script);
+    a flash of the wrong theme is a defect.
+
 ## 17. 3D and motion
 
 Use: - hero bottle scene - subtle floating motion - fruit/liquid

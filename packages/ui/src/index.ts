@@ -20,6 +20,16 @@ export {
   useToast,
 } from './primitives/Toast';
 
+export { ThemeToggle, type ThemeToggleLabels, type ThemeToggleProps } from './theme/ThemeToggle';
+export {
+  THEMES,
+  THEME_INIT_SCRIPT,
+  THEME_STORAGE_KEY,
+  type Theme,
+  applyTheme,
+  readTheme,
+} from './theme/theme';
+
 export { GlassCard, type GlassCardProps } from './surfaces/GlassCard';
 export { MediaFrame, type MediaFrameProps, type MediaRatio } from './surfaces/MediaFrame';
 export { Section, type SectionProps, type SectionTone } from './surfaces/Section';

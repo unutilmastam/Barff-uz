@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { type ReactNode } from 'react';
+import { ThemeToggle } from '@barff/ui';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Sidebar } from '@/components/Sidebar';
 import { QueryProvider } from '@/lib/query';
@@ -45,7 +46,23 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             </p>
           </div>
 
-          <LogoutButton />
+          <div className="flex items-center gap-2">
+            {/*
+              Admin panel kun bo'yi ochiq turadi — yorug' xonada ishlagan
+              muharrir uchun ko'rinishni almashtirish ommaviy saytdagidan
+              ham kerakroq. Matnlar bu yerda o'zbekcha: panel bir tilda
+              (S18).
+            */}
+            <ThemeToggle
+              labels={{
+                label: 'Ko‘rinish',
+                system: 'Tizim',
+                light: 'Yorug‘',
+                dark: 'Qorong‘i',
+              }}
+            />
+            <LogoutButton />
+          </div>
         </header>
 
         {/*

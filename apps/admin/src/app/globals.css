@@ -30,14 +30,14 @@
    * `outline: none` bilan olib tashlash — eng keng tarqalgan a11y xatosi.
    */
   :focus-visible {
-    outline: 2px solid var(--color-brand-400);
+    outline: 2px solid var(--color-focus);
     outline-offset: 2px;
     border-radius: 2px;
   }
 
   ::selection {
-    background-color: var(--color-brand-500);
-    color: var(--color-ink-900);
+    background-color: var(--color-accent);
+    color: var(--color-accent-on);
   }
 }
 
@@ -49,9 +49,9 @@
     top: -4rem;
     z-index: 100;
     border-radius: 0.5rem;
-    background-color: var(--color-brand-500);
+    background-color: var(--color-accent);
     padding: 0.75rem 1.25rem;
-    color: var(--color-ink-900);
+    color: var(--color-accent-on);
     font-weight: 600;
     transition: top var(--duration-fast) var(--ease-barff);
   }

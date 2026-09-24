@@ -90,6 +90,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S19 Admin CMS screens
 - [x] S20 Admin leads pipeline
 - [x] S21 Phase 1 QA + staging deploy — **PHASE 1 GATE** (QA o'tdi; staging joylash Q18 ga bog'liq — `docs/RELEASE-P1.md`)
+- [x] S21A Light theme (rejadan tashqari — buyurtmachi so'rovi)
 
 **Phase 2**
 - [ ] S22 Dealers domain + registration/approval
@@ -435,6 +436,28 @@ Tasks
 
 Gate: public site + CMS fully usable on staging in three languages on mobile and desktop.
 Commit: `chore(S21): phase 1 qa and staging release`
+
+---
+
+## S21A — Light theme (rejadan tashqari)
+
+**Depends on:** S21
+
+Buyurtmachi so'rovi bilan qo'shildi: sayt faqat qorong'i ko'rinishda edi.
+
+Tasks
+- Colour tokens carry both values via `light-dark()`; one definition per colour.
+- Semantic accent tokens (`accent`, `accent-on`, `accent-text`, `focus`,
+  `danger-on`) replace raw palette usage in components.
+- Three-state toggle (`system` / `light` / `dark`) in the public header,
+  the mobile menu and the admin panel; choice remembered per browser.
+- Blocking inline script applies the choice before first paint.
+- `contrast.test.ts` runs every pair in BOTH themes; axe sweeps every
+  page in both; `qa/theme.mjs` covers the mechanism.
+
+DoD: har bir sahifa ikkala ko'rinishda AA dan o'tadi; noto'g'ri ko'rinish
+bir lahzaga ham ko'rinmaydi; xotira bloklangan brauzerda sayt ishlaydi.
+Commit: `feat(S21A): light theme`
 
 ---
 

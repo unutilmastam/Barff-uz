@@ -44,7 +44,7 @@ export function Tabs({ items, defaultValue, label, className }: TabsProps) {
               // Faol tab ostidagi chiziq — rang YAGONA belgi bo'lib qolmasligi
               // uchun qo'shimcha vizual ishora.
               'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-transparent',
-              'data-[state=active]:after:bg-[var(--color-brand-500)]',
+              'data-[state=active]:after:bg-[var(--color-accent)]',
             )}
           >
             {item.label}

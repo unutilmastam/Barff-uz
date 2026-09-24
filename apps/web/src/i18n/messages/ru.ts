@@ -207,6 +207,12 @@ export const ru: Messages = {
     unavailableBody: 'Не удалось загрузить данные. Обновите страницу чуть позже.',
     empty: 'Пока данных нет',
     skipToContent: 'Перейти к содержимому',
+    theme: {
+      label: 'Оформление',
+      system: 'Системное',
+      light: 'Светлое',
+      dark: 'Тёмное',
+    },
     languageSwitcher: 'Выбор языка',
     openMenu: 'Открыть меню',
     closeMenu: 'Закрыть меню',

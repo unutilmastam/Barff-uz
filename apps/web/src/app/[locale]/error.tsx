@@ -41,7 +41,7 @@ export default function ErrorBoundary({
         <button
           type="button"
           onClick={reset}
-          className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)]"
+          className="rounded-full bg-[var(--color-accent)] px-6 py-3 font-medium text-[var(--color-accent-on)] transition-colors hover:bg-[var(--color-accent-hover)]"
         >
           {uz.errors.genericCta}
         </button>

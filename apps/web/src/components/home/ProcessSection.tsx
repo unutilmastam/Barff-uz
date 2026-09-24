@@ -41,7 +41,7 @@ export function ProcessSection({
             <Reveal as="ol" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger>
               {steps.map((step, index) => (
                 <GlassCard as="li" key={step.id} className="flex flex-col gap-3 p-6">
-                  <span className="text-sm font-medium tabular-nums text-[var(--color-brand-400)]">
+                  <span className="text-sm font-medium tabular-nums text-[var(--color-accent-text)]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <h3 className="text-lg font-medium">{text(step.title, locale, step.slug)}</h3>

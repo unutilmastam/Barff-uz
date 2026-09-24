@@ -86,7 +86,7 @@ export default function LeadsPage() {
               cell: (row) => (
                 <Link
                   href={`/leads/${row.id}`}
-                  className="underline-offset-4 hover:text-[var(--color-brand-400)] hover:underline"
+                  className="underline-offset-4 hover:text-[var(--color-accent-text)] hover:underline"
                 >
                   {row.companyName}
                 </Link>

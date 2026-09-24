@@ -23,7 +23,7 @@ export default async function LocaleNotFound() {
 
   return (
     <Container as="section" className="flex min-h-[60vh] flex-col justify-center py-20">
-      <p className="text-sm font-medium tracking-widest text-[var(--color-brand-400)]">404</p>
+      <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)]">404</p>
       <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
         {messages.errors.notFoundTitle}
       </h1>
@@ -32,7 +32,7 @@ export default async function LocaleNotFound() {
       <div className="mt-8">
         <Link
           href={`/${DEFAULT_LOCALE}`}
-          className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 font-medium text-[var(--color-ink-900)] transition-colors hover:bg-[var(--color-brand-400)]"
+          className="rounded-full bg-[var(--color-accent)] px-6 py-3 font-medium text-[var(--color-accent-on)] transition-colors hover:bg-[var(--color-accent-hover)]"
         >
           {messages.errors.notFoundCta}
         </Link>

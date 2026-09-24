@@ -53,7 +53,7 @@ export function Checkbox({
           className={cn(
             'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border',
             'transition-colors duration-[var(--duration-fast)]',
-            'data-[state=checked]:border-[var(--color-brand-500)] data-[state=checked]:bg-[var(--color-brand-500)]',
+            'data-[state=checked]:border-[var(--color-accent)] data-[state=checked]:bg-[var(--color-accent)]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             error !== undefined
               ? 'border-[var(--color-danger)]'
