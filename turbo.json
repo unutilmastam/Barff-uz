@@ -13,12 +13,19 @@
   "globalPassThroughEnv": [
     "CI",
 
-    // Tarmoq muhiti. `next/font/google` shriftlarni QURISH PAYTIDA
-    // yuklab oladi, ya'ni build tarmoqqa bog'liq. Proksi orqali
-    // ishlaydigan muhitda (masalan agent konteyneri) sertifikat
-    // ro'yxatisiz bu "self-signed certificate in certificate chain"
-    // bilan yiqiladi — va sabab turbo o'zgaruvchini olib
-    // tashlaganida ekanini topish oson emas.
+    // Tarmoq muhiti.
+    //
+    // TARIX: ilgari `next/font/google` shriftlarni QURISH PAYTIDA
+    // yuklab olardi va build tarmoqqa bog'liq edi — proksi orqali
+    // ishlaydigan muhitda u "self-signed certificate in certificate
+    // chain" bilan yiqilardi, tarmoqsiz Docker builder'da esa
+    // "Cannot read properties of null" bilan. Shriftlar endi
+    // `apps/web/public/fonts` da va build TARMOQSIZ ham o'tadi
+    // (tekshirilgan).
+    //
+    // O'zgaruvchilar baribir qoldirildi: boshqa qadamlar (paket
+    // o'rnatish, tasvir yuklash) tarmoqdan foydalanadi va ular
+    // o'chirilsa sabab yana topilishi qiyin bo'lardi.
     "NODE_EXTRA_CA_CERTS",
     "HTTPS_PROXY",
     "HTTP_PROXY",

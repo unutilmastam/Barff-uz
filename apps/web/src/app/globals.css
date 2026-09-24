@@ -9,11 +9,138 @@
 @source '../../../../packages/ui/src';
 
 /*
+ * SHRIFTLAR — O'ZIMIZDA SAQLANADI, Google'dan OLINMAYDI.
+ *
+ * NEGA: `next/font/google` shriftlarni QURISH PAYTIDA yuklab oladi,
+ * ya'ni `next build` tarmoqqa bog'liq bo'lib qoladi. Docker tasviri
+ * tarmoqsiz muhitda qurilganda bu shunday yiqildi:
+ *
+ *   src/app/fonts.ts
+ *   An error occurred in `next/font`.
+ *   TypeError: Cannot read properties of null (reading '1')
+ *
+ * Xato KO'RINMAY turgan edi, chunki Docker qatlami keshdan kelardi —
+ * u faqat kesh o'tkazib yuborilganda chiqdi. Joylash paytida esa u
+ * ALBATTA chiqardi.
+ *
+ * Fayllar `public/fonts` da. Ular SIL Open Font License ostida
+ * (`public/fonts/LICENSE.txt`), ya'ni tarqatish ruxsat etilgan.
+ *
+ * `next/font/local` ISHLATILMADI: u `unicode-range` ni qo'llab
+ * quvvatlamaydi, ya'ni ruscha matn bo'lmagan sahifada ham kirill
+ * to'plami yuklanardi (230 KB o'rniga 73 KB kerak).
+ *
+ * `font-display: swap` — matn shrift kelguncha ham O'QILADI
+ * (CLAUDE.md §26: kontent og'ir effektlardan OLDIN ko'rinadi).
+ */
+
+/* Manrope — cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+/* Manrope — cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* Manrope — latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* Manrope — latin */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Inter — cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/inter-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+/* Inter — cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/inter-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* Inter — latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* Inter — latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
  * Ilovaga xos qatlam. Dizayn tokenlari `@barff/config` da — ular barcha
  * ilovalar uchun umumiy (S07 da `packages/ui` shu tokenlarni ishlatadi).
  */
 
 @layer base {
+  /*
+   * Shrift o'zgaruvchilari. Avval ular `next/font` yaratgan sinf
+   * orqali `<html>` ga tushardi; endi to'g'ridan-to'g'ri shu yerda.
+   * Nomlar o'zgarmadi — `theme.css` dagi `--font-sans` va
+   * `--font-display` o'shalarga tayanadi.
+   */
+  :root {
+    --font-barff-display: 'Manrope';
+    --font-barff-sans: 'Inter';
+  }
+
   html {
     scroll-behavior: smooth;
   }

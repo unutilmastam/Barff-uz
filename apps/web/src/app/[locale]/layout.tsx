@@ -1,4 +1,3 @@
-import { fontVariables } from '@/app/fonts';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { type ReactNode } from 'react';
@@ -66,7 +65,7 @@ export default async function LocaleLayout({
   const messages = await getMessages(locale);
 
   return (
-    <html lang={locale} className={fontVariables}>
+    <html lang={locale}>
       {/*
         Ko'rinish sahifa CHIZILISHIDAN OLDIN qo'llanadi.
 
