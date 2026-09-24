@@ -46,6 +46,13 @@ qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
 xotirasida. `e2e-phase1.mjs` javob statusini ham chop etadi, shuning
 uchun bu holat "ilova ishlamayapti" bilan adashtirilmaydi.
 
+**3. `e2e` har yurganda bitta sinov arizasi QOLDIRADI.** Yaratgan
+yangiligini u o'zi o'chiradi, arizani esa o'chira olmaydi: arizani
+o'chirish endpointi ATAYLAB yo'q — ariza biznes yozuvi va u faqat
+holat o'zgarishi bilan yuritiladi (S14, S20). Shuning uchun lokal
+bazada `Faza1 Sinov <vaqt>` nomli arizalar to'planib boradi. Bu
+kutilgan holat; kerak bo'lsa ular bazadan qo'lda tozalanadi.
+
 ## Skriptlar
 
 | Skript                  | Nimani o'lchaydi                                                                             |
