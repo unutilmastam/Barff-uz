@@ -89,7 +89,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S18 Admin app shell
 - [x] S19 Admin CMS screens
 - [x] S20 Admin leads pipeline
-- [ ] S21 Phase 1 QA + staging deploy — **PHASE 1 GATE**
+- [x] S21 Phase 1 QA + staging deploy — **PHASE 1 GATE** (QA o'tdi; staging joylash Q18 ga bog'liq — `docs/RELEASE-P1.md`)
 
 **Phase 2**
 - [ ] S22 Dealers domain + registration/approval

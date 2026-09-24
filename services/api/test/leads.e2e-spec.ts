@@ -313,19 +313,43 @@ describe('Leads (e2e)', () => {
     });
 
     describe('xodimga biriktirish', () => {
+      /*
+        Biriktiriladigan xodim SHU TO'PLAM O'ZI yaratgan admin bo'ladi.
+
+        Avval `/assignees` ro'yxatining BIRINCHI yozuvi olinardi va
+        test CI da vaqti-vaqti bilan `400` bilan yiqilardi (lokalda
+        takrorlanmadi). Aniq mexanizmni CI logidan isbotlay olmadim,
+        lekin sabab aniq: ro'yxat BUTUN bazadagi `leads.manage`
+        ruxsatiga ega foydalanuvchilarni qaytaradi, vitest esa test
+        FAYLLARINI parallel yurgizadi — ya'ni `[0]` boshqa fayl
+        yaratgan va istalgan payt o'chirib yuborishi mumkin bo'lgan
+        foydalanuvchi bo'lishi mumkin edi.
+
+        Endi test faqat O'ZI yaratgan va o'zi o'chiradigan admin'ga
+        tayanadi. Endpoint baribir tekshiriladi: ro'yxat so'raladi va
+        unda kutilgan xodim BORLIGI talab qilinadi — agar kelajakda
+        yiqilsa, xabar "200 kutilgandi, 400 keldi" emas, aynan nima
+        yo'qligini aytadi.
+      */
+      const ownAssignee = async (): Promise<string> => {
+        const assignees = await admin('get', '/assignees').expect(200);
+        const rows = assignees.body as { id: string; email: string }[];
+        const own = rows.find((row) => row.email === ADMIN.email);
+        expect(own, `/assignees ro'yxatida ${ADMIN.email} bo'lishi kerak`).toBeDefined();
+        return own!.id;
+      };
+
       it('ruxsati BOR xodimga biriktiriladi', async () => {
         const body = payload();
         await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
         const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
 
-        const assignees = await admin('get', '/assignees').expect(200);
-        const assignee = (assignees.body as { id: string }[])[0];
-        expect(assignee).toBeDefined();
+        const assigneeId = await ownAssignee();
 
-        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId: assignee?.id }).expect(200);
+        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId }).expect(200);
 
         const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id } });
-        expect(after.assignedToId).toBe(assignee?.id);
+        expect(after.assignedToId).toBe(assigneeId);
       });
 
       it('ruxsati YOQ xodimga biriktirib bolmaydi', async () => {
@@ -359,10 +383,9 @@ describe('Leads (e2e)', () => {
         await request(app.getHttpServer()).post(`${base}/leads`).send(body).expect(202);
         const lead = await prisma.lead.findFirstOrThrow({ where: { phone: stored(body.phone) } });
 
-        const assignees = await admin('get', '/assignees').expect(200);
-        const assignee = (assignees.body as { id: string }[])[0];
+        const assigneeId = await ownAssignee();
 
-        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId: assignee?.id }).expect(200);
+        await admin('patch', `/${lead.id}/assignee`).send({ assigneeId }).expect(200);
 
         const audit = await prisma.auditLog.findFirst({
           where: { entity: 'Lead', entityId: lead.id, action: 'lead.assigned' },

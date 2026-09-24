@@ -1,0 +1,4 @@
+# Playwright brauzerlari va bog'liqliklari
+node_modules/
+package-lock.json
+shots/

@@ -1,0 +1,18 @@
+{
+  "name": "@barff/qa",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Faza 1 QA to'plami — brauzerda yuriladigan tekshiruvlar",
+  "scripts": {
+    "e2e": "node e2e-phase1.mjs",
+    "perf": "node perf.mjs",
+    "a11y": "node a11y-axe.mjs",
+    "a11y:keyboard": "node a11y-keyboard.mjs",
+    "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node perf.mjs && node e2e-phase1.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "playwright": "^1.55.0"
+  }
+}
