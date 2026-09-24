@@ -72,7 +72,7 @@ const GROUPS: AdminNavGroup[] = [
   },
   {
     label: 'Savdo',
-    items: [{ href: '/leads', label: 'Arizalar', permission: 'leads.view', ready: false }],
+    items: [{ href: '/leads', label: 'Arizalar', permission: 'leads.view', ready: true }],
   },
   {
     label: 'Tizim',

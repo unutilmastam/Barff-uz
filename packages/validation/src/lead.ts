@@ -34,3 +34,14 @@ export const leadStatusUpdateSchema = z.object({
   status: z.enum(LEAD_STATUSES),
   note: z.string().trim().max(2000).optional(),
 });
+
+/**
+ * Arizani xodimga biriktirish.
+ *
+ * `null` — biriktirishni olib tashlash, shuning uchun `nullable`
+ * va `optional` emas: "berilmagan" va "olib tashlash" bir xil
+ * ma'noga ega bo'lib qolmasligi kerak.
+ */
+export const leadAssignSchema = z.object({
+  assigneeId: z.uuid().nullable(),
+});

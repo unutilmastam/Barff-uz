@@ -88,7 +88,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S17 3D hero (Three.js)
 - [x] S18 Admin app shell
 - [x] S19 Admin CMS screens
-- [ ] S20 Admin leads pipeline
+- [x] S20 Admin leads pipeline
 - [ ] S21 Phase 1 QA + staging deploy — **PHASE 1 GATE**
 
 **Phase 2**

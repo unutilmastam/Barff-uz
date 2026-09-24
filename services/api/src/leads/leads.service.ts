@@ -177,7 +177,15 @@ export class LeadsService {
   async findOne(id: string) {
     const lead = await this.prisma.lead.findFirst({
       where: { id, deletedAt: null },
-      include: { events: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        events: {
+          orderBy: { createdAt: 'asc' },
+          // Tarixda KIM o'zgartirgani ko'rinishi kerak — audit
+          // jurnalini ochmasdan.
+          include: { actor: { select: { id: true, fullName: true, email: true } } },
+        },
+        assignedTo: { select: { id: true, fullName: true, email: true } },
+      },
     });
 
     if (lead === null) {
@@ -185,6 +193,77 @@ export class LeadsService {
     }
 
     return lead;
+  }
+
+  /**
+   * Arizani xodimga biriktirish.
+   *
+   * Faqat `leads.manage` ruxsatiga EGA xodimga biriktiriladi: aks
+   * holda ariza ko'ra olmaydigan odamga tushib, javobsiz qolardi.
+   * `null` — biriktirishni olib tashlash.
+   */
+  async assign(id: string, assigneeId: string | null, actor: Actor, ctx: RequestContext) {
+    const lead = await this.findOne(id);
+
+    if (assigneeId !== null) {
+      const assignee = await this.prisma.user.findFirst({
+        where: {
+          id: assigneeId,
+          isActive: true,
+          deletedAt: null,
+          roles: {
+            some: { role: { permissions: { some: { permission: { code: 'leads.manage' } } } } },
+          },
+        },
+        select: { id: true },
+      });
+
+      if (assignee === null) {
+        throw new BadRequestException({
+          message: "Bu xodimga ariza biriktirib bo'lmaydi",
+          code: 'LEAD_ASSIGNEE_INVALID',
+        });
+      }
+    }
+
+    const updated = await this.prisma.lead.update({
+      where: { id },
+      data: { assignedToId: assigneeId },
+    });
+
+    await this.audit.record({
+      action: AUDIT_ACTIONS.LEAD_ASSIGNED,
+      entity: 'Lead',
+      entityId: id,
+      actorId: actor.id,
+      actorEmail: actor.email,
+      before: { assignedToId: lead.assignedToId },
+      after: { assignedToId: assigneeId },
+      ...ctx,
+    });
+
+    return updated;
+  }
+
+  /**
+   * Arizani yuritishi mumkin bo'lgan xodimlar.
+   *
+   * Ro'yxat RUXSAT bo'yicha quriladi, rol nomi bo'yicha emas: rollar
+   * o'zgarishi mumkin, lekin "arizani yurita oladi" degan ma'no
+   * ruxsatda qoladi.
+   */
+  listAssignees() {
+    return this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        deletedAt: null,
+        roles: {
+          some: { role: { permissions: { some: { permission: { code: 'leads.manage' } } } } },
+        },
+      },
+      select: { id: true, fullName: true, email: true },
+      orderBy: { fullName: 'asc' },
+    });
   }
 
   /**
