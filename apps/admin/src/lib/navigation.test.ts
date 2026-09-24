@@ -54,7 +54,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 da CMS ekranlari qo'shildi; qolganlari S20+ da.
+    // S19 da CMS ekranlari, S23 da narx qoidalari qo'shildi.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -65,6 +65,7 @@ describe('admin navigatsiyasi', () => {
       '/media',
       '/products',
       '/leads',
+      '/pricing',
       '/system/settings',
     ]);
   });

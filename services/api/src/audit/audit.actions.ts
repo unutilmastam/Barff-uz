@@ -20,6 +20,15 @@ export const AUDIT_ACTIONS = {
   SETTINGS_UPDATED: 'settings.updated',
   LEAD_STATUS_CHANGED: 'lead.status.changed',
   LEAD_ASSIGNED: 'lead.assigned',
+  DEALER_REGISTERED: 'dealer.registered',
+  DEALER_UPDATED: 'dealer.updated',
+  DEALER_STATUS_CHANGED: 'dealer.status.changed',
+  DEALER_TERMS_CHANGED: 'dealer.terms.changed',
+  DEALER_ADDRESS_CREATED: 'dealer.address.created',
+  DEALER_ADDRESS_UPDATED: 'dealer.address.updated',
+  DEALER_ADDRESS_DELETED: 'dealer.address.deleted',
+  DEALER_TIER_CHANGED: 'dealer.tier.changed',
+  PRICE_RULE_CHANGED: 'pricing.rule.changed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

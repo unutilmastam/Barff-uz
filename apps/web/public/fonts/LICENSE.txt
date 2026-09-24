@@ -1,0 +1,22 @@
+BARFF saytida ishlatiladigan shriftlar
+======================================
+
+Ikkala shrift ham SIL Open Font License 1.1 ostida tarqatiladi,
+ya'ni ularni saytga joylashtirish va tarqatish ruxsat etilgan.
+
+  Manrope — Copyright (c) 2018-2019 Mikhail Sharanda
+             https://github.com/sharanda/manrope
+
+  Inter   — Copyright (c) 2016-2020 The Inter Project Authors
+             https://github.com/rsms/inter
+
+Litsenziya to'liq matni: https://openfontlicense.org
+
+FAYLLAR GOOGLE FONTS DAN OLINGAN va o'zgartirilmagan. Ular
+`unicode-range` bo'yicha bo'lingan: latin, latin-ext, cyrillic,
+cyrillic-ext. Brauzer faqat sahifadagi matnga kerak bo'lganini
+yuklaydi.
+
+NEGA O'ZIMIZDA: `next/font/google` shriftlarni QURISH PAYTIDA
+yuklab oladi va `next build` ni tarmoqqa bog'lab qo'yadi —
+Docker tasviri tarmoqsiz qurilganda bu yiqiladi.

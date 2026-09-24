@@ -61,6 +61,11 @@ model User {
   refreshTokens   RefreshToken[]       @relation("UserRefreshTokens")
   refreshFamilies RefreshTokenFamily[] @relation("UserRefreshFamilies")
 
+  /// Diler akkaunti (faqat DEALER rolidagi foydalanuvchida bo'ladi).
+  dealer          Dealer?       @relation("DealerAccount")
+  reviewedDealers Dealer[]      @relation("DealerReviewer")
+  dealerEvents    DealerEvent[] @relation("DealerEventActor")
+
   @@index([isActive])
   @@index([createdAt])
   @@map("users")
@@ -310,7 +315,8 @@ model ProductCategory {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  products Product[]
+  products   Product[]
+  priceRules PriceRule[]
 
   @@index([isActive, displayOrder])
   @@index([parentId])
@@ -357,9 +363,10 @@ model Product {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  variants  ProductVariant[]
-  images    ProductImage[]
-  documents ProductDocument[]
+  variants   ProductVariant[]
+  images     ProductImage[]
+  documents  ProductDocument[]
+  priceRules PriceRule[]
 
   @@index([categoryId])
   @@index([isActive, displayOrder])
@@ -390,7 +397,11 @@ model ProductVariant {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  prices ProductPrice[]
+  prices     ProductPrice[]
+  priceRules PriceRule[]
+
+  /// Eng kam buyurtma miqdori (dona). `null` — cheklov yo'q.
+  minOrderQuantity Int?
 
   @@index([productId, isActive])
   @@map("product_variants")
@@ -737,6 +748,9 @@ model Lead {
 
   events LeadEvent[]
 
+  /// Ariza dilerga aylangan bo'lsa (CONVERTED).
+  dealers Dealer[] @relation("LeadDealer")
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -818,6 +832,260 @@ model Notification {
   @@index([recipientId, readAt])
   @@index([event, createdAt])
   @@map("notifications")
+}
+
+// =============================================================================
+// DILERLAR (CLAUDE.md §5)
+// =============================================================================
+
+enum DealerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+/// Diler darajasi: narx siyosatining asosi (S23).
+///
+/// Chegirma FOIZ emas, BAZIS PUNKT (foizning yuzdan bir ulushi):
+/// 250 = 2.5%. Sabab — pul hisobida kasr son ishlatilmaydi
+/// (`product_prices` ham butun tiyinda). 2.5% ni `0.025` sifatida
+/// saqlash yaxlitlash xatolarini keltirib chiqarardi.
+model DealerTier {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Barqaror kod: `BRONZE`, `SILVER`, `GOLD`. Narx qoidalari shunga
+  /// bog'lanadi, shuning uchun u nomdan ALOHIDA — nom o'zgarishi
+  /// mumkin, kod esa yo'q.
+  code String @unique
+  name String
+
+  discountBasisPoints Int @default(0)
+
+  /// Shu darajadagi diler uchun eng kam buyurtma summasi (tiyinda).
+  minOrderAmount Int?
+
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  dealers    Dealer[]
+  priceRules PriceRule[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isActive, displayOrder])
+  @@map("dealer_tiers")
+}
+
+/// Diler tashkiloti.
+///
+/// BIR FOYDALANUVCHI = BIR DILER (hozircha). `userId` yagona, ya'ni
+/// bitta akkaunt ikkita tashkilotga kira olmaydi. Ko'p kontaktli
+/// tashkilot kerak bo'lsa, bu alohida jadval bilan kengaytiriladi —
+/// lekin hozir kerak emas va soddaligi tekshiruvni ishonchli qiladi.
+///
+/// `status` KIRISH HUQUQINI hal qiladi: faqat `APPROVED` diler
+/// endpoint'lariga kira oladi. Tekshiruv SERVERDA (`DealerGuard`),
+/// panelda tugma yashirish bilan emas (CLAUDE.md §3).
+model Dealer {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Kirish akkaunti. Ariza tasdiqlanmaguncha ham mavjud bo'ladi —
+  /// diler o'z arizasi holatini ko'ra olishi kerak.
+  userId String @unique @db.Uuid
+  user   User   @relation("DealerAccount", fields: [userId], references: [id], onDelete: Cascade)
+
+  companyName String
+  /// STIR / INN — O'zbekistonda 9 raqam. Yagona: bir tashkilot ikki
+  /// marta ro'yxatdan o'ta olmaydi.
+  taxId       String? @unique
+  region      String
+
+  businessType BusinessType
+
+  status DealerStatus @default(PENDING)
+
+  tierId String?     @db.Uuid
+  tier   DealerTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+
+  /// Kredit limiti (tiyinda). `null` — limit yo'q, faqat oldindan to'lov.
+  creditLimit Int?
+
+  /// Ichki izoh — DILERGA KO'RSATILMAYDI. Rad etish sababi mijozga
+  /// alohida maydonda (`statusReason`) beriladi.
+  internalNote String?
+  /// Oxirgi holat o'zgarishining sababi; dilerga ko'rsatiladi.
+  statusReason String?
+
+  /// Arizani kim ko'rib chiqdi.
+  reviewedById String?   @db.Uuid
+  reviewedBy   User?     @relation("DealerReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+
+  /// Ariza qaysi lead'dan o'sib chiqqan (bo'lsa). `SetNull`: lead
+  /// o'chirilsa diler qolaveradi.
+  leadId String? @db.Uuid
+  lead   Lead?   @relation("LeadDealer", fields: [leadId], references: [id], onDelete: SetNull)
+
+  addresses  DealerAddress[]
+  events     DealerEvent[]
+  priceRules PriceRule[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([tierId])
+  @@index([region])
+  @@map("dealers")
+}
+
+/// Yetkazib berish manzili.
+///
+/// STANDART MANZIL bittadan ko'p bo'lmasligi kerak. Buni qisman
+/// indeks bilan bazada qo'riqlash mumkin emas (Prisma uni
+/// ifodalamaydi), shuning uchun servis standartni bitta tranzaksiya
+/// ichida almashtiradi.
+model DealerAddress {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  dealerId String @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  /// Ichki nom: "Asosiy ombor", "Chilonzor do'koni".
+  label String
+
+  region   String
+  district String?
+  city     String?
+  street   String
+  /// Qo'shimcha: mo'ljal, qavat, kirish.
+  notes    String?
+
+  contactName  String
+  /// 998XXXXXXXXX ko'rinishida (`@barff/utils` normalizePhone).
+  contactPhone String
+
+  isDefault Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([dealerId, isDefault])
+  @@map("dealer_addresses")
+}
+
+/// Diler tarixi: holat o'zgarishi va izohlar.
+///
+/// `audit_logs` dan FARQI: bu diler oqimining O'Z tarixi va u
+/// dilerning o'ziga ham ko'rsatiladi (arizam qanday ketyapti).
+/// Audit jurnali esa ichki va butun tizim bo'ylab.
+model DealerEvent {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  dealerId String @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  fromStatus DealerStatus?
+  toStatus   DealerStatus
+
+  note String?
+
+  actorId String? @db.Uuid
+  actor   User?   @relation("DealerEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([dealerId, createdAt])
+  @@map("dealer_events")
+}
+
+// =============================================================================
+// NARX QOIDALARI (CLAUDE.md §5)
+// =============================================================================
+
+enum PriceRuleKind {
+  /// Bazaviy narx O'RNIGA qo'yiladigan qat'iy narx (tiyinda).
+  FIXED_PRICE
+  /// Foizli chegirma, bazis punktda (250 = 2.5%).
+  PERCENT_DISCOUNT
+  /// Qat'iy summali chegirma (tiyinda).
+  AMOUNT_DISCOUNT
+}
+
+/// Narx qoidasi.
+///
+/// NEGA BITTA JADVAL, NEGA HAR TURGA ALOHIDA EMAS: daraja narxi,
+/// hududiy narx, hajm chegirmasi va aksiya — bularning hammasi bir
+/// xil savolga javob beradi ("shu dilerga, shu variant uchun, shu
+/// miqdorda qancha?"). Alohida jadvallarda ularning USTUNLIGINI
+/// aniqlash kod bo'ylab tarqalib ketardi va "qaysi narx qo'llandi"
+/// degan savolga javob berib bo'lmasdi.
+///
+/// QAMROV maydonlari `null` bo'lsa — "hammasi uchun". Qancha ko'p
+/// maydon to'ldirilgan bo'lsa, qoida shuncha ANIQ va shuncha
+/// ustunroq (`PriceResolver.specificity`).
+model PriceRule {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Inson o'qiydigan nom — admin panelda ko'rinadi.
+  name String
+
+  kind PriceRuleKind
+
+  /// Ma'nosi `kind` ga bog'liq: tiyin yoki bazis punkt.
+  amount   Int
+  currency String @default("UZS")
+
+  // --- QAMROV: qaysi mahsulotga -------------------------------------------
+  variantId  String?          @db.Uuid
+  variant    ProductVariant?  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  productId  String?          @db.Uuid
+  product    Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String?          @db.Uuid
+  category   ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // --- QAMROV: kimga -------------------------------------------------------
+  dealerId String?     @db.Uuid
+  dealer   Dealer?     @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  tierId   String?     @db.Uuid
+  tier     DealerTier? @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  /// Hudud nomi. Diler manzilidan emas, DILER yozuvidan olinadi.
+  region   String?
+
+  // --- SHART ---------------------------------------------------------------
+  /// Shu miqdordan boshlab amal qiladi (hajm chegirmasi shu orqali).
+  minQuantity Int @default(1)
+
+  /// Aksiya kodi. Berilgan bo'lsa, qoida FAQAT kod kiritilganda
+  /// hisobga olinadi — aks holda har bir mijoz uni bilmasdan olardi.
+  code String? @unique
+
+  // --- AMAL QILISH ---------------------------------------------------------
+  validFrom DateTime  @default(now())
+  validTo   DateTime?
+
+  isActive Boolean @default(true)
+
+  /// Qo'lda ustunlik. Aniqlik BIR XIL bo'lgan ikki qoida uchun hal
+  /// qiluvchi belgi; katta son ustun.
+  priority Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isActive, validFrom, validTo])
+  @@index([variantId])
+  @@index([productId])
+  @@index([categoryId])
+  @@index([dealerId])
+  @@index([tierId])
+  @@map("price_rules")
 }
 
 /// Amaldagi refresh token.

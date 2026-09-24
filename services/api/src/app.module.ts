@@ -10,7 +10,9 @@ import { AppConfig } from './config/app.config';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
 import { ContentModule } from './content/content.module';
+import { DealersModule } from './dealers/dealers.module';
 import { LeadsModule } from './leads/leads.module';
+import { PricingModule } from './pricing/pricing.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CacheModule } from './public/cache/cache.module';
 import { MediaModule } from './media/media.module';
@@ -50,6 +52,8 @@ import { UsersModule } from './users/users.module';
     ContentModule,
     NotificationsModule,
     LeadsModule,
+    DealersModule,
+    PricingModule,
     HealthModule,
   ],
   providers: [

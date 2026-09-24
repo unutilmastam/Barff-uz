@@ -276,3 +276,53 @@ jobs:
             exit 1
           fi
           echo "X-Robots-Tag joyida"
+
+      - name: Diler portali tasvirini qurish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/dealer/Dockerfile
+          push: false
+          load: true
+          tags: barff-dealer:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Diler tasviri root'dan ishlamasligini tekshirish
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id barff-dealer:ci -u)
+          echo "Konteyner UID: $USER_ID"
+          if [ "$USER_ID" = "0" ]; then
+            echo "XATO: tasvir root sifatida ishlayapti"
+            exit 1
+          fi
+
+      - name: Diler portali ko'tarilishi va qidiruvga tushmasligini tekshirish
+        run: |
+          docker run -d --name barff-dealer-ci -p 3003:3003 barff-dealer:ci
+
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:3003/login > /dev/null; then
+              echo "Diler portali javob berdi"
+
+              # Portalda DILER NARXLARI bor — u hech qachon
+              # indekslanmasligi kerak (CLAUDE.md §19).
+              HEADERS=$(curl -sI http://127.0.0.1:3003/login || true)
+              docker rm -f barff-dealer-ci
+
+              if ! echo "$HEADERS" | grep -qi "x-robots-tag: noindex"; then
+                echo "XATO: X-Robots-Tag sarlavhasi yo'q"
+                echo "$HEADERS"
+                exit 1
+              fi
+
+              echo "X-Robots-Tag joyida"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "XATO: diler portali ko'tarilmadi"
+          docker logs barff-dealer-ci
+          docker rm -f barff-dealer-ci
+          exit 1

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ORDER_STATUSES, canTransitionOrder, isTerminalOrderStatus } from './orders';
 import { DELIVERY_STATUSES, canTransitionDelivery } from './delivery';
 import { LEAD_STATUSES, canTransitionLead } from './leads';
+import { DEALER_STATUSES, canTransitionDealer, isDealerActive } from './dealers';
 
 describe('buyurtma holatlari', () => {
   it("spec'dagi asosiy ketma-ketlikka ruxsat beradi", () => {
@@ -89,5 +90,44 @@ describe('lead holatlari', () => {
       if (status === 'CONVERTED' || status === 'REJECTED') continue;
       expect(canTransitionLead(status, 'REJECTED'), status).toBe(true);
     }
+  });
+});
+
+describe('diler holatlari', () => {
+  it('asosiy yo‘l: ariza → tasdiq', () => {
+    expect(canTransitionDealer('PENDING', 'APPROVED')).toBe(true);
+    expect(canTransitionDealer('PENDING', 'REJECTED')).toBe(true);
+  });
+
+  it("tasdiqlanmagan dilerni TO'XTATIB bo'lmaydi", () => {
+    // To'xtatish faqat FAOL dilerga nisbatan ma'noga ega. Aks holda
+    // "ko'rib chiqilmoqda" va "to'xtatilgan" holatlari aralashardi.
+    expect(canTransitionDealer('PENDING', 'SUSPENDED')).toBe(false);
+  });
+
+  it('rad etilgan ariza QAYTA ko‘rib chiqilishi mumkin', () => {
+    // Hujjat to'g'rilangan bo'lishi mumkin — rad etish oxirgi so'z emas.
+    expect(canTransitionDealer('REJECTED', 'PENDING')).toBe(true);
+    // Lekin to'g'ridan-to'g'ri tasdiqlab bo'lmaydi: ariza qaytadan
+    // ko'rib chiqilishi kerak.
+    expect(canTransitionDealer('REJECTED', 'APPROVED')).toBe(false);
+  });
+
+  it("to'xtatilgan diler qayta ochilishi yoki rad etilishi mumkin", () => {
+    expect(canTransitionDealer('SUSPENDED', 'APPROVED')).toBe(true);
+    expect(canTransitionDealer('SUSPENDED', 'REJECTED')).toBe(true);
+  });
+
+  it('o‘ziga o‘tish hech qayerda ruxsat etilmagan', () => {
+    for (const status of DEALER_STATUSES) {
+      expect(canTransitionDealer(status, status), status).toBe(false);
+    }
+  });
+
+  it('FAQAT APPROVED holati ishlashga ruxsat beradi', () => {
+    // Bu tekshiruv bir necha qatlamda takrorlanadi (guard, servis,
+    // panel), shuning uchun qoida bitta joyda va u shu yerda qulflanadi.
+    const active = DEALER_STATUSES.filter(isDealerActive);
+    expect(active).toEqual(['APPROVED']);
   });
 });
