@@ -94,7 +94,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S21B Avgust dizayni, harakat tizimi, brend va cPanel (rejadan tashqari — buyurtmachi so'rovi)
 
 **Phase 2**
-- [ ] S22 Dealers domain + registration/approval
+- [x] S22 Dealers domain + registration/approval
 - [ ] S23 Pricing engine
 - [ ] S24 Dealer app shell + auth
 - [ ] S25 Dealer catalog + cart
