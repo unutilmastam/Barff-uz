@@ -25,7 +25,7 @@
 | Q15 | Omborlar ro'yxati va boshlang'ich qoldiqlar                                                                                                                                                                                                                                                                               | S30      | ochiq      |
 | Q16 | Yetkazib berish hududlari, haydovchilar va transport ma'lumotlari                                                                                                                                                                                                                                                         | S32      | ochiq      |
 | Q17 | Hisob-faktura shakli va soliq/QQS qoidalari                                                                                                                                                                                                                                                                               | S36      | ochiq      |
-| Q18 | AWS akkaunti, domen boshqaruvi va Cloudflare kirish huquqlari. **ENG USTUVOR:** bu S21 (Faza 1 darvozasi) ning "staging'ga joylash" vazifasini BLOKLAYAPTI — kod tayyor, quvur yozilgan, lekin hech qayerga chiqarilmagan. Tayyor retsept va smoke test ro'yxati `docs/RELEASE-P1.md` §6 da.                              | S21, S40 | ochiq      |
+| Q18 | Joylash muhiti. **QISMAN JAVOB:** BARFF da `barff.uz` domeni va hostmaster.uz dagi **cPanel** hosting bor. Lekin cPanel bu platformani ko'tara oladimi — hali NOMA'LUM (pastdagi "Hosting" bo'limiga qarang). Domen bor bo'lishi blokerni yopmaydi.                                                                       | S21, S40 | qisman     |
 | Q19 | Rate limiting instansiya xotirasida hisoblanadi — bir nechta ECS task'da amaldagi limit shuncha barobar oshadi. Taqsimlangan (Redis) hisoblagich kerakmi, yoki Cloudflare WAF darajasidagi himoya yetarlimi?                                                                                                              | S41      | ochiq      |
 | Q20 | Production'da API oldida nechta proksi turadi (Cloudflare + ALB = 2)? `API_TRUST_PROXY_HOPS` aynan shu songa teng bo'lishi shart — xato qiymat rate limiter'ni chetlab o'tishga yo'l ochadi.                                                                                                                              | S40      | ochiq      |
 | Q21 | Dilerlar bitta ofis/NAT ortidan kirishadimi? Shunday bo'lsa, `AUTH_LOGIN_MAX_ATTEMPTS_PER_IP` (hozir 50) yetarlimi — bir ofisdagi bir necha xodim bir-birini bloklab qo'ymaydimi?                                                                                                                                         | S22      | ochiq      |
@@ -110,15 +110,44 @@ topilmaydi — yuridik bo'limdan kelishi kerak.
 - Ishlab chiqarish jarayoni rasmlari (galereya va `/production` uchun)
 - Video bo'lsa — bosh ekranda ishlatish mumkin
 
-### 10. Infratuzilma (Q18) — ENG USTUVOR
+### 10. Hosting (Q18) — ENG USTUVOR
 
-Sayt hozir hech qayerga chiqarilmagan. Buning uchun:
+**Ma'lum:** `barff.uz` domeni va hostmaster.uz dagi cPanel hosting bor.
 
-- AWS akkaunti
-- `barff.uz` domen boshqaruvi
-- Cloudflare kirish huquqi
+**Muammo:** bu loyiha oddiy sayt EMAS. Uchta Node.js ilovasi (ommaviy
+sayt, admin panel, API), PostgreSQL, Redis va fayl saqlash kerak.
+Odatdagi cPanel ulushli hosting faqat PHP va MySQL beradi — unda bu
+platforma **umuman ishlamaydi**.
 
-Bularsiz sayt faqat lokal ishlaydi.
+Shuning uchun avval shu beshta savolga javob kerak. Hammasi cPanel
+ichida ko'rinadi:
+
+1. **"Setup Node.js App"** bo'limi bormi? Bo'lsa, qaysi Node
+   versiyalari tanlanadi? (Kamida **20**, afzali 22.)
+2. **PostgreSQL** bormi? (cPanel'da "PostgreSQL Databases" bo'limi.
+   Faqat MySQL bo'lsa — yetarli emas.)
+3. **Redis** bormi?
+4. **SSH** kirish bormi?
+5. Tarif qanday: **ulushli (shared)**, **VPS** yoki **dedicated**?
+
+Skrinshot yuborsangiz ham bo'ladi — parol yoki kalit KERAK EMAS va
+ularni bu yerga yozmang.
+
+**Javobga qarab uch yo'l bor:**
+
+- **Node + PostgreSQL bor bo'lsa** — API va ilovalarni shu yerda
+  ishlatib ko'ramiz. Redis bo'lmasa kesh o'chiriladi (sayt ishlaydi,
+  faqat sekinroq).
+- **Faqat PHP/MySQL bo'lsa** — platforma u yerda ishlamaydi. Eng
+  arzon yechim: o'sha provayderdan kichik **VPS** (2 yadro / 4 GB) va
+  `docker-compose` bilan hammasi bitta mashinada. Domen o'z joyida
+  qoladi, faqat DNS yozuvi VPS ga yo'naltiriladi.
+- **AWS** (CLAUDE.md §13 dagi yo'l) — kerak bo'lganda, o'sish uchun.
+  Hozirgi bosqich uchun u qimmat va ortiqcha.
+
+**DIQQAT:** parollar, SSH kalitlari va API kalitlari chatga
+yozilmaydi va repozitoriyga qo'yilmaydi (CLAUDE.md §12). Ular
+joylash vaqtida to'g'ridan-to'g'ri serverga kiritiladi.
 
 ---
 
