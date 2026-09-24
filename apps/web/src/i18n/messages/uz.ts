@@ -26,6 +26,7 @@ export const uz = {
     heroTitle: 'Tabiat tomchisi',
     heroSubtitle: "Zamonaviy ishlab chiqarish, qat'iy sifat nazorati.",
     heroCta: "Mahsulotlarni ko'rish",
+    heroBottleAlt: 'BARFF shishasi — vaqtinchalik maket',
     heroSecondaryCta: "Hamkor bo'lish",
 
     statsEyebrow: 'Raqamlarda',

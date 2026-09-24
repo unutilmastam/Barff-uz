@@ -6,17 +6,20 @@ import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
-import { HeroVisual } from '@/motion/HeroVisual';
+import { HeroComposition } from '@/motion/HeroComposition';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Bosh ekran.
  *
- * LCP elementi — SARLAVHA, effekt emas (ROADMAP S12). Shuning uchun
- * matn serverda chiziladi va hech narsani kutmaydi; fon rasmi
- * bo'lsa ham u matnning ORTIDA, alohida qatlamda turadi.
+ * LCP elementi — SARLAVHA, effekt emas. Shuning uchun matn serverda
+ * chiziladi va hech narsani kutmaydi; kompozitsiya esa yonida,
+ * alohida ustunda turadi.
  *
- * 3D sahna S17 da shu bo'lim ichiga qo'shiladi — o'shanda ham matn
- * birinchi bo'lib ko'rinishi shart.
+ * Tartib 2026-08-26 qurilishidan: chapda yorliq → sarlavha → matn →
+ * CTA, o'ngda shisha kompozitsiyasi. Sarlavha `TextReveal` bilan
+ * qatorma-qator ko'tariladi, lekin harakat o'chiq bo'lsa ham u
+ * JOYIDA turadi.
  */
 export function HeroSection({
   locale,
@@ -34,13 +37,6 @@ export function HeroSection({
 
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
-      {/*
-        Uch o'lchamli sahna (yoki uning zaxirasi) MATN ORTIDA turadi va
-        `ssr: false` bilan keyin yuklanadi — sarlavha undan oldin
-        chiziladi (CLAUDE.md §26).
-      */}
-      <HeroVisual />
-
       {section?.image != null && (
         <div aria-hidden className="absolute inset-0">
           <ApiImage
@@ -55,14 +51,25 @@ export function HeroSection({
         </div>
       )}
 
-      <Container as="div" className="relative flex min-h-[70vh] flex-col justify-center py-20">
-        <div className="max-w-3xl">
-          {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
-          <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-            {title}
-          </h1>
+      <Container
+        as="div"
+        className="relative grid min-h-[86vh] items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16"
+      >
+        <div>
+          <p className="text-[length:var(--text-label)] font-medium tracking-[var(--text-label--letter-spacing)] text-[var(--color-fg-subtle)] uppercase">
+            BARFF
+          </p>
 
-          <p className="mt-6 max-w-xl text-lg text-[var(--color-fg-muted)] sm:text-xl">
+          {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
+          <TextReveal
+            as="h1"
+            immediate
+            className="mt-4 block font-[family-name:var(--font-display)] text-[length:var(--text-hero)] leading-[var(--text-hero--line-height)] font-semibold tracking-[var(--text-hero--letter-spacing)] text-balance"
+          >
+            {title}
+          </TextReveal>
+
+          <p className="mt-6 max-w-[42ch] text-[length:var(--text-lead)] leading-[var(--text-lead--line-height)] text-[var(--color-fg-muted)]">
             {subtitle}
           </p>
 
@@ -78,6 +85,8 @@ export function HeroSection({
             )}
           </div>
         </div>
+
+        <HeroComposition bottleAlt={messages.home.heroBottleAlt} />
       </Container>
     </section>
   );
