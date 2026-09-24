@@ -5,6 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { formatDate, text } from '@/lib/localized';
 import { Reveal } from '@/motion/Reveal';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Sifat va sertifikatlar.
@@ -25,7 +26,10 @@ export function QualitySection({
   return (
     <Section>
       <Container>
-        <SectionHeader eyebrow={messages.home.qualityEyebrow} title={messages.home.qualityTitle} />
+        <SectionHeader
+          eyebrow={messages.home.qualityEyebrow}
+          title={<TextReveal as="span">{messages.home.qualityTitle}</TextReveal>}
+        />
 
         <div className="mt-12">
           {certificates === null ? (

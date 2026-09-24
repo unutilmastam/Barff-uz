@@ -7,6 +7,8 @@ import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
 import { HeroComposition } from '@/motion/HeroComposition';
+import { HeroField } from '@/motion/HeroField';
+import { Magnetic } from '@/motion/Magnetic';
 import { TextReveal } from '@/motion/TextReveal';
 
 /**
@@ -37,6 +39,13 @@ export function HeroSection({
 
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+      {/*
+        WebGL zarracha maydoni — KONTENT ORTIDA va butunlay bezak.
+        `three` dinamik yuklanadi va faqat kuchli, keng ekranli,
+        WebGL'li qurilmada ishga tushadi; qolgan hamma joyda hero
+        tekis kompozitsiya bilan to'liq ishlaydi.
+      */}
+      <HeroField />
       {section?.image != null && (
         <div aria-hidden className="absolute inset-0">
           <ApiImage
@@ -74,14 +83,18 @@ export function HeroSection({
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href={ctaHref}>{ctaLabel}</Link>
-            </Button>
+            <Magnetic>
+              <Button asChild size="lg">
+                <Link href={ctaHref}>{ctaLabel}</Link>
+              </Button>
+            </Magnetic>
 
             {routeReady('becomePartner') && (
-              <Button asChild size="lg" variant="secondary">
-                <Link href={`/${locale}/become-partner`}>{messages.home.heroSecondaryCta}</Link>
-              </Button>
+              <Magnetic>
+                <Button asChild size="lg" variant="secondary">
+                  <Link href={`/${locale}/become-partner`}>{messages.home.heroSecondaryCta}</Link>
+                </Button>
+              </Magnetic>
             )}
           </div>
         </div>

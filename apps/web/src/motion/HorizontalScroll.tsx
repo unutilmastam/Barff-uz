@@ -13,10 +13,15 @@ export interface HorizontalScrollProps {
  * Gorizontal skroll: bo'lim ekranga "yopishtiriladi" va ichidagi lenta
  * yon tomonga suriladi.
  *
- * HARAKAT O'CHIQ BO'LSA lenta oddiy gorizontal skrollga aylanadi
- * (`overflow-x: auto`) — kontent hech qachon yetib bo'lmaydigan bo'lib
- * qolmaydi (CLAUDE.md §17: animatsiya kontentni tushunishning yagona
- * yo'li bo'lmasligi kerak).
+ * FAQAT DESKTOPDA yopishtiriladi. Telefonda va harakat o'chiq bo'lganda
+ * lenta oddiy gorizontal skrollga aylanadi (`overflow-x: auto`) —
+ * kontent hech qachon yetib bo'lmaydigan bo'lib qolmaydi
+ * (CLAUDE.md §17: animatsiya kontentni tushunishning yagona yo'li
+ * bo'lmasligi kerak).
+ *
+ * Shu sababli `overflow-x-auto` HAR DOIM qo'yiladi: desktopda GSAP
+ * `x` ni boshqaradi va skroll ishlatilmaydi, mobilda esa u yagona
+ * yo'l bo'lib qoladi.
  */
 export function HorizontalScroll({ children, className, trackClassName }: HorizontalScrollProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -52,9 +57,7 @@ export function HorizontalScroll({ children, className, trackClassName }: Horizo
     <div ref={sectionRef} className={className}>
       <div
         ref={trackRef}
-        // Harakat yoqilganda GSAP `x` ni boshqaradi va skroll kerak
-        // emas; o'chiq bo'lsa brauzerning o'z skrolli qoladi.
-        className={enabled ? trackClassName : `overflow-x-auto ${trackClassName ?? ''}`}
+        className={`overflow-x-auto md:overflow-x-visible ${trackClassName ?? ''}`}
       >
         {children}
       </div>

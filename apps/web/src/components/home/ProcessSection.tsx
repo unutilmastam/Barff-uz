@@ -5,6 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { type Messages } from '@/i18n/dictionary';
 import { text } from '@/lib/localized';
 import { Reveal } from '@/motion/Reveal';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Ishlab chiqarish jarayoni (CLAUDE.md §4).
@@ -25,7 +26,10 @@ export function ProcessSection({
   return (
     <Section tone="raised">
       <Container>
-        <SectionHeader eyebrow={messages.home.processEyebrow} title={messages.home.processTitle} />
+        <SectionHeader
+          eyebrow={messages.home.processEyebrow}
+          title={<TextReveal as="span">{messages.home.processTitle}</TextReveal>}
+        />
 
         <div className="mt-12">
           {steps === null ? (

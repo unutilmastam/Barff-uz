@@ -5,14 +5,19 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import { Container } from '@/components/layout/Container';
 import { ProductCard } from '@/components/products/ProductCard';
 import { type Messages } from '@/i18n/dictionary';
-import { Reveal } from '@/motion/Reveal';
+import { HorizontalScroll } from '@/motion/HorizontalScroll';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
- * Mahsulotlar bo'limi.
+ * Mahsulotlar ko'rgazmasi.
  *
- * Mobilda gorizontal siljish, kengroq ekranda to'r. Siljish CSS bilan
- * (`snap`) — JavaScript karusel emas: kontentga yetib borish uchun
- * animatsiya SHART bo'lmasligi kerak (CLAUDE.md §17).
+ * DESKTOPDA bo'lim ekranga yopishtiriladi va lenta skroll bilan yon
+ * tomonga suriladi (2026-08-26 qurilishidagi "Kolleksiya"). MOBILDA
+ * esa oddiy gorizontal siljish (`snap`) qoladi — telefonda
+ * yopishtirish barmoq skrollini qo'lga oladi.
+ *
+ * Har ikkala holatda ham lenta klaviatura bilan siljiydi va kontentga
+ * yetib borish uchun animatsiya SHART emas (CLAUDE.md §17).
  */
 export function ProductsSection({
   locale,
@@ -28,7 +33,7 @@ export function ProductsSection({
       <Container>
         <SectionHeader
           eyebrow={messages.home.productsEyebrow}
-          title={messages.home.productsTitle}
+          title={<TextReveal as="span">{messages.home.productsTitle}</TextReveal>}
           action={
             <Button asChild variant="secondary">
               <Link href={`/${locale}/products`}>{messages.home.productsAll}</Link>
@@ -45,20 +50,27 @@ export function ProductsSection({
           ) : products.length === 0 ? (
             <EmptyState message={messages.products.empty} />
           ) : (
-            <Reveal
-              as="ul"
-              stagger
-              className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4"
-              // Gorizontal ro'yxat klaviatura bilan ham siljiy olishi uchun.
-              tabIndex={0}
-              aria-label={messages.home.productsTitle}
-            >
-              {products.map((product) => (
-                <li key={product.id} className="w-[75vw] shrink-0 snap-start sm:w-auto">
-                  <ProductCard product={product} locale={locale} messages={messages} />
-                </li>
-              ))}
-            </Reveal>
+            <HorizontalScroll trackClassName="-mx-4 flex snap-x snap-mandatory gap-5 px-4 pb-4 md:mx-0 md:w-max md:snap-none md:px-0 md:pb-0">
+              <ul
+                className="contents"
+                // Gorizontal ro'yxat klaviatura bilan ham siljiy olishi uchun.
+                tabIndex={0}
+                aria-label={messages.home.productsTitle}
+              >
+                {products.map((product, index) => (
+                  <li
+                    key={product.id}
+                    className="w-[75vw] shrink-0 snap-start sm:w-[45vw] md:w-[26rem]"
+                  >
+                    <p className="mb-3 text-[length:var(--text-label)] tracking-[var(--text-label--letter-spacing)] text-[var(--color-fg-subtle)]">
+                      {String(index + 1).padStart(2, '0')} /{' '}
+                      {String(products.length).padStart(2, '0')}
+                    </p>
+                    <ProductCard product={product} locale={locale} messages={messages} />
+                  </li>
+                ))}
+              </ul>
+            </HorizontalScroll>
           )}
         </div>
       </Container>

@@ -28,11 +28,11 @@ Frontend: - Next.js + React + TypeScript - Tailwind CSS - shadcn/ui
 where useful - TanStack Query - React Hook Form + Zod - Zustand only
 when needed
 
-Visual: - GSAP (+ ScrollTrigger, SplitText) - Lenis - respect
-`prefers-reduced-motion`
+Visual: - GSAP (+ ScrollTrigger, SplitText) - Lenis - Three.js for an
+ambient WebGL layer - respect `prefers-reduced-motion`
 
-No WebGL. The hero is a flat illustrated composition, not a 3D scene
-(§17).
+The hero product is a flat illustrated composition; WebGL adds depth
+behind it but never draws the product itself (§17).
 
 Backend: - NestJS + TypeScript - REST API - Swagger/OpenAPI - modular
 monolith first; do NOT start with unnecessary microservices
@@ -292,8 +292,20 @@ motion - parallax - section reveals - split-text reveals - pinned
 horizontal product showcase - magnetic buttons - image reveals -
 microinteractions
 
-**No Three.js.** The earlier 3D hero was replaced by the restored
-flat composition (`git a86f349`); WebGL is not part of this design.
+**WebGL never draws the product.** The earlier 3D hero was a bottle
+built in code — an invented shape, not BARFF's. It is replaced by the
+restored flat illustration (`git a86f349`). Three.js survives as an
+*ambient* layer only (`motion/HeroField.tsx`): a particle field behind
+the composition, which makes no product claim. Two different bottles
+on one screen, and a product that changes shape with the device, were
+the reasons.
+
+When the real model arrives (Q24), that layer is where a true product
+scene goes.
+
+The WebGL layer runs only when motion is enabled, WebGL is present and
+the viewport is wide; `three` is dynamically imported. Everywhere else
+the hero is complete without it.
 
 Motion constants live in one place (`apps/web/src/motion/config.ts`)
 and mirror the CSS duration/easing tokens; a test guards the pair.

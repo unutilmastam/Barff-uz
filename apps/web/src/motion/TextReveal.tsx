@@ -26,8 +26,16 @@ export interface TextRevealProps {
  * JavaScript ichida, animatsiya boshlanishi oldidan qo'yiladi — skript
  * yuklanmasa yoki qurilma kuchsiz bo'lsa, matn shunchaki joyida turadi.
  *
- * QULAYLIK: bo'lingan matnni ekran o'quvchi harf-harf o'qimasligi uchun
- * konteynerga `aria-label` qo'yiladi va bo'laklar `aria-hidden` bo'ladi.
+ * QULAYLIK: `lines` va `words` da hech narsa qilinmaydi — ekran
+ * o'quvchi qator va so'zlarni tabiiy o'qiydi.
+ *
+ * `chars` esa harf-harf o'qilardi, shuning uchun u yerda bo'laklar
+ * `aria-hidden` bo'ladi va yoniga faqat ekran o'quvchi uchun to'liq
+ * matn nusxasi qo'yiladi.
+ *
+ * DIQQAT: konteynerga `aria-label` QO'YILMAYDI. `<span>` kabi rolsiz
+ * elementda u ARIA qoidasi bo'yicha taqiqlangan va axe uni haqli
+ * ravishda rad etadi (o'lchab aniqlangan).
  *
  * `2026-08-26` qurilishidan tiklandi (`components/animation/SplitText.tsx`
  * va `TextReveal.tsx` bitta komponentga birlashtirildi — ular faqat
@@ -60,8 +68,8 @@ export function TextReveal({
       if (cancelled) return;
 
       const label = root.textContent ?? '';
-      root.setAttribute('aria-label', label);
       root.dataset['reveal'] = 'on';
+      let screenReaderCopy: HTMLElement | undefined;
 
       const context = gsap.context(() => {
         const split = new SplitText(root, {
@@ -71,7 +79,17 @@ export function TextReveal({
           autoSplit: type === 'lines',
           onSplit: (self) => {
             const pieces = self[type] as HTMLElement[];
-            for (const piece of pieces) piece.setAttribute('aria-hidden', 'true');
+
+            if (type === 'chars') {
+              for (const piece of pieces) piece.setAttribute('aria-hidden', 'true');
+
+              if (screenReaderCopy === undefined) {
+                screenReaderCopy = document.createElement('span');
+                screenReaderCopy.className = 'sr-only';
+                screenReaderCopy.textContent = label;
+                root.append(screenReaderCopy);
+              }
+            }
 
             return revealText(pieces, {
               ...(immediate ? {} : { trigger: root }),
@@ -86,7 +104,7 @@ export function TextReveal({
 
       cleanup = () => {
         context.revert();
-        root.removeAttribute('aria-label');
+        screenReaderCopy?.remove();
         delete root.dataset['reveal'];
       };
     })();

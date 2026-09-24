@@ -4,7 +4,12 @@ import { cn } from '../lib/cn';
 export interface SectionHeaderProps {
   /** Kichik ustki yozuv (masalan "Mahsulotlar"). */
   eyebrow?: string;
-  title: string;
+  /**
+   * `ReactNode`, `string` emas: sarlavha `TextReveal` kabi animatsiya
+   * o'ramiga o'ralishi mumkin. Matn baribir `<h2>` ichida qoladi, ya'ni
+   * hujjat tuzilmasi o'zgarmaydi.
+   */
+  title: ReactNode;
   description?: string;
   /** Sarlavha darajasi. Sahifada `<h1>` bitta bo'lishi uchun sozlanadi. */
   as?: 'h2' | 'h3';
@@ -37,7 +42,7 @@ export function SectionHeader({
           </p>
         )}
 
-        <Heading className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+        <Heading className="mt-3 block font-[family-name:var(--font-display)] text-[length:var(--text-title)] leading-[var(--text-title--line-height)] font-semibold tracking-[var(--text-title--letter-spacing)] text-balance">
           {title}
         </Heading>
 

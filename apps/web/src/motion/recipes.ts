@@ -257,17 +257,30 @@ export function horizontalScroll(
 
   const distance = () => Math.max(track.scrollWidth - window.innerWidth, 0);
 
-  return gsap.to(track, {
-    x: () => -distance(),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: () => `+=${distance()}`,
-      pin: true,
-      scrub: true,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-    },
+  /*
+    FAQAT DESKTOPDA. Telefonda bo'limni "yopishtirish" barmoq bilan
+    skrollni qo'lga oladi va foydalanuvchi sahifadan chiqa olmay
+    qolishi mumkin — u yerda brauzerning o'z gorizontal skrolli
+    qoladi. `matchMedia` ishlatiladi, chunki u oyna o'lchami
+    o'zgarganda animatsiyani o'zi qayta quradi.
+  */
+  const media = gsap.matchMedia();
+
+  media.add(MEDIA.desktop, () => {
+    gsap.to(track, {
+      x: () => -distance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${distance()}`,
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
   });
+
+  return media;
 }
