@@ -28,6 +28,7 @@ export const AUDIT_ACTIONS = {
   DEALER_ADDRESS_UPDATED: 'dealer.address.updated',
   DEALER_ADDRESS_DELETED: 'dealer.address.deleted',
   DEALER_TIER_CHANGED: 'dealer.tier.changed',
+  PRICE_RULE_CHANGED: 'pricing.rule.changed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

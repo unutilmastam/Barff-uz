@@ -315,7 +315,8 @@ model ProductCategory {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  products Product[]
+  products   Product[]
+  priceRules PriceRule[]
 
   @@index([isActive, displayOrder])
   @@index([parentId])
@@ -362,9 +363,10 @@ model Product {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  variants  ProductVariant[]
-  images    ProductImage[]
-  documents ProductDocument[]
+  variants   ProductVariant[]
+  images     ProductImage[]
+  documents  ProductDocument[]
+  priceRules PriceRule[]
 
   @@index([categoryId])
   @@index([isActive, displayOrder])
@@ -395,7 +397,11 @@ model ProductVariant {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  prices ProductPrice[]
+  prices     ProductPrice[]
+  priceRules PriceRule[]
+
+  /// Eng kam buyurtma miqdori (dona). `null` — cheklov yo'q.
+  minOrderQuantity Int?
 
   @@index([productId, isActive])
   @@map("product_variants")
@@ -862,7 +868,8 @@ model DealerTier {
   isActive     Boolean @default(true)
   displayOrder Int     @default(0)
 
-  dealers Dealer[]
+  dealers    Dealer[]
+  priceRules PriceRule[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -922,8 +929,9 @@ model Dealer {
   leadId String? @db.Uuid
   lead   Lead?   @relation("LeadDealer", fields: [leadId], references: [id], onDelete: SetNull)
 
-  addresses DealerAddress[]
-  events    DealerEvent[]
+  addresses  DealerAddress[]
+  events     DealerEvent[]
+  priceRules PriceRule[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -994,6 +1002,90 @@ model DealerEvent {
 
   @@index([dealerId, createdAt])
   @@map("dealer_events")
+}
+
+// =============================================================================
+// NARX QOIDALARI (CLAUDE.md §5)
+// =============================================================================
+
+enum PriceRuleKind {
+  /// Bazaviy narx O'RNIGA qo'yiladigan qat'iy narx (tiyinda).
+  FIXED_PRICE
+  /// Foizli chegirma, bazis punktda (250 = 2.5%).
+  PERCENT_DISCOUNT
+  /// Qat'iy summali chegirma (tiyinda).
+  AMOUNT_DISCOUNT
+}
+
+/// Narx qoidasi.
+///
+/// NEGA BITTA JADVAL, NEGA HAR TURGA ALOHIDA EMAS: daraja narxi,
+/// hududiy narx, hajm chegirmasi va aksiya — bularning hammasi bir
+/// xil savolga javob beradi ("shu dilerga, shu variant uchun, shu
+/// miqdorda qancha?"). Alohida jadvallarda ularning USTUNLIGINI
+/// aniqlash kod bo'ylab tarqalib ketardi va "qaysi narx qo'llandi"
+/// degan savolga javob berib bo'lmasdi.
+///
+/// QAMROV maydonlari `null` bo'lsa — "hammasi uchun". Qancha ko'p
+/// maydon to'ldirilgan bo'lsa, qoida shuncha ANIQ va shuncha
+/// ustunroq (`PriceResolver.specificity`).
+model PriceRule {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Inson o'qiydigan nom — admin panelda ko'rinadi.
+  name String
+
+  kind PriceRuleKind
+
+  /// Ma'nosi `kind` ga bog'liq: tiyin yoki bazis punkt.
+  amount   Int
+  currency String @default("UZS")
+
+  // --- QAMROV: qaysi mahsulotga -------------------------------------------
+  variantId  String?          @db.Uuid
+  variant    ProductVariant?  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  productId  String?          @db.Uuid
+  product    Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String?          @db.Uuid
+  category   ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // --- QAMROV: kimga -------------------------------------------------------
+  dealerId String?     @db.Uuid
+  dealer   Dealer?     @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  tierId   String?     @db.Uuid
+  tier     DealerTier? @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  /// Hudud nomi. Diler manzilidan emas, DILER yozuvidan olinadi.
+  region   String?
+
+  // --- SHART ---------------------------------------------------------------
+  /// Shu miqdordan boshlab amal qiladi (hajm chegirmasi shu orqali).
+  minQuantity Int @default(1)
+
+  /// Aksiya kodi. Berilgan bo'lsa, qoida FAQAT kod kiritilganda
+  /// hisobga olinadi — aks holda har bir mijoz uni bilmasdan olardi.
+  code String? @unique
+
+  // --- AMAL QILISH ---------------------------------------------------------
+  validFrom DateTime  @default(now())
+  validTo   DateTime?
+
+  isActive Boolean @default(true)
+
+  /// Qo'lda ustunlik. Aniqlik BIR XIL bo'lgan ikki qoida uchun hal
+  /// qiluvchi belgi; katta son ustun.
+  priority Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isActive, validFrom, validTo])
+  @@index([variantId])
+  @@index([productId])
+  @@index([categoryId])
+  @@index([dealerId])
+  @@index([tierId])
+  @@map("price_rules")
 }
 
 /// Amaldagi refresh token.

@@ -50,6 +50,23 @@ tekshiruv ESKI build'ni ko'radi. To'g'ri buyruq:
 pkill -f next-server
 ```
 
+XUDDI SHU TUZOQ API'da ham takrorlandi (S23 da). `pkill` buyrug'i
+boshqa buyruq bilan birga yozilgan edi va o'sha buyruq yiqilgani
+uchun `pkill` UMUMAN ishlamadi — natijada eski API port 3000 ni
+ushlab turdi va admin panel yangi endpoint'ga `404` oldi. Ekran
+"buzuq" ko'rindi, aslida kod joyida edi.
+
+ISHONCHLI USUL — jarayonning YOSHINI ko'rish, nomini emas:
+
+```bash
+ps -o pid,lstart,cmd -p $(pgrep -f 'dist/main.js')
+```
+
+Ishga tushish vaqti oxirgi `build` dan OLDIN bo'lsa — bu eski
+jarayon. Uni PID bo'yicha o'ldiring. Va har doim MARSHRUT bilan
+tasdiqlang: `404` — eski build, `401` — yangi build (endpoint bor,
+token yo'q).
+
 Tekshirish — brauzer emas, port: sahifa HTML dagi CSS nomi `200`
 qaytarishi kerak.
 

@@ -126,3 +126,74 @@ export const dealerTierSchema = z.object({
 });
 
 export const dealerTierUpdateSchema = dealerTierSchema.partial();
+
+/**
+ * Narx qoidasi (S23).
+ *
+ * `amount` ma'nosi `kind` ga bog'liq: `FIXED_PRICE` va
+ * `AMOUNT_DISCOUNT` uchun TIYIN, `PERCENT_DISCOUNT` uchun BAZIS
+ * PUNKT (250 = 2.5%). Shuning uchun yuqori chegara ham shartli
+ * tekshiriladi — 10 000 bazis punkt 100% degani, undan ortig'i
+ * ma'nosiz.
+ */
+export const PRICE_RULE_KINDS = ['FIXED_PRICE', 'PERCENT_DISCOUNT', 'AMOUNT_DISCOUNT'] as const;
+
+export const priceRuleSchema = z
+  .object({
+    name: z.string().trim().min(2, { message: 'Nom kiritilishi shart' }).max(200),
+    kind: z.enum(PRICE_RULE_KINDS),
+    amount: z.number().int().min(0).max(100_000_000_00),
+    currency: z.string().trim().length(3).optional(),
+
+    variantId: z.uuid().nullable().optional(),
+    productId: z.uuid().nullable().optional(),
+    categoryId: z.uuid().nullable().optional(),
+    dealerId: z.uuid().nullable().optional(),
+    tierId: z.uuid().nullable().optional(),
+    region: z.string().trim().min(2).max(120).nullable().optional(),
+
+    minQuantity: z.number().int().min(1).max(1_000_000).optional(),
+    code: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z0-9_-]{3,32}$/, { message: 'Kod 3-32 ta harf, raqam, _ yoki -' })
+      .nullable()
+      .optional(),
+
+    validFrom: z.coerce.date().optional(),
+    validTo: z.coerce.date().nullable().optional(),
+    isActive: z.boolean().optional(),
+    priority: z.number().int().min(0).max(10_000).optional(),
+  })
+  .refine((v) => v.kind !== 'PERCENT_DISCOUNT' || v.amount <= 10_000, {
+    message: 'Foizli chegirma 10 000 bazis punktdan (100%) oshmasligi kerak',
+    path: ['amount'],
+  })
+  .refine(
+    (v) =>
+      v.validTo === undefined ||
+      v.validTo === null ||
+      v.validFrom === undefined ||
+      v.validTo > v.validFrom,
+    {
+      message: 'Tugash sanasi boshlanish sanasidan keyin bo‘lishi kerak',
+      path: ['validTo'],
+    },
+  );
+
+export const priceRuleUpdateSchema = priceRuleSchema;
+
+/** Savat narxini so'rash. */
+export const priceQuoteSchema = z.object({
+  lines: z
+    .array(
+      z.object({
+        variantId: z.uuid(),
+        quantity: z.number().int().min(1).max(1_000_000),
+      }),
+    )
+    .min(1, { message: 'Kamida bitta pozitsiya kerak' })
+    .max(200),
+  promoCode: z.string().trim().toUpperCase().max(32).optional(),
+});
