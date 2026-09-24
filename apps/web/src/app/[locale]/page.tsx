@@ -2,6 +2,7 @@ import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { FactorySection } from '@/components/home/FactorySection';
 import { HeroSection } from '@/components/home/HeroSection';
+import { MarqueeSection } from '@/components/home/MarqueeSection';
 import { NewsSection } from '@/components/home/NewsSection';
 import { PartnerCta } from '@/components/home/PartnerCta';
 import { ProcessSection } from '@/components/home/ProcessSection';
@@ -83,6 +84,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <JsonLd data={organizationJsonLd(locale, messages.meta.description)} />
 
       <HeroSection locale={locale} messages={messages} section={section('hero')} />
+
+      {/* Hero va raqamlar orasida ritm — bezak lenta. */}
+      <MarqueeSection />
       <StatsSection messages={messages} />
       <FactorySection locale={locale} messages={messages} section={section('factory')} />
       <ProductsSection
