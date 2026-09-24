@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DEALER_STATUSES } from '@barff/types';
+import { DEALER_STATUSES, ORDER_STATUSES } from '@barff/types';
 import { emailSchema, passwordSchema, phoneSchema } from './primitives';
 import { BUSINESS_TYPES } from './lead';
 
@@ -222,4 +222,23 @@ export const dealerCatalogQuerySchema = z.object({
   search: z.string().trim().min(1).max(120).optional(),
   /** Hajm millilitrda — aniq moslik. */
   volumeMl: z.coerce.number().int().min(1).max(100_000).optional(),
+});
+
+/** Buyurtma yuborish. */
+export const orderSubmitSchema = z.object({
+  addressId: z.uuid(),
+  note: z.string().trim().max(2000).optional(),
+  /**
+   * Takroriy yuborishga qarshi kalit.
+   *
+   * Mijoz beradi (odatda UUID). Bir xil kalit bilan kelgan ikkinchi
+   * so'rov YANGI buyurtma yaratmaydi — mavjudini qaytaradi.
+   */
+  idempotencyKey: z.string().trim().min(8).max(128).optional(),
+});
+
+/** Admin buyurtma holatini o'zgartiradi. */
+export const orderStatusUpdateSchema = z.object({
+  status: z.enum(ORDER_STATUSES),
+  note: z.string().trim().max(2000).optional(),
 });

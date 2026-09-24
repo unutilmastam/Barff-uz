@@ -62,9 +62,10 @@ model User {
   refreshFamilies RefreshTokenFamily[] @relation("UserRefreshFamilies")
 
   /// Diler akkaunti (faqat DEALER rolidagi foydalanuvchida bo'ladi).
-  dealer          Dealer?       @relation("DealerAccount")
-  reviewedDealers Dealer[]      @relation("DealerReviewer")
-  dealerEvents    DealerEvent[] @relation("DealerEventActor")
+  dealer          Dealer?              @relation("DealerAccount")
+  orderStatuses   OrderStatusHistory[] @relation("OrderStatusActor")
+  reviewedDealers Dealer[]             @relation("DealerReviewer")
+  dealerEvents    DealerEvent[]        @relation("DealerEventActor")
 
   @@index([isActive])
   @@index([createdAt])
@@ -400,6 +401,7 @@ model ProductVariant {
   prices     ProductPrice[]
   priceRules PriceRule[]
   cartItems  CartItem[]
+  orderItems OrderItem[]
 
   /// Eng kam buyurtma miqdori (dona). `null` — cheklov yo'q.
   minOrderQuantity Int?
@@ -934,6 +936,7 @@ model Dealer {
   events     DealerEvent[]
   priceRules PriceRule[]
   cart       Cart?
+  orders     Order[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -972,6 +975,8 @@ model DealerAddress {
   contactPhone String
 
   isDefault Boolean @default(false)
+
+  orders Order[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1147,6 +1152,170 @@ model CartItem {
   @@unique([cartId, variantId])
   @@index([cartId])
   @@map("cart_items")
+}
+
+// =============================================================================
+// BUYURTMALAR (CLAUDE.md §5, §28)
+// =============================================================================
+
+enum OrderStatus {
+  DRAFT
+  PENDING_REVIEW
+  CONFIRMED
+  RESERVED
+  PICKING
+  PACKED
+  READY_FOR_DELIVERY
+  DRIVER_ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+/// Diler buyurtmasi.
+///
+/// NARX BU YERDA MUZLATILADI (`order_items`). Savatda narx har safar
+/// qayta hisoblanadi (S25), lekin BUYURTMA YUBORILGAN lahzadan
+/// boshlab u o'zgarmaydi: mijoz ko'rgan summa bilan hisob-faktura
+/// FARQ QILMASLIGI kerak.
+model Order {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Inson o'qiydigan raqam: `BRF-2026-000123`. Yagona.
+  number String @unique
+
+  dealerId String @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Restrict)
+
+  status OrderStatus @default(PENDING_REVIEW)
+
+  /**
+   * YETKAZIB BERISH MANZILI NUSXA sifatida saqlanadi.
+   * Havola YETARLI EMAS: diler manzilni keyinchalik tahrirlashi yoki
+   * o'chirishi mumkin, va o'shanda eski buyurtma QAYERGA yetkazilgani
+   * yo'qolardi. Havola ham qoldiriladi (tahlil uchun), lekin matn
+   * buyurtmaning O'ZIDA.
+   */
+  addressId       String?        @db.Uuid
+  address         DealerAddress? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  shippingLabel   String
+  shippingRegion  String
+  shippingAddress String
+  contactName     String
+  contactPhone    String
+  /// Mo'ljal, qavat, kirish.
+  shippingNotes   String?
+
+  /// Diler izohi.
+  note String?
+
+  /// Buyurtma paytidagi aksiya kodi — tahlil va nizolar uchun.
+  promoCode String?
+
+  /// Pozitsiyalar yig'indisi (tiyin). Yuborish paytida muzlatiladi.
+  subtotal Int
+  /// Umumiy chegirma (tiyin) — `basePrice` va `unitPrice` farqi.
+  discount Int    @default(0)
+  /// To'lanishi kerak summa (tiyin). Hozircha `subtotal` ga teng;
+  /// yetkazib berish narxi va soliq S34+ da qo'shiladi.
+  total    Int
+  currency String @default("UZS")
+
+  /**
+   * Takroriy yuborishga qarshi kalit.
+   * Mijoz tugmani ikki marta bossa yoki tarmoq uzilib qayta yuborsa,
+   * IKKITA buyurtma yaratilmasligi kerak. Kalit diler bo'yicha
+   * yagona: bir xil kalit bilan kelgan ikkinchi so'rov MAVJUD
+   * buyurtmani qaytaradi.
+   */
+  idempotencyKey String?
+
+  items   OrderItem[]
+  history OrderStatusHistory[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([dealerId, idempotencyKey])
+  @@index([dealerId, createdAt])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+/// Buyurtma pozitsiyasi — NARX MUZLATILGAN holda.
+///
+/// Mahsulot nomi ham NUSXA sifatida saqlanadi: mahsulot keyin
+/// o'zgartirilsa yoki o'chirilsa, eski buyurtmada NIMA buyurtma
+/// qilingani yo'qolmasligi kerak.
+model OrderItem {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// `Restrict`: pozitsiyasi bor variantni o'chirib bo'lmaydi.
+  variantId String         @db.Uuid
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  /// Yuborish paytidagi nusxalar.
+  sku         String
+  productName Json
+  volumeMl    Int
+
+  quantity Int
+
+  /// Chegirmasiz narx (tiyin, bir dona).
+  basePrice Int
+  /// Qo'llangan narx (tiyin, bir dona).
+  unitPrice Int
+  /// `unitPrice * quantity`.
+  total     Int
+
+  /// Qaysi qoida qo'llangani — nizo chiqsa javob shu yerda.
+  appliedRuleId   String? @db.Uuid
+  appliedRuleName String?
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+/// Holat tarixi — HAR BIR o'tish yoziladi (CLAUDE.md §23).
+model OrderStatusHistory {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+
+  note String?
+
+  /// Kim o'zgartirdi. `null` — tizim (avtomatik o'tish).
+  actorId String? @db.Uuid
+  actor   User?   @relation("OrderStatusActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
+}
+
+/// Buyurtma raqami uchun hisoblagich.
+///
+/// NEGA ALOHIDA JADVAL: `COUNT(*) + 1` poyga sharoitida ikki bir xil
+/// raqam berardi. Bu yerda `UPDATE ... RETURNING` atomar oshiradi.
+/// Yil bo'yicha: har yil 1 dan boshlanadi.
+model OrderCounter {
+  year  Int @id
+  value Int @default(0)
+
+  @@map("order_counters")
 }
 
 /// Amaldagi refresh token.
