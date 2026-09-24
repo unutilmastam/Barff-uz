@@ -25,7 +25,7 @@
 | Q15 | Omborlar ro'yxati va boshlang'ich qoldiqlar                                                                                                                                                                                                                                                                               | S30      | ochiq      |
 | Q16 | Yetkazib berish hududlari, haydovchilar va transport ma'lumotlari                                                                                                                                                                                                                                                         | S32      | ochiq      |
 | Q17 | Hisob-faktura shakli va soliq/QQS qoidalari                                                                                                                                                                                                                                                                               | S36      | ochiq      |
-| Q18 | Joylash muhiti. **QISMAN JAVOB:** BARFF da `barff.uz` domeni va hostmaster.uz dagi **cPanel** hosting bor. Lekin cPanel bu platformani ko'tara oladimi — hali NOMA'LUM (pastdagi "Hosting" bo'limiga qarang). Domen bor bo'lishi blokerni yopmaydi.                                                                       | S21, S40 | qisman     |
+| Q18 | Joylash muhiti. **JAVOB KELDI:** hostmaster.uz cPanel — Node.js App, PostgreSQL, SSH va Terminal BOR; Redis, S3 va Docker YO'Q; ulushli (shared) tarif. Ikki narsa qurilishi kerak (pastga qarang), ikki savol ochiq: Node versiyasi va xotira chegarasi.                                                                 | S21, S40 | qisman     |
 | Q19 | Rate limiting instansiya xotirasida hisoblanadi — bir nechta ECS task'da amaldagi limit shuncha barobar oshadi. Taqsimlangan (Redis) hisoblagich kerakmi, yoki Cloudflare WAF darajasidagi himoya yetarlimi?                                                                                                              | S41      | ochiq      |
 | Q20 | Production'da API oldida nechta proksi turadi (Cloudflare + ALB = 2)? `API_TRUST_PROXY_HOPS` aynan shu songa teng bo'lishi shart — xato qiymat rate limiter'ni chetlab o'tishga yo'l ochadi.                                                                                                                              | S40      | ochiq      |
 | Q21 | Dilerlar bitta ofis/NAT ortidan kirishadimi? Shunday bo'lsa, `AUTH_LOGIN_MAX_ATTEMPTS_PER_IP` (hozir 50) yetarlimi — bir ofisdagi bir necha xodim bir-birini bloklab qo'ymaydimi?                                                                                                                                         | S22      | ochiq      |
@@ -128,44 +128,65 @@ topilmaydi — yuridik bo'limdan kelishi kerak.
 - Ishlab chiqarish jarayoni rasmlari (galereya va `/production` uchun)
 - Video bo'lsa — bosh ekranda ishlatish mumkin
 
-### 10. Hosting (Q18) — ENG USTUVOR
+### 10. Hosting (Q18) — SKRINSHOT KELDI
 
-**Ma'lum:** `barff.uz` domeni va hostmaster.uz dagi cPanel hosting bor.
+**cPanel'da BOR:**
 
-**Muammo:** bu loyiha oddiy sayt EMAS. Uchta Node.js ilovasi (ommaviy
-sayt, admin panel, API), PostgreSQL, Redis va fayl saqlash kerak.
-Odatdagi cPanel ulushli hosting faqat PHP va MySQL beradi — unda bu
-platforma **umuman ishlamaydi**.
+| Kerak                                 | Holat                               |
+| ------------------------------------- | ----------------------------------- |
+| `Setup Node.js App`                   | ✅ bor                              |
+| `PostgreSQL Databases` + `phpPgAdmin` | ✅ bor                              |
+| `SSH Access`, `Terminal`, `Cron Jobs` | ✅ bor                              |
+| Redis                                 | ❌ yo'q                             |
+| S3 / obyekt saqlash                   | ❌ yo'q                             |
+| Docker                                | ❌ yo'q (ulushli tarifda bo'lmaydi) |
 
-Shuning uchun avval shu beshta savolga javob kerak. Hammasi cPanel
-ichida ko'rinadi:
+Tarif **ulushli** (`Shared IP Address 91.213.99.99`), cPanel 136.
 
-1. **"Setup Node.js App"** bo'limi bormi? Bo'lsa, qaysi Node
-   versiyalari tanlanadi? (Kamida **20**, afzali 22.)
-2. **PostgreSQL** bormi? (cPanel'da "PostgreSQL Databases" bo'limi.
-   Faqat MySQL bo'lsa — yetarli emas.)
-3. **Redis** bormi?
-4. **SSH** kirish bormi?
-5. Tarif qanday: **ulushli (shared)**, **VPS** yoki **dedicated**?
+**DIQQAT:** birlamchi domen `unutilmastam.uz`, `barff.uz` emas. Demak
+`barff.uz` bu akkauntga qo'shimcha domen sifatida ulanishi kerak.
 
-Skrinshot yuborsangiz ham bo'ladi — parol yoki kalit KERAK EMAS va
-ularni bu yerga yozmang.
+#### Redis yo'qligi — bu KESH masalasi EMAS
 
-**Javobga qarab uch yo'l bor:**
+Redis'da ikkita XAVFSIZLIK holati saqlanadi:
 
-- **Node + PostgreSQL bor bo'lsa** — API va ilovalarni shu yerda
-  ishlatib ko'ramiz. Redis bo'lmasa kesh o'chiriladi (sayt ishlaydi,
-  faqat sekinroq).
-- **Faqat PHP/MySQL bo'lsa** — platforma u yerda ishlamaydi. Eng
-  arzon yechim: o'sha provayderdan kichik **VPS** (2 yadro / 4 GB) va
-  `docker-compose` bilan hammasi bitta mashinada. Domen o'z joyida
-  qoladi, faqat DNS yozuvi VPS ga yo'naltiriladi.
-- **AWS** (CLAUDE.md §13 dagi yo'l) — kerak bo'lganda, o'sish uchun.
-  Hozirgi bosqich uchun u qimmat va ortiqcha.
+- `refresh-token.store.ts` — refresh token'ni bekor qilish va qayta
+  ishlatishni aniqlash (token oilasi)
+- `login-attempt.service.ts` — parol tanlashga qarshi urinishlar
+  hisobi (email va IP bo'yicha)
 
-**DIQQAT:** parollar, SSH kalitlari va API kalitlari chatga
-yozilmaydi va repozitoriyga qo'yilmaydi (CLAUDE.md §12). Ular
-joylash vaqtida to'g'ridan-to'g'ri serverga kiritiladi.
+Ularni shunchaki o'chirib qo'yish **xavfsizlik tekshiruvini olib
+tashlash** bo'lardi, bu esa `CLAUDE.md` §30 da taqiqlangan. Shuning
+uchun ikki yo'l bor:
+
+1. Hostdan Redis so'rash (ko'p cPanel provayderlari iltimosga ko'ra
+   yoqadi).
+2. **Shu ikki holatni PostgreSQL ga ko'chirish.** Bu shunchaki
+   chetlab o'tish emas — hozir Redis qayta ishga tushsa BARCHA
+   refresh token'lar yo'qoladi va hamma tizimdan chiqib ketadi.
+   Bazada saqlansa bu muammo ham yo'qoladi.
+
+Ikkinchi yo'l tanlandi: u hostdan mustaqil va mahsulotni yaxshilaydi.
+
+#### S3 yo'qligi
+
+Media quvuri (S08) S3 ga yozadi va production'da S3 sozlanmasa ilova
+ATAYLAB ko'tarilmaydi. cPanel'da doimiy disk bor, shuning uchun
+**fayl tizimi adapteri** qo'shiladi: rasmlar uy katalogida saqlanadi
+va veb-server ularni beradi.
+
+#### HALI IKKI SAVOL
+
+1. `Setup Node.js App` da **qaysi Node versiyalari** bor? Kamida
+   **20** kerak (afzali 22). cPanel'da o'sha bo'limni ochsangiz
+   ro'yxat ko'rinadi.
+2. Tarifda **qancha operativ xotira** va nechta jarayonga ruxsat bor?
+   Uchta Node ilovasi (sayt, admin, API) birga ishlaydi — ulushli
+   tarifda eng katta xavf shu. cPanel → `Metrics` → `Resource Usage`
+   da ko'rinadi.
+
+Javoblarga qarab: yetarli bo'lsa shu yerda joylashtiramiz, yetmasa —
+o'sha provayderdan kichik VPS.
 
 ---
 
