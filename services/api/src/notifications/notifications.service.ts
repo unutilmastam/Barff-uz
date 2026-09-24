@@ -38,8 +38,41 @@ export class NotificationsService {
     @Inject(NOTIFICATION_PROVIDERS) private readonly providers: NotificationProvider[],
   ) {}
 
+  /**
+   * Bildirishnoma yuborish — HECH QACHON XATO TASHLAMAYDI.
+   *
+   * Bu sinf boshidagi kafolat edi, lekin u AMALDA BAJARILMAGAN edi:
+   * `sendInApp` ichidagi baza xatosi yuqoriga chiqib ketardi va
+   * ASOSIY amalni yiqitardi. Aniq holat CI'da ko'rindi — diler
+   * arizasi `202` o'rniga `500` qaytardi, garchi diler BAZAGA
+   * YOZILGAN bo'lsa ham: qabul qiluvchilar ro'yxati o'qilgandan
+   * KEYIN, lekin yozuv kiritilishidan OLDIN o'sha foydalanuvchi
+   * o'chirilgan edi (parallel test), natijada tashqi kalit buzildi.
+   *
+   * Production'da ham xuddi shunday: admin o'chirilgan lahzada
+   * kelgan ariza yo'qolardi. Ariza saqlangan — demak ish bajarilgan;
+   * bildirishnoma esa ikkinchi darajali.
+   *
+   * Shuning uchun har ikkala yo'nalish ALOHIDA o'raladi: biri
+   * yiqilsa, ikkinchisi baribir bajariladi.
+   */
   async notify(input: NotifyInput): Promise<void> {
-    await Promise.all([this.sendInApp(input), this.sendExternal(input)]);
+    await Promise.all([
+      this.safely('in-app', () => this.sendInApp(input)),
+      this.safely('tashqi', () => this.sendExternal(input)),
+    ]);
+  }
+
+  /** Xatoni yutadi va LOGGA yozadi — jim yo'qotmaydi. */
+  private async safely(label: string, run: () => Promise<void>): Promise<void> {
+    try {
+      await run();
+    } catch (error) {
+      this.logger.error(
+        `Bildirishnoma yuborilmadi (${label})`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   private async sendInApp(input: NotifyInput): Promise<void> {
