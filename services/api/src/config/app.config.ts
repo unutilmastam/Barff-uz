@@ -55,7 +55,7 @@ export class AppConfig {
     return this.get('DATABASE_URL');
   }
 
-  get redisUrl(): string {
+  get redisUrl(): string | undefined {
     return this.get('REDIS_URL');
   }
 

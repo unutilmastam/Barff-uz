@@ -50,7 +50,13 @@ export const envSchema = z.object({
   API_TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
 
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
-  REDIS_URL: z.url({ protocol: /^rediss?$/ }),
+  /**
+   * IXTIYORIY. Redis endi FAQAT kesh uchun (xavfsizlik holati S21G da
+   * PostgreSQL ga ko'chirildi). Berilmasa ilova ishlaydi — har so'rov
+   * bazaga tushadi, ya'ni sekinroq, lekin to'g'ri. Joylash muhitida
+   * (cPanel) Redis yo'q (`docs/OPEN-QUESTIONS.md` Q18).
+   */
+  REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
 
   /**
    * JWT sirlari. Access va refresh uchun ALOHIDA sirlar ishlatiladi: bitta sir

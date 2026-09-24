@@ -35,7 +35,7 @@ export class CacheService {
 
   private async version(namespace: CacheNamespace): Promise<string> {
     try {
-      const value = await this.redis.client.get(this.versionKey(namespace));
+      const value = await this.redis.get(this.versionKey(namespace));
       return value ?? '1';
     } catch {
       // Redis yetib bo'lmasa, versiya "0" — kalit har safar boshqacha
@@ -63,7 +63,7 @@ export class CacheService {
     const key = await this.buildKey(namespace, suffix);
 
     try {
-      const cached = await this.redis.client.get(key);
+      const cached = await this.redis.get(key);
       if (cached !== null) {
         return JSON.parse(cached) as T;
       }
@@ -75,7 +75,7 @@ export class CacheService {
     const value = await produce();
 
     try {
-      await this.redis.client.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+      await this.redis.set(key, JSON.stringify(value), ttlSeconds);
     } catch {
       // Saqlab bo'lmasa ham javob berilaveradi.
       this.logger.warn(`Keshga yozib bo'lmadi: ${key}`);
@@ -92,7 +92,7 @@ export class CacheService {
    */
   async invalidate(namespace: CacheNamespace): Promise<void> {
     try {
-      await this.redis.client.incr(this.versionKey(namespace));
+      await this.redis.incr(this.versionKey(namespace));
     } catch {
       this.logger.warn(`Keshni bekor qilib bo'lmadi: ${namespace}`);
     }

@@ -49,15 +49,17 @@ model User {
   /// foydalanuvchi yozuvi fizik o'chirilmaydi.
   deletedAt DateTime?
 
-  roles         UserRole[]
-  media         MediaAsset[]    @relation("MediaUploader")
-  newsArticles  NewsArticle[]   @relation("NewsAuthor")
-  auditLogs     AuditLog[]      @relation("AuditActor")
-  settings      SystemSetting[] @relation("SettingUpdatedBy")
-  grantedRoles  UserRole[]      @relation("RoleAssignedBy")
-  assignedLeads Lead[]          @relation("LeadAssignee")
-  leadEvents    LeadEvent[]     @relation("LeadEventActor")
-  notifications Notification[]  @relation("NotificationRecipient")
+  roles           UserRole[]
+  media           MediaAsset[]         @relation("MediaUploader")
+  newsArticles    NewsArticle[]        @relation("NewsAuthor")
+  auditLogs       AuditLog[]           @relation("AuditActor")
+  settings        SystemSetting[]      @relation("SettingUpdatedBy")
+  grantedRoles    UserRole[]           @relation("RoleAssignedBy")
+  assignedLeads   Lead[]               @relation("LeadAssignee")
+  leadEvents      LeadEvent[]          @relation("LeadEventActor")
+  notifications   Notification[]       @relation("NotificationRecipient")
+  refreshTokens   RefreshToken[]       @relation("UserRefreshTokens")
+  refreshFamilies RefreshTokenFamily[] @relation("UserRefreshFamilies")
 
   @@index([isActive])
   @@index([createdAt])
@@ -816,4 +818,80 @@ model Notification {
   @@index([recipientId, readAt])
   @@index([event, createdAt])
   @@map("notifications")
+}
+
+/// Amaldagi refresh token.
+///
+/// JWT o'zi bekor qilinmaydi — imzo to'g'ri bo'lsa, u muddati tugaguncha
+/// amal qiladi. Shuning uchun "amaldagi" token'lar ro'yxati alohida
+/// saqlanadi: chiqish (logout) va almashtirish (rotation) shu ro'yxatdan
+/// o'chirish orqali ishlaydi.
+///
+/// NEGA BAZADA, REDIS'DA EMAS: bu xavfsizlik holati, kesh emas. Redis
+/// qayta ishga tushsa ro'yxat yo'qolardi va BARCHA foydalanuvchilar
+/// tizimdan chiqib ketardi. Bundan tashqari joylash muhitida (cPanel)
+/// Redis umuman yo'q (`docs/OPEN-QUESTIONS.md` Q18).
+model RefreshToken {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  userId String @db.Uuid
+  user   User   @relation("UserRefreshTokens", fields: [userId], references: [id], onDelete: Cascade)
+
+  /// JWT `jti` da'vosi — token nusxasini aniqlaydi.
+  jti    String
+  /// Sessiya oilasi: almashtirishda yangi token o'sha oilada qoladi.
+  family String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jti])
+  @@index([userId, family])
+  /// Muddati o'tganlarini tozalash uchun.
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+/// Refresh token OILASI — bitta sessiya.
+///
+/// Ishlatilgan token qayta taqdim etilsa, butun oila bekor qilinadi:
+/// haqiqiy foydalanuvchi qayta kiradi, o'g'ri esa kira olmaydi.
+model RefreshTokenFamily {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  userId String @db.Uuid
+  user   User   @relation("UserRefreshFamilies", fields: [userId], references: [id], onDelete: Cascade)
+
+  family String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([userId, family])
+  @@index([expiresAt])
+  @@map("refresh_token_families")
+}
+
+/// Muvaffaqiyatsiz kirish urinishlari hisoblagichi.
+///
+/// Kalit ikki turda bo'ladi: `email:<email>` va `ip:<ip>`. Birinchisi
+/// bitta akkauntni parol tanlashdan, ikkinchisi bitta manbadan ko'p
+/// akkauntni sinashdan himoya qiladi.
+///
+/// Redis'da bu `INCR` + `EXPIRE` edi. Bazada muddat AVTOMATIK o'chmaydi,
+/// shuning uchun o'qishda `expiresAt` tekshiriladi va yozishda muddati
+/// o'tgan qatorlar tozalanadi.
+model LoginAttempt {
+  /// `email:<email>` yoki `ip:<ip>`.
+  key String @id
+
+  count Int @default(0)
+
+  /// Shu paytdan keyin hisoblagich kuchini yo'qotadi.
+  expiresAt DateTime
+
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@map("login_attempts")
 }

@@ -6,7 +6,7 @@ import { PrismaClient } from '@barff/db';
 import { AppModule } from '../src/app.module';
 import { AUDIT_ACTIONS } from '../src/audit/audit.actions';
 import { PasswordService } from '../src/auth/password.service';
-import { RedisService } from '../src/redis/redis.service';
+import { LoginAttemptService } from '../src/auth/login-attempt.service';
 import { UserRolesService } from '../src/users/user-roles.service';
 import { GLOBAL_PREFIX } from '../src/swagger';
 
@@ -64,10 +64,10 @@ describe('Rol ozgarishi (e2e)', () => {
 
   /** Testlar ketma-ketligida urinish hisoblagichi to'planib qolmasligi uchun. */
   const resetCounters = async (): Promise<void> => {
-    const redis = app.get(RedisService);
-    await redis.client.del(`auth:fail:email:${USER.email}`);
+    const attempts = app.get(LoginAttemptService);
+    // IP bir nechta ko'rinishda kelishi mumkin (IPv4, IPv6, mapped).
     for (const ip of ['::ffff:127.0.0.1', '::1', '127.0.0.1']) {
-      await redis.client.del(`auth:fail:ip:${ip}`);
+      await attempts.reset(USER.email, ip);
     }
   };
 

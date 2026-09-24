@@ -16,8 +16,26 @@ describe('validateEnv', () => {
     expect(env.API_CORS_ORIGINS).toEqual([]);
   });
 
-  it('REDIS_URL yoq bolsa toxtaydi', () => {
-    expect(() => validateEnv({ ...base, REDIS_URL: undefined })).toThrow(/REDIS_URL/);
+  /**
+   * REDIS_URL ENDI IXTIYORIY.
+   *
+   * Avval u majburiy edi va bu to'g'ri edi: Redis'da xavfsizlik holati
+   * (refresh token'lar, kirish urinishlari) saqlanardi, ya'ni usiz
+   * ilova himoyasiz ishlardi.
+   *
+   * S21G da o'sha holat PostgreSQL ga ko'chirildi. Endi Redis'da faqat
+   * KESH bor — usiz ilova sekinroq, lekin TO'G'RI ishlaydi. Shuning
+   * uchun majburiylik olib tashlandi; bu xavfsizlik tekshiruvini olib
+   * tashlash emas, chunki olib tashlanadigan narsa qolmadi.
+   */
+  it('REDIS_URL yoq bolsa ham ishga tushadi — u faqat kesh', () => {
+    const env = validateEnv({ ...base, REDIS_URL: undefined });
+    expect(env.REDIS_URL).toBeUndefined();
+  });
+
+  it('notogri REDIS_URL ni baribir rad etadi', () => {
+    // Ixtiyoriy bo'lishi "xohlagan narsani yozish mumkin" degani emas.
+    expect(() => validateEnv({ ...base, REDIS_URL: 'http://localhost' })).toThrow(/REDIS_URL/);
   });
 
   it('DATABASE_URL yoq bolsa toxtaydi', () => {
