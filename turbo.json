@@ -51,6 +51,22 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+
+      // `globalPassThroughEnv` EMAS, `env`: Next `NEXT_PUBLIC_*`
+      // qiymatlarini qurish paytida bundle ICHIGA yozadi, ya'ni ular
+      // build natijasini O'ZGARTIRADI va kesh kalitiga kirishi shart.
+      // Ular e'lon qilinmaganida turbo ularni task'dan olib tashlagan
+      // va sayt API manzilisiz qurilgan edi: barcha kontent sahifalari
+      // "ma'lumot mavjud emas" holatida chiqardi, garchi API ishlab
+      // tursa ham.
+      "env": [
+        "NEXT_PUBLIC_API_BASE_URL",
+        "NEXT_PUBLIC_SITE_URL",
+        "NEXT_PUBLIC_DEALER_URL",
+        "NEXT_PUBLIC_ADMIN_URL",
+        "NEXT_PUBLIC_ALLOW_INDEXING"
+      ],
+
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "generated/**"]
     },
     "dev": {

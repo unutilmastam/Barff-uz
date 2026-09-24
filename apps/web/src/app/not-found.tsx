@@ -21,9 +21,7 @@ export default async function RootNotFound() {
       <body className="flex min-h-dvh items-center bg-[var(--color-ink-900)] text-[var(--color-fg)]">
         <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-10">
           <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)]">404</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-            {messages.errors.notFoundTitle}
-          </h1>
+          <h1 className="display-3 mt-4">{messages.errors.notFoundTitle}</h1>
           <p className="mt-4 max-w-lg text-[var(--color-fg-muted)]">
             {messages.errors.notFoundBody}
           </p>

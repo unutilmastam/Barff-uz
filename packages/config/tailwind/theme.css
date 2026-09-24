@@ -176,3 +176,76 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * TIPOGRAFIKA SINFLARI.
+ *
+ * Tokenlar yuqorida, lekin ularni har bir komponentda qo'lda yig'ish
+ * (`font-[family-name:var(--font-display)] text-[length:var(--text-title)]
+ * leading-[...] tracking-[...]`) uzun va xatoga moyil: bitta joyda
+ * `leading` tushib qolsa, sarlavha boshqalaridan farq qilib ketadi.
+ * Shuning uchun DARAJALAR shu yerda bir marta yig'iladi.
+ *
+ * `display-1` bosh ekran, `display-2` sahifa sarlavhasi, `display-3`
+ * bo'lim sarlavhasi, `display-4` kartochka sarlavhasi.
+ */
+@layer components {
+  .display-1,
+  .display-2,
+  .display-3,
+  .display-4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  .display-1 {
+    font-size: var(--text-hero);
+    line-height: var(--text-hero--line-height);
+    letter-spacing: var(--text-hero--letter-spacing);
+    text-wrap: balance;
+  }
+
+  .display-2 {
+    font-size: var(--text-section);
+    line-height: var(--text-section--line-height);
+    letter-spacing: var(--text-section--letter-spacing);
+    text-wrap: balance;
+  }
+
+  .display-3 {
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    letter-spacing: var(--text-title--letter-spacing);
+    text-wrap: balance;
+  }
+
+  /*
+   * Kartochka sarlavhasi. Bu yerda `clamp()` yo'q: kartochka kengligi
+   * ekran kengligiga emas, panjara ustuniga bog'liq — ya'ni katta
+   * ekranda ham kichik qoladi.
+   */
+  .display-4 {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  /* Sarlavha ustidagi kichik yozuv. */
+  .eyebrow {
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  /* Sarlavha ostidagi kirish matni. */
+  .lead {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-fg-muted);
+    text-wrap: pretty;
+  }
+}

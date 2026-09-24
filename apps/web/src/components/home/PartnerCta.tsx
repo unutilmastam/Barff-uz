@@ -26,9 +26,7 @@ export function PartnerCta({
       <Container>
         <GlassCard className="flex flex-col gap-6 p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-xl">
-            <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-              {title}
-            </h2>
+            <h2 className="display-3">{title}</h2>
             <p className="mt-3 text-[var(--color-fg-muted)]">{body}</p>
           </div>
 

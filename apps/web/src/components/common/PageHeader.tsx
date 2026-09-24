@@ -1,4 +1,5 @@
 import { Container } from '@/components/layout/Container';
+import { TextReveal } from '@/motion/TextReveal';
 
 /**
  * Sahifa sarlavhasi.
@@ -6,6 +7,16 @@ import { Container } from '@/components/layout/Container';
  * Har bir ommaviy sahifada bitta `<h1>` bo'lishi uchun shu komponent
  * yagona joyda saqlanadi — sarlavha darajalari qo'lda yozilsa, vaqt
  * o'tib bir-biridan farq qilib ketardi.
+ *
+ * O'lcham `--text-section` token'idan: sahifa sarlavhasi bosh
+ * ekrandagi hero'dan kichik, lekin bo'lim sarlavhalaridan katta.
+ * Sarlavha `TextReveal` bilan qatorma-qator ko'tariladi; harakat
+ * o'chiq bo'lsa u JOYIDA turadi.
+ *
+ * PASTKI bo'shliq ATAYLAB yo'q: bu komponentdan keyin har doim
+ * `<Section>` keladi va uning `py-20` i o'zining ustki bo'shlig'ini
+ * beradi. Ikkalasi ham bo'shliq qo'ysa, sarlavha bilan kontent
+ * orasida 200px dan ortiq bo'sh joy qolardi.
  */
 export function PageHeader({
   eyebrow,
@@ -17,18 +28,14 @@ export function PageHeader({
   intro?: string;
 }) {
   return (
-    <Container as="div" className="pt-20 pb-12 sm:pt-28">
-      <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
-        {eyebrow}
-      </p>
+    <Container as="div" className="pt-20 sm:pt-28">
+      <p className="eyebrow">{eyebrow}</p>
 
-      <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+      <TextReveal as="h1" immediate className="display-2 mt-4 block">
         {title}
-      </h1>
+      </TextReveal>
 
-      {intro !== undefined && (
-        <p className="mt-6 max-w-2xl text-lg text-[var(--color-fg-muted)]">{intro}</p>
-      )}
+      {intro !== undefined && <p className="lead mt-6 max-w-[48ch]">{intro}</p>}
     </Container>
   );
 }

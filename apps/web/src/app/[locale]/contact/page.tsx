@@ -95,9 +95,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       */}
       <Section tone="raised">
         <Container className="max-w-3xl">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {messages.lead.title}
-          </h2>
+          <h2 className="display-3">{messages.lead.title}</h2>
           <p className="mt-3 text-[var(--color-fg-muted)]">{messages.lead.intro}</p>
 
           <div className="mt-8">

@@ -70,9 +70,7 @@ export default async function ProductionPage({ params }: { params: Promise<{ loc
                   </span>
 
                   <div>
-                    <h2 className="text-xl font-medium sm:text-2xl">
-                      {text(step.title, locale, step.slug)}
-                    </h2>
+                    <h2 className="display-3">{text(step.title, locale, step.slug)}</h2>
                     {step.description !== null && (
                       <p className="mt-3 max-w-2xl text-[var(--color-fg-muted)]">
                         {text(step.description, locale)}

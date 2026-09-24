@@ -28,9 +28,7 @@ export default function ErrorBoundary({
 
   return (
     <Container as="section" className="flex min-h-[60vh] flex-col justify-center py-20">
-      <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-        {uz.errors.genericTitle}
-      </h1>
+      <h1 className="display-3">{uz.errors.genericTitle}</h1>
       <p className="mt-4 max-w-lg text-[var(--color-fg-muted)]">{uz.errors.genericBody}</p>
 
       {error.digest !== undefined && (

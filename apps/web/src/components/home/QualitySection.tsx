@@ -43,7 +43,7 @@ export function QualitySection({
             <Reveal as="ul" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stagger>
               {certificates.map((certificate) => (
                 <GlassCard as="li" key={certificate.id} className="flex flex-col gap-2 p-6">
-                  <h3 className="text-lg font-medium">{text(certificate.title, locale)}</h3>
+                  <h3 className="display-4">{text(certificate.title, locale)}</h3>
 
                   {certificate.issuer !== null && (
                     <p className="text-sm text-[var(--color-fg-muted)]">{certificate.issuer}</p>

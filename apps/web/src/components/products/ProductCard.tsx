@@ -4,6 +4,7 @@ import { GlassCard, MediaFrame } from '@barff/ui';
 import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
 import { formatMoney, text } from '@/lib/localized';
+import { ImageReveal } from '@/motion/ImageReveal';
 
 /**
  * Mahsulot kartochkasi.
@@ -12,6 +13,10 @@ import { formatMoney, text } from '@/lib/localized';
  * ro'yxatida "mahsulot nomi" ni ko'radi, "kartochka" ni emas.
  * `after:absolute` bilan bosiladigan maydon baribir butun kartaga
  * yoyiladi, shuning uchun sichqoncha bilan ishlash o'zgarmaydi.
+ *
+ * Rasm `ImageReveal` ichida: u `clip-path` bilan pastdan ochiladi.
+ * Harakat o'chiq bo'lsa rasm shunchaki joyida turadi — o'ram
+ * ko'rinishga ta'sir qilmaydi (`h-full` bilan ramkani to'ldiradi).
  */
 export function ProductCard({
   product,
@@ -33,12 +38,14 @@ export function ProductCard({
         className="rounded-none border-0 border-b border-[var(--color-line)]"
       >
         {image !== undefined ? (
-          <ApiImage
-            image={image}
-            alt={name}
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
-            className="h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-hover:scale-[1.03]"
-          />
+          <ImageReveal className="h-full w-full">
+            <ApiImage
+              image={image}
+              alt={name}
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
+              className="h-full w-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-barff)] group-hover:scale-[1.04]"
+            />
+          </ImageReveal>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-[var(--color-fg-subtle)]">
             {messages.common.empty}
@@ -48,12 +55,10 @@ export function ProductCard({
 
       <div className="flex flex-1 flex-col gap-2 p-5">
         {product.category !== null && (
-          <p className="text-xs tracking-widest text-[var(--color-accent-text)] uppercase">
-            {text(product.category.name, locale)}
-          </p>
+          <p className="eyebrow">{text(product.category.name, locale)}</p>
         )}
 
-        <h3 className="text-lg font-medium">
+        <h3 className="display-4">
           <Link
             href={`/${locale}/products/${product.slug}`}
             className="after:absolute after:inset-0 after:content-['']"
@@ -62,7 +67,7 @@ export function ProductCard({
           </Link>
         </h3>
 
-        <p className="mt-auto text-sm text-[var(--color-fg-muted)]">
+        <p className="mt-auto pt-2 text-sm text-[var(--color-fg-muted)] tabular-nums">
           {variant !== undefined
             ? variant.price !== null
               ? formatMoney(variant.price.amount, variant.price.currency, locale)

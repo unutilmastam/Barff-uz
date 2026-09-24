@@ -65,22 +65,14 @@ export function HeroSection({
         className="relative grid min-h-[86vh] items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16"
       >
         <div>
-          <p className="text-[length:var(--text-label)] font-medium tracking-[var(--text-label--letter-spacing)] text-[var(--color-fg-subtle)] uppercase">
-            BARFF
-          </p>
+          <p className="eyebrow text-[var(--color-fg-subtle)]">BARFF</p>
 
           {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
-          <TextReveal
-            as="h1"
-            immediate
-            className="mt-4 block font-[family-name:var(--font-display)] text-[length:var(--text-hero)] leading-[var(--text-hero--line-height)] font-semibold tracking-[var(--text-hero--letter-spacing)] text-balance"
-          >
+          <TextReveal as="h1" immediate className="display-1 mt-4 block">
             {title}
           </TextReveal>
 
-          <p className="mt-6 max-w-[42ch] text-[length:var(--text-lead)] leading-[var(--text-lead--line-height)] text-[var(--color-fg-muted)]">
-            {subtitle}
-          </p>
+          <p className="lead mt-6 max-w-[42ch]">{subtitle}</p>
 
           <div className="mt-10 flex flex-wrap gap-3">
             <Magnetic>

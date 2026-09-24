@@ -164,14 +164,10 @@ export default async function ProductPage({
 
           <div>
             {product.category !== null && (
-              <p className="text-sm tracking-widest text-[var(--color-accent-text)] uppercase">
-                {text(product.category.name, locale)}
-              </p>
+              <p className="eyebrow">{text(product.category.name, locale)}</p>
             )}
 
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-              {name}
-            </h1>
+            <h1 className="display-2 mt-3">{name}</h1>
 
             {product.flavor !== null && (
               <Badge tone="brand" className="mt-4">
@@ -179,13 +175,11 @@ export default async function ProductPage({
               </Badge>
             )}
 
-            {description.length > 0 && (
-              <p className="mt-6 text-lg text-[var(--color-fg-muted)]">{description}</p>
-            )}
+            {description.length > 0 && <p className="lead mt-6">{description}</p>}
 
             {product.variants.length > 0 && (
               <div className="mt-10">
-                <h2 className="text-sm font-medium tracking-widest text-[var(--color-fg-muted)] uppercase">
+                <h2 className="eyebrow text-[var(--color-fg-muted)]">
                   {messages.products.variants}
                 </h2>
 
@@ -229,7 +223,7 @@ export default async function ProductPage({
 
             {product.documents.length > 0 && (
               <div className="mt-10">
-                <h2 className="text-sm font-medium tracking-widest text-[var(--color-fg-muted)] uppercase">
+                <h2 className="eyebrow text-[var(--color-fg-muted)]">
                   {messages.products.documents}
                 </h2>
 

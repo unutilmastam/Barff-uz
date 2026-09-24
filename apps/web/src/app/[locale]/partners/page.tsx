@@ -67,7 +67,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                 <span className="text-sm font-medium tabular-nums text-[var(--color-accent-text)]">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h3 className="text-lg font-medium">{step.title}</h3>
+                <h3 className="display-4">{step.title}</h3>
                 <p className="text-sm text-[var(--color-fg-muted)]">{step.body}</p>
               </GlassCard>
             ))}

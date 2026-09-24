@@ -48,7 +48,7 @@ export function ProcessSection({
                   <span className="text-sm font-medium tabular-nums text-[var(--color-accent-text)]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="text-lg font-medium">{text(step.title, locale, step.slug)}</h3>
+                  <h3 className="display-4">{text(step.title, locale, step.slug)}</h3>
                   {step.description !== null && (
                     <p className="text-sm text-[var(--color-fg-muted)]">
                       {text(step.description, locale)}

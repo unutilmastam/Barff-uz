@@ -101,9 +101,7 @@ export default async function NewsArticlePage({
             </time>
           )}
 
-          <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-            {title}
-          </h1>
+          <h1 className="display-2 mt-3">{title}</h1>
 
           {article.coverImage !== null && (
             <MediaFrame ratio="wide" className="mt-8">

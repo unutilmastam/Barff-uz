@@ -1,6 +1,7 @@
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { GlassCard, Section, SectionHeader, StatBlock } from '@barff/ui';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Container } from '@/components/layout/Container';
 import { isLocale } from '@/i18n/config';
 
@@ -58,21 +59,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <Section>
-        <Container>
-          <p className="text-sm font-medium tracking-widest text-[var(--color-accent-text)] uppercase">
-            {messages.company.subtitle}
-          </p>
-
-          <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            {messages.company.title}
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-lg text-[var(--color-fg-muted)]">
-            {messages.company.intro}
-          </p>
-        </Container>
-      </Section>
+      <PageHeader
+        eyebrow={messages.company.subtitle}
+        title={messages.company.title}
+        intro={messages.company.intro}
+      />
 
       <Section tone="raised">
         <Container>
@@ -105,7 +96,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ locale
           <ul className="mt-12 grid gap-4 sm:grid-cols-3">
             {values.map((value) => (
               <GlassCard as="li" key={value.title} className="flex flex-col gap-3 p-6">
-                <h3 className="text-lg font-medium">{value.title}</h3>
+                <h3 className="display-4">{value.title}</h3>
                 <p className="text-sm text-[var(--color-fg-muted)]">{value.body}</p>
               </GlassCard>
             ))}

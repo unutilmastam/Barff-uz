@@ -63,7 +63,7 @@ export function NewsSection({
 
                   {/* Maqola sahifasi S13 da quriladi — u paydo bo'lgunicha
                       sarlavha havola EMAS, oddiy matn. */}
-                  <h3 className="text-lg font-medium">
+                  <h3 className="display-4">
                     {routeReady('news') ? (
                       <Link
                         href={`/${locale}/news/${article.slug}`}
