@@ -110,10 +110,25 @@ describe('Products (e2e)', () => {
       expect(res.body.details).toHaveProperty('slug');
     });
 
-    it('tarjimasi tolmagan nomni rad etadi', async () => {
-      const res = await createProduct(adminToken, {
+    /**
+     * QISMAN tarjima QABUL QILINADI (S19 da o'zgardi).
+     *
+     * `text()` yordamchisi tarjimasi yo'q tilda boshqa tildagi matnni
+     * ko'rsatadi, shuning uchun bo'sh nom xavfi yo'q. Uchala tilni
+     * talab qilish esa "o'zbekcha yoz, ruschasini keyin qo'sh" degan
+     * haqiqiy oqimni bloklardi.
+     */
+    it('qisman tarjimani qabul qiladi', async () => {
+      await createProduct(adminToken, {
         ...validBody('d'),
         name: { uz: 'Faqat ozbekcha' },
+      }).expect(201);
+    });
+
+    it('hech bir tilda nom bolmasa rad etadi', async () => {
+      const res = await createProduct(adminToken, {
+        ...validBody('d2'),
+        name: { uz: '', ru: '', en: '' },
       }).expect(400);
 
       expect(res.body.code).toBe('VALIDATION_FAILED');

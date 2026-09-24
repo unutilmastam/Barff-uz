@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { type ReactNode } from 'react';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Sidebar } from '@/components/Sidebar';
+import { QueryProvider } from '@/lib/query';
 import { visibleNav } from '@/lib/navigation';
 import { getSession } from '@/lib/session';
 
@@ -47,8 +48,12 @@ export default async function PanelLayout({ children }: { children: ReactNode })
           <LogoutButton />
         </header>
 
+        {/*
+          CMS ekranlari ma'lumotni MIJOZDA o'qiydi: tahrirlashdan keyin
+          ro'yxat darhol yangilanishi kerak, sahifani qayta yuklamasdan.
+        */}
         <main id="main" className="min-w-0 flex-1 p-4 lg:p-8">
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </main>
       </div>
     </div>

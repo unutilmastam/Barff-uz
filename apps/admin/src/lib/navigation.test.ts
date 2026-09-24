@@ -54,8 +54,18 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S18 da faqat boshqaruv paneli qurilgan.
-    expect(ready).toEqual(['/']);
+    // S19 da CMS ekranlari qo'shildi; qolganlari S20+ da.
+    expect(ready).toEqual([
+      '/',
+      '/content/news',
+      '/content/certificates',
+      '/content/gallery',
+      '/content/documents',
+      '/content/pages',
+      '/media',
+      '/products',
+      '/system/settings',
+    ]);
   });
 
   it('havolalar takrorlanmaydi', () => {

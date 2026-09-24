@@ -294,9 +294,26 @@ describe('Content (e2e)', () => {
       expect(res.body.code).toBe('VALIDATION_FAILED');
     });
 
-    it('tarjimasi tolmagan sarlavhani rad etadi', async () => {
+    /**
+     * QISMAN tarjima QABUL QILINADI (S19 da o'zgardi).
+     *
+     * Avval uchala til ham majburiy edi. Lekin `text()` yordamchisi
+     * tarjimasi yo'q tilda boshqa tildagi matnni ko'rsatadi, ya'ni
+     * bo'sh sarlavha xavfi yo'q — uchala tilni talab qilish esa
+     * muharrir oqimini bloklardi.
+     */
+    it('qisman tarjimani qabul qiladi', async () => {
+      const slug = `${prefix}-qisman`;
+      cleanupSlugs.push(slug);
+
       await admin('post', '/news')
-        .send({ slug: `${prefix}-t`, title: { uz: 'Faqat uz' }, body: L('Y') })
+        .send({ slug, title: { uz: 'Faqat uz' }, body: L('Y') })
+        .expect(201);
+    });
+
+    it('hech bir tilda sarlavha bolmasa rad etadi', async () => {
+      await admin('post', '/news')
+        .send({ slug: `${prefix}-bosh`, title: { uz: '', ru: '', en: '' }, body: L('Y') })
         .expect(400);
     });
 

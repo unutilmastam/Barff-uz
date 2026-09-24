@@ -39,8 +39,49 @@ export const passwordSchema = z
 export const localeSchema = z.enum(LOCALES);
 
 /** Ko'p tilli matn: uchala til ham to'ldirilishi shart. */
+/**
+ * Ko'p tilli maydon (CLAUDE.md §18).
+ *
+ * KAMIDA BITTA til to'ldirilishi shart, uchalasi emas. Sabab amaliy:
+ * muharrir yangilikni o'zbekcha yozadi, tarjimon esa ruscha va
+ * inglizchasini keyinroq qo'shadi. Uchala tilni talab qilish bu
+ * oqimni butunlay bloklardi — qoralama saqlash uchun ham o'rindosh
+ * matn yozishga majbur qilardi.
+ *
+ * Ko'rsatish tomonida bu xavfsiz: `text()` yordamchisi tarjimasi yo'q
+ * tilda boshqa tildagi matnni ko'rsatadi, bo'sh joy qoldirmaydi.
+ *
+ * Bo'sh satrlar OLIB TASHLANADI, ya'ni `{ uz: 'X', ru: '', en: '' }`
+ * bazaga `{ uz: 'X' }` bo'lib tushadi va "tarjima bor, lekin bo'sh"
+ * degan chalkash holat yuzaga kelmaydi.
+ */
 export const localizedSchema = (field: z.ZodString) =>
-  z.object({ uz: field, ru: field, en: field });
+  z.preprocess(
+    (value) => {
+      if (typeof value !== 'object' || value === null) return value;
+
+      /*
+        Bo'sh satr "berilmagan" degani va u TEKSHIRUVDAN OLDIN olib
+        tashlanadi. Aks holda `field.min(1)` uni rad etardi — ya'ni
+        formada to'ldirilmagan til butun yozuvni saqlashga to'sqinlik
+        qilardi.
+      */
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).filter(
+          ([, text]) => !(typeof text === 'string' && text.trim().length === 0),
+        ),
+      );
+    },
+    z
+      .object({
+        uz: field.optional(),
+        ru: field.optional(),
+        en: field.optional(),
+      })
+      .refine((value) => Object.values(value).some((text) => text !== undefined), {
+        message: 'Kamida bitta tilda matn kiritilishi shart',
+      }),
+  );
 
 /** Ro'yxat so'rovlari uchun umumiy parametrlar (CLAUDE.md §11). */
 export const paginationQuerySchema = z.object({
