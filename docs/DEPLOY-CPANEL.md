@@ -27,8 +27,8 @@ Quyidagilar shu repoda **haqiqatda yurgizib** tekshirildi, taxmin emas:
 
 1. `Setup Node.js App` qaysi Node versiyalarini beradi — kamida **20**
    kerak.
-2. Tarifda operativ xotira va jarayon limiti qancha — bu yerda **uchta**
-   Node ilovasi birga ishlaydi.
+2. Tarifda operativ xotira va jarayon limiti qancha — bu yerda **to'rtta**
+   Node ilovasi birga ishlaydi (api, web, admin, dealer).
 
 Ikkalasi ham cPanel'da ko'rinadi (§1). Yetmasa — o'sha provayderdan
 kichik VPS; kod o'zgarmaydi.
@@ -81,6 +81,7 @@ dist-cpanel/
   api/     NestJS API
   web/     barff.uz — ommaviy sayt
   admin/   admin.barff.uz — CMS
+  dealer/  partner.barff.uz — diler portali
 ```
 
 `scripts/package-cpanel.mjs` nima qilishini va NEGA qo'lda
@@ -103,7 +104,7 @@ yuklang, masalan:
 
 ---
 
-## 5. Uchta Node ilovasini yaratish
+## 5. Node ilovalarini yaratish
 
 `Setup Node.js App` → `CREATE APPLICATION`, har biri uchun:
 
@@ -175,12 +176,21 @@ uchun fayl tizimi adapteri tanlanadi va rasmlar diskda saqlanadi.
 > bilan QAYTA YIG'ISH kerak (§3). Serverdagi qiymat faqat server
 > tomonidagi o'qish uchun.
 
-### 6.3 admin
+### 6.3 admin va dealer
+
+Ikkalasi uchun bir xil:
 
 | O'zgaruvchi                | Qiymat                        |
 | -------------------------- | ----------------------------- |
 | `NODE_ENV`                 | `production`                  |
 | `NEXT_PUBLIC_API_BASE_URL` | `https://api.barff.uz/api/v1` |
+
+`dealer` uchun qo'shimcha — kirish sahifasidagi "ariza qoldiring"
+havolasi uchun:
+
+| O'zgaruvchi            | Qiymat             |
+| ---------------------- | ------------------ |
+| `NEXT_PUBLIC_SITE_URL` | `https://barff.uz` |
 
 ---
 
@@ -203,7 +213,7 @@ admin panelda almashtiring.
 ## 8. Domenlar va SSL
 
 1. `Domains` → `barff.uz` ni addon domain sifatida qo'shing.
-2. Subdomenlar: `api.barff.uz`, `admin.barff.uz`.
+2. Subdomenlar: `api.barff.uz`, `admin.barff.uz`, `partner.barff.uz`.
 3. `SSL/TLS Status` → uchalasi uchun `Run AutoSSL`.
 4. Cloudflare ishlatilsa: DNS `Proxied`, SSL rejimi `Full (strict)`.
 
@@ -215,9 +225,10 @@ admin panelda almashtiring.
 curl -s -o /dev/null -w "%{http_code}\n" https://api.barff.uz/api/v1/health
 curl -s -o /dev/null -w "%{http_code}\n" https://barff.uz/uz
 curl -s -o /dev/null -w "%{http_code}\n" https://admin.barff.uz/login
+curl -s -o /dev/null -w "%{http_code}\n" https://partner.barff.uz/login
 ```
 
-Uchalasi ham `200` bo'lishi kerak.
+Hammasi `200` bo'lishi kerak.
 
 **Eng muhim tekshiruv — sahifa uslubi joyidami.** Buni brauzerda
 ko'z bilan emas, port bilan tekshiring:
@@ -251,9 +262,10 @@ cd ~/barff/api && npm run db:deploy
 
 ## 11. Agar tarif yetmasa
 
-Uchta Node jarayoni ulushli tarifda xotiraga sig'masligi mumkin. Shunda:
+To'rtta Node jarayoni ulushli tarifda xotiraga sig'masligi mumkin.
+Shunda:
 
-1. `admin` ni vaqtincha to'xtatib turing — u faqat ichki foydalanish
-   uchun; sayt undan mustaqil ishlaydi.
+1. `admin` va `dealer` ni vaqtincha to'xtatib turing — ular ichki
+   foydalanish uchun; ommaviy sayt ulardan mustaqil ishlaydi.
 2. Yetmasa — o'sha provayderdan kichik VPS (2 yadro / 4 GB). Domen o'z
    joyida qoladi, kod o'zgarmaydi, `docker-compose.yml` repoda bor.

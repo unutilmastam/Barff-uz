@@ -224,6 +224,7 @@ async function main() {
   await packApi();
   await packNextApp('web');
   await packNextApp('admin');
+  await packNextApp('dealer');
 
   await writeFile(
     join(out, 'README.txt'),
