@@ -2,7 +2,9 @@
 
 Bu skriptlar ilovani **haqiqiy brauzerda** tekshiradi — koddan o'qib
 xulosa qilmaydi. `ROADMAP.md` S21 (Faza 1 darvozasi) shu to'plam bilan
-yopilgan; natijalar `docs/RELEASE-P1.md` da.
+yopilgan; natijalar `docs/RELEASE-P1.md` da. S29 (Faza 2 darvozasi)
+`e2e-phase2.mjs` va `load-phase2.mjs` bilan yopilgan; natijalar
+`docs/RELEASE-P2.md` da.
 
 ## Nega alohida, pnpm workspace'dan TASHQARIDA
 
@@ -19,11 +21,15 @@ cd qa && npm install
 
 Uchala xizmat ishlab turishi kerak:
 
-| Xizmat | Port | Buyruq                                       |
-| ------ | ---- | -------------------------------------------- |
-| API    | 3000 | `pnpm --filter @barff/api start`             |
-| Sayt   | 3001 | `pnpm --filter @barff/web start`             |
-| Admin  | 3002 | `PORT=3002 pnpm --filter @barff/admin start` |
+| Xizmat | Port | Buyruq                                        |
+| ------ | ---- | --------------------------------------------- |
+| API    | 3000 | `pnpm --filter @barff/api start`              |
+| Sayt   | 3001 | `pnpm --filter @barff/web start`              |
+| Admin  | 3002 | `PORT=3002 pnpm --filter @barff/admin start`  |
+| Diler  | 3003 | `PORT=3003 pnpm --filter @barff/dealer start` |
+
+Faza 2 skriptlari uchun sayt (3001) shart emas — diler arizasi
+portalning O'ZIDA (`/register`).
 
 Shuningdek PostgreSQL va Redis (`docker compose up -d`).
 
@@ -128,11 +134,62 @@ holat o'zgarishi bilan yuritiladi (S14, S20). Shuning uchun lokal
 bazada `Faza1 Sinov <vaqt>` nomli arizalar to'planib boradi. Bu
 kutilgan holat; kerak bo'lsa ular bazadan qo'lda tozalanadi.
 
+**5. FAZA 2: TELEFON RAQAMI HAR YURISHDA BOSHQACHA BO'LSIN.**
+
+`User.phone` `@unique`. Band telefon bilan kelgan ariza (S29 dagi
+tuzatishdan keyin) `202` va `{accepted: true}` qaytaradi, lekin
+YANGI YOZUV YARATMAYDI — bu ataylab: "bu raqam band" javobi kimning
+raqami ro'yxatda borligini oshkor qilardi.
+
+Men `e2e-phase2.mjs` da telefonni QATTIQ yozgan edim. Birinchi
+yurish yashil, ikkinchisi esa JIM yiqildi: ariza "OK", keyin
+kirish ishlamadi va panelda ariza ko'rinmadi. Aybdor ilova emas,
+sinovning O'ZI edi. Endi telefon `Date.now()` dan quriladi.
+
+**6. FAZA 2: TIPOGRAFIK APOSTROF.**
+
+`To‘xtatilgan` dagi belgi `’` (U+2018), ASCII `'` EMAS. Ko'zga bir
+xil ko'rinadi, lekin `getByRole('button', { name: ... })` uni
+topmaydi. Bu yerda ham men avval yorliqni ASCII bilan yozib,
+sinovni "ishlamayapti" deb o'ylagan edim. Butun panel U+2018
+ishlatadi — yangi yorliq ham shunday bo'lsin.
+
+**7. FAZA 2: `429` O'LCHOVNI BUZADI, LEKIN NOSOZLIK EMAS.**
+
+`load-phase2.mjs` katalogga 200 ta so'rov yuboradi; standart
+cheklov esa 60 soniyada 120 ta. Cheklovga urilgan yurish O'LCHOV
+emas va skript uni shunday deb aytadi (chiqish kodi `2`), chunki
+`p95` aslida cheklovning tezligini ko'rsatardi.
+
+```bash
+API_RATE_LIMIT_MAX=100000 node dist/main.js
+```
+
+`POST /dealers/register` esa ALOHIDA, soatiga 5 ta. `load-phase2`
+uchta diler yaratadi, ya'ni ikki marta ketma-ket yurgizib
+bo'lmaydi. Hisob instansiya XOTIRASIDA — API ni qayta ishga
+tushirish uni nolga qaytaradi.
+
+**8. FAZA 2 SINOV YOZUVLARI BAZADA QOLADI.**
+
+Diler va buyurtmani o'chirish endpointi ATAYLAB yo'q: ikkalasi ham
+biznes yozuvi (S22, S26). Tozalash alohida:
+
+```bash
+cd qa && node cleanup-phase2.mjs
+```
+
+U FAQAT `Faza2 Sinov ` va `Yuk Sinov ` bilan boshlanadigan
+kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
+
 ## Skriptlar
 
 | Skript                  | Nimani o'lchaydi                                                                             |
 | ----------------------- | -------------------------------------------------------------------------------------------- |
 | `npm run e2e`           | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
+| `npm run e2e:p2`        | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
+| `npm run load:p2`       | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
+| `npm run cleanup:p2`    | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
 | `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
 | `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |

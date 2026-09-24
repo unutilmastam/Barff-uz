@@ -101,7 +101,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S26 Orders domain + state machine
 - [x] S27 Dealer orders UI + addresses + repeat order
 - [x] S28 Admin order management
-- [ ] S29 Phase 2 QA — **PHASE 2 GATE**
+- [x] S29 Phase 2 QA — **PHASE 2 GATE** (zanjir brauzerda o'tdi; joylash Q18 ga bog'liq — `docs/RELEASE-P2.md`)
 
 **Phase 3**
 - [ ] S30 Warehouse schema + stock + movements

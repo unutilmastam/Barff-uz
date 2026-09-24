@@ -34,15 +34,31 @@ export default async function LoginPage() {
           Hali diler bo'lmagan odam ham shu sahifaga tushadi. Uni
           "parolingiz noto'g'ri" bilan qoldirish o'rniga ariza
           formasiga yo'naltiramiz (S22).
+
+          IKKI YO'L ATAYLAB: portaldagi ariza AKKAUNT yaratadi va
+          ariza egasi holatini o'zi kuzatadi; ommaviy saytdagi forma
+          esa anonim lead qoldiradi va uni sotuvchi yuritadi (S14).
+          Kim darhol buyurtma bermoqchi bo'lsa — birinchisi.
         */}
         <p className="mt-6 text-center text-sm text-[var(--color-fg-muted)]">
           Hali hamkor emasmisiz?{' '}
           <Link
-            href={`${siteUrl()}/uz/become-partner`}
+            href="/register"
             className="text-[var(--color-accent-text)] underline-offset-4 hover:underline"
           >
-            Ariza qoldiring
+            Ariza yuborish
           </Link>
+        </p>
+
+        <p className="mt-2 text-center text-sm text-[var(--color-fg-subtle)]">
+          Yoki{' '}
+          <Link
+            href={`${siteUrl()}/uz/become-partner`}
+            className="underline-offset-4 hover:underline"
+          >
+            saytdagi qisqa ariza
+          </Link>{' '}
+          orqali bog‘laning.
         </p>
       </div>
     </main>
