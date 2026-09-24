@@ -399,6 +399,7 @@ model ProductVariant {
 
   prices     ProductPrice[]
   priceRules PriceRule[]
+  cartItems  CartItem[]
 
   /// Eng kam buyurtma miqdori (dona). `null` — cheklov yo'q.
   minOrderQuantity Int?
@@ -932,6 +933,7 @@ model Dealer {
   addresses  DealerAddress[]
   events     DealerEvent[]
   priceRules PriceRule[]
+  cart       Cart?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1086,6 +1088,65 @@ model PriceRule {
   @@index([dealerId])
   @@index([tierId])
   @@map("price_rules")
+}
+
+// =============================================================================
+// SAVAT (CLAUDE.md §5)
+// =============================================================================
+
+/// Diler savati.
+///
+/// SERVERDA saqlanadi, brauzer xotirasida EMAS. Sabab amaliy: diler
+/// telefonda savat yig'ib, buyurtmani kompyuterda yakunlashi mumkin
+/// (`ROADMAP.md` S25 DoD: "cart survives device switch").
+///
+/// HAR BIR DILERDA BITTA savat: `dealerId` yagona. Ko'p savat kerak
+/// bo'lsa (masalan turli manzillarga) bu keyin kengaytiriladi —
+/// hozir soddaligi oqimni ishonchli qiladi.
+model Cart {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  dealerId String @unique @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  /// Mijoz kiritgan aksiya kodi. Narx HAR SAFAR qayta hisoblanadi,
+  /// ya'ni kod muddati tugasa savat o'zi yangilanadi.
+  promoCode String?
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+/// Savat pozitsiyasi.
+///
+/// DIQQAT: bu yerda NARX SAQLANMAYDI — faqat variant va miqdor.
+///
+/// Narxni savatga yozish eng keng tarqalgan xato bo'lardi: mijoz
+/// savatni bir hafta ochiq qoldirsa, narx o'zgargan bo'lsa ham
+/// eskisi qolardi. Narx HAR SAFAR `PricingService` orqali qayta
+/// hisoblanadi (CLAUDE.md §5: narx faqat bitta joyda hisoblanadi).
+model CartItem {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  cartId String @db.Uuid
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  variantId String         @db.Uuid
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  quantity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Bitta variant savatda IKKI MARTA turmaydi — miqdor qo'shiladi.
+  @@unique([cartId, variantId])
+  @@index([cartId])
+  @@map("cart_items")
 }
 
 /// Amaldagi refresh token.

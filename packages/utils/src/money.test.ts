@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addMoney,
   applyPercentDiscount,
+  formatMoney,
   fromMajor,
   money,
   multiplyMoney,
@@ -57,5 +58,58 @@ describe('pul', () => {
   it('bo’sh ro’yxat yig’indisi nol', () => {
     expect(sumMoney([]).amount).toBe(0);
     expect(sumMoney([money(100), money(250), money(3)]).amount).toBe(353);
+  });
+});
+
+describe('formatMoney', () => {
+  /**
+   * NATIJA MUHITGA BOG'LIQ BO'LMASLIGI KERAK.
+   *
+   * `Intl` UZS uchun Node'da `900 soʻm`, Chromium'da `UZS 900`
+   * beradi; oddiy `NumberFormat` ham Node'da `18 000`, Chromium'da
+   * `18,000`. Ikkalasi ham O'LCHAB tekshirilgan.
+   *
+   * Server va brauzer bir xil narxni turlicha chizsa, React
+   * gidratsiya nomuvofiqligini beradi va mijoz "narx boshqacha"
+   * deb o'ylaydi. Shuning uchun format QO'LDA va bu testlar uni
+   * qulflaydi.
+   */
+  const NBSP = '\u202f';
+
+  it("valyuta yorlig'i QO'LDA qo'yiladi", () => {
+    expect(formatMoney(money(90_000_00), 'uz-UZ', 0)).toContain("so'm");
+    expect(formatMoney(money(90_000_00), 'uz-UZ', 0)).not.toContain('UZS');
+  });
+
+  it('mingliklar TOR AJRALMAS BO‘SHLIQ bilan ajratiladi', () => {
+    expect(formatMoney(money(18_000_00), 'uz-UZ', 0)).toBe(`18${NBSP}000 so'm`);
+    expect(formatMoney(money(1_234_567_00), 'uz-UZ', 0)).toBe(`1${NBSP}234${NBSP}567 so'm`);
+  });
+
+  it('vergul ham, nuqta ham AJRATGICH sifatida ishlatilmaydi', () => {
+    // Aynan shu ikkisi muhitga qarab paydo bo'lardi.
+    const formatted = formatMoney(money(18_000_00), 'uz-UZ', 0);
+    expect(formatted).not.toContain(',');
+    expect(formatted).not.toContain('.');
+  });
+
+  it('tiyin ko‘rsatiladi yoki yashiriladi', () => {
+    expect(formatMoney(money(1_250_050), 'uz-UZ', 2)).toBe(`12${NBSP}500,50 so'm`);
+    // Yaxlitlash: 50 tiyin -> yuqoriga.
+    expect(formatMoney(money(1_250_050), 'uz-UZ', 0)).toBe(`12${NBSP}501 so'm`);
+    expect(formatMoney(money(1_250_049), 'uz-UZ', 0)).toBe(`12${NBSP}500 so'm`);
+  });
+
+  it('kichik summalar ajratgichsiz', () => {
+    expect(formatMoney(money(90_000), 'uz-UZ', 0)).toBe("900 so'm");
+    expect(formatMoney(money(0), 'uz-UZ', 0)).toBe("0 so'm");
+  });
+
+  it('manfiy summa ishorasini saqlaydi', () => {
+    expect(formatMoney(money(-18_000_00), 'uz-UZ', 0)).toBe(`-18${NBSP}000 so'm`);
+  });
+
+  it("noma'lum valyuta uchun kodning O'ZI ishlatiladi", () => {
+    expect(formatMoney({ amount: 100, currency: 'EUR' as never }, 'uz-UZ', 0)).toContain('EUR');
   });
 });
