@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
@@ -37,6 +38,21 @@ export default tseslint.config(
   {
     // Seed — CLI skripti: uning yagona chiqish kanali konsol.
     files: ['prisma/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
+    /*
+      `qa/` — brauzerda yuriladigan tekshiruvlar (S21).
+
+      Ikki xil global to'plami ARALASH: skriptning o'zi Node'da
+      ishlaydi, `page.evaluate()` ichidagi funksiyalar esa BRAUZERda
+      bajariladi va `document`/`performance` ni ko'radi. Shuning
+      uchun ikkalasi ham e'lon qilinadi.
+
+      Konsolga chiqarish — bu skriptlarning yagona vazifasi.
+    */
+    files: ['qa/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
     rules: { 'no-console': 'off' },
   },
   prettier,
