@@ -333,6 +333,39 @@ async function seedProductionSteps(): Promise<void> {
   console.log(`  ishlab chiqarish bosqichlari: ${PRODUCTION_STEPS.length} ta (tavsiflar MOCK)`);
 }
 
+/**
+ * Standart ombor.
+ *
+ * Bittasi BO'LISHI SHART: kelim yozish uchun omborchiga tayyor
+ * ombor kerak, aks holda u avval kartochka yaratishi kerak bo'lardi
+ * va birinchi kelim shu yerda to'xtab qolardi.
+ *
+ * Nomi va hududi MOCK — haqiqiy ombor manzillari BARFF dan
+ * kelmagan (`docs/OPEN-QUESTIONS.md`, Q11).
+ */
+async function seedWarehouse(): Promise<void> {
+  const existing = await prisma.warehouse.findFirst({
+    where: { deletedAt: null },
+    select: { id: true },
+  });
+
+  if (existing !== null) {
+    console.log('  ombor: allaqachon bor');
+    return;
+  }
+
+  await prisma.warehouse.create({
+    data: {
+      code: 'MAIN',
+      name: 'Asosiy ombor (MOCK)',
+      region: 'REPLACE_WITH_REAL_DATA',
+      isDefault: true,
+    },
+  });
+
+  console.log('  ombor: MAIN yaratildi (MOCK)');
+}
+
 async function main(): Promise<void> {
   console.log('Seed boshlandi');
 
@@ -342,6 +375,7 @@ async function main(): Promise<void> {
   await seedSettings();
   await seedMockProducts();
   await seedProductionSteps();
+  await seedWarehouse();
 
   console.log('Seed tugadi');
 }

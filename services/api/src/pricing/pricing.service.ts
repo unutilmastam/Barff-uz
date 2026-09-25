@@ -86,7 +86,29 @@ export class PricingService {
    */
   async quote(
     lines: QuoteRequest[],
-    options: { dealerId?: string | undefined; at?: Date | undefined } = {},
+    options: {
+      dealerId?: string | undefined;
+      at?: Date | undefined;
+      /**
+       * Narxi belgilanmagan variantni XATO qilmasdan TUSHIRIB
+       * QOLDIRISH.
+       *
+       * FAQAT KATALOG RO'YXATI uchun. Savat va buyurtmada `false`
+       * bo'lib qolishi SHART: noma'lum narxda sotib bo'lmaydi.
+       *
+       * Nega kerak — o'lchab topilgan nosozlik (S30): narxsiz
+       * BITTA variant butun diler katalogini `400` ga aylantirardi.
+       * Admin yangi variant qo'shib, narxini keyinroq belgilamoqchi
+       * bo'lsa, o'sha oraliqda HAMMA diler uchun katalog ishlamay
+       * qolardi.
+       *
+       * Panel buni allaqachon kutardi — `price === null` uchun
+       * "Narx belgilanmagan" deb chizadi. Ya'ni ikki tomon
+       * bir-biriga zid edi: panel `null` kutardi, server esa uni
+       * hech qachon qaytara olmasdi.
+       */
+      skipUnpriced?: boolean | undefined;
+    } = {},
   ): Promise<QuoteLine[]> {
     if (lines.length === 0) return [];
 
@@ -138,7 +160,9 @@ export class PricingService {
 
     const rules = await this.activeRules(at, dealer?.id ?? null, dealer?.tierId ?? null);
 
-    return lines.map((line) => {
+    const quoted: QuoteLine[] = [];
+
+    for (const line of lines) {
       const variant = byId.get(line.variantId);
       /* c8 ignore next -- yuqorida tekshirilgan, TypeScript uchun */
       if (variant === undefined) throw new NotFoundException();
@@ -146,6 +170,10 @@ export class PricingService {
       const price = variant.prices[0];
 
       if (price === undefined) {
+        // Katalog ro'yxati narxsiz variantni "narx belgilanmagan"
+        // deb ko'rsatadi; savat va buyurtma esa RAD ETADI.
+        if (options.skipUnpriced === true) continue;
+
         throw new BadRequestException({
           message: `Variant uchun narx belgilanmagan: ${variant.sku}`,
           code: 'PRICE_NOT_SET',
@@ -170,15 +198,17 @@ export class PricingService {
         ...(line.promoCode !== undefined ? { promoCode: line.promoCode } : {}),
       };
 
-      return {
+      quoted.push({
         ...resolvePrice(price.amount, rules, ctx),
         variantId: variant.id,
         sku: variant.sku,
         quantity: line.quantity,
         currency: price.currency,
         minOrderQuantity: variant.minOrderQuantity,
-      };
-    });
+      });
+    }
+
+    return quoted;
   }
 
   /**

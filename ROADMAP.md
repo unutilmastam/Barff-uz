@@ -104,7 +104,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S29 Phase 2 QA — **PHASE 2 GATE** (zanjir brauzerda o'tdi; joylash Q18 ga bog'liq — `docs/RELEASE-P2.md`)
 
 **Phase 3**
-- [ ] S30 Warehouse schema + stock + movements
+- [x] S30 Warehouse schema + stock + movements
 - [ ] S31 Reservations + picking + packing
 - [ ] S32 Delivery domain + drivers + assignment
 - [ ] S33 Driver PWA

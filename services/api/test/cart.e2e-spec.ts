@@ -187,6 +187,63 @@ describe('Cart (e2e)', () => {
       expect(variant?.price?.unitPrice).toBe(BASE_PRICE);
     });
 
+    /*
+      NARXSIZ VARIANT — S30 DA O'LCHAB TOPILGAN NOSOZLIK.
+
+      `quote()` narxi belgilanmagan variant uchun `PRICE_NOT_SET`
+      tashlardi va u BUTUN katalog so'rovini `400` ga aylantirardi.
+      Ya'ni admin yangi variant qo'shib, narxini keyinroq
+      belgilamoqchi bo'lsa, o'sha oraliqda HAMMA diler uchun
+      katalog ishlamay qolardi.
+
+      Panel buni allaqachon kutardi: `price === null` uchun "Narx
+      belgilanmagan" deb chizadi. Ikki tomon bir-biriga ZID edi.
+    */
+    it('narxsiz variant KATALOGNI YIQITMAYDI', async () => {
+      const bare = await prisma.productVariant.create({
+        data: { productId, sku: `${SLUG}-narxsiz`, volumeMl: 250 },
+        select: { id: true },
+      });
+
+      try {
+        const response = await asDealer('get', '/dealer/products?limit=60').expect(200);
+
+        const product = (response.body.items as { slug: string }[]).find(
+          (p) => p.slug === `${SLUG}-mahsulot`,
+        ) as { variants: { id: string; price: unknown }[] } | undefined;
+
+        const unpriced = product?.variants.find((v) => v.id === bare.id);
+
+        // Variant KO'RINADI, lekin narxsiz — yashirilmaydi.
+        expect(unpriced).toBeDefined();
+        expect(unpriced?.price).toBeNull();
+
+        // Narxi bor variant O'Z narxini yo'qotmaydi.
+        const priced = product?.variants.find((v) => v.id === variantId);
+        expect((priced?.price as { unitPrice: number } | null)?.unitPrice).toBe(BASE_PRICE);
+      } finally {
+        await prisma.productVariant.delete({ where: { id: bare.id } });
+      }
+    });
+
+    it('narxsiz variantni SAVATGA qo‘shib bo‘lmaydi — noma‘lum narxda sotilmaydi', async () => {
+      const bare = await prisma.productVariant.create({
+        data: { productId, sku: `${SLUG}-narxsiz-savat`, volumeMl: 330 },
+        select: { id: true },
+      });
+
+      try {
+        const response = await asDealer('post', '/dealer/cart/items')
+          .send({ variantId: bare.id, quantity: 1 })
+          .expect(400);
+
+        expect(response.body.code).toBe('PRICE_NOT_SET');
+      } finally {
+        await prisma.cartItem.deleteMany({ where: { variantId: bare.id } });
+        await prisma.productVariant.delete({ where: { id: bare.id } });
+      }
+    });
+
     it('kategoriya bo‘yicha filtrlaydi', async () => {
       const ours = await asDealer('get', `/dealer/products?categoryId=${categoryId}`).expect(200);
       expect(ours.body.items.length).toBeGreaterThan(0);

@@ -14,6 +14,7 @@ import { CartModule } from './cart/cart.module';
 import { DealersModule } from './dealers/dealers.module';
 import { LeadsModule } from './leads/leads.module';
 import { OrdersModule } from './orders/orders.module';
+import { WarehouseModule } from './warehouse/warehouse.module';
 import { PricingModule } from './pricing/pricing.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CacheModule } from './public/cache/cache.module';
@@ -58,6 +59,7 @@ import { UsersModule } from './users/users.module';
     PricingModule,
     CartModule,
     OrdersModule,
+    WarehouseModule,
     HealthModule,
   ],
   providers: [
