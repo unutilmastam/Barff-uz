@@ -14,6 +14,7 @@ import { CartService } from '../cart/cart.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { DeliveryService } from '../delivery/delivery.service';
 import { ReservationsService } from '../warehouse/reservations.service';
 import { OrderNumberService } from './order-number.service';
 
@@ -76,6 +77,7 @@ export class OrdersService {
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
     private readonly reservations: ReservationsService,
+    private readonly delivery: DeliveryService,
   ) {}
 
   // ===========================================================================
@@ -431,6 +433,30 @@ export class OrdersService {
 
       return row;
     });
+
+    /*
+      YETKAZMA HOLAT YOZILGANDAN KEYIN tug'iladi (S32).
+
+      Zaxiradan FARQLI tartib va bu ataylab: zaxira olinmasa
+      buyurtma o'tmasligi KERAK (tovar yo'q), yetkazma esa
+      buyurtmaning o'tishiga TO'SQINLIK QILMASLIGI kerak —
+      `READY_FOR_DELIVERY` buyurtma yetkazmasiz ham to'g'ri holat,
+      faqat uni hech kim ko'rmaydi.
+
+      Shuning uchun xatolik JURNALGA yoziladi va o'tish saqlanadi;
+      yetkazmani logist qo'lda ham yarata oladi.
+      Siyosat: `docs/DELIVERY-POLICY.md` §7.
+    */
+    if (to === 'READY_FOR_DELIVERY') {
+      try {
+        await this.delivery.createForOrder(id, actor, ctx);
+      } catch (error) {
+        this.logger.error(
+          `Yetkazma yaratilmadi (buyurtma ${order.number})`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
+    }
 
     await this.audit.record({
       action: AUDIT_ACTIONS.ORDER_STATUS_CHANGED,

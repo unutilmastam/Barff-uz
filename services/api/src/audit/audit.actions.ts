@@ -39,6 +39,12 @@ export const AUDIT_ACTIONS = {
   STOCK_RESERVED: 'stock.reserved',
   STOCK_RELEASED: 'stock.released',
   STOCK_FULFILLED: 'stock.fulfilled',
+  DELIVERY_CREATED: 'delivery.created',
+  DELIVERY_ASSIGNED: 'delivery.assigned',
+  DELIVERY_STATUS_CHANGED: 'delivery.status.changed',
+  DELIVERY_NOTE_CHANGED: 'delivery.note.changed',
+  DRIVER_CHANGED: 'driver.changed',
+  VEHICLE_CHANGED: 'vehicle.changed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

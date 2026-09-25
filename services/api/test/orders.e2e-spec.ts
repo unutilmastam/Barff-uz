@@ -213,6 +213,16 @@ describe('Orders (e2e)', () => {
       'ALTER TABLE "warehouse_stock" ENABLE TRIGGER warehouse_stock_guard',
     );
 
+    /*
+      YETKAZMA AVVAL — `Delivery.orderId` da `onDelete: Restrict`.
+
+      Bu ATAYLAB: yetkazmasi bor buyurtmani o'chirib bo'lmaydi,
+      aks holda tovar qayerga ketgani yo'qolardi. Tozalash tartibi
+      shuni hisobga olishi kerak (S32 da o'lchab aniqlandi).
+    */
+    await prisma.deliveryEvent.deleteMany({ where: { delivery: { orderId: { in: orderIds } } } });
+    await prisma.delivery.deleteMany({ where: { orderId: { in: orderIds } } });
+    await prisma.stockReservation.deleteMany({ where: { orderId: { in: orderIds } } });
     await prisma.orderStatusHistory.deleteMany({ where: { orderId: { in: orderIds } } });
     await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
     await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
