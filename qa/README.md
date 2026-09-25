@@ -190,6 +190,8 @@ kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 | `npm run e2e:p2`        | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
 | `npm run load:p2`       | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
 | `npm run cleanup:p2`    | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
+| `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
+| `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
 | `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
 | `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |
@@ -197,6 +199,18 @@ kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 | `npm run all`           | Hammasi ketma-ket                                                                            |
 
 `npm run a11y -- <katalog>` ekran nusxalarini ham saqlaydi.
+
+**9. OMBOR SINOVLARI QOLDIQ QOLDIRADI.**
+
+`warehouse-check.mjs` va `picking-check.mjs` bazaga harakatlar
+yozadi va ularni O'CHIRA OLMAYDI: jurnal ataylab o'zgarmas (S30).
+Bu kutilgan holat — qoldiq raqami o'sib boradi, lekin sinovlar
+o'zlari yozgan miqdorni O'LCHAYDI (oldin/keyin), shuning uchun
+avvalgi yurishlar natijaga ta'sir qilmaydi.
+
+`picking-check.mjs` bundan tashqari bitta sinov dileri va bitta
+buyurtma qoldiradi. Ularni `cleanup-phase2.mjs` olmaydi (prefiks
+boshqacha) — kerak bo'lsa bazadan qo'lda tozalanadi.
 
 ## O'LCHOV USULI HAQIDA
 

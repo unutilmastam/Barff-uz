@@ -36,6 +36,9 @@ export const AUDIT_ACTIONS = {
   STOCK_MOVED: 'stock.moved',
   STOCK_ADJUSTED: 'stock.adjusted',
   STOCK_THRESHOLD_CHANGED: 'stock.threshold.changed',
+  STOCK_RESERVED: 'stock.reserved',
+  STOCK_RELEASED: 'stock.released',
+  STOCK_FULFILLED: 'stock.fulfilled',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

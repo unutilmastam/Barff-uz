@@ -84,6 +84,12 @@ const GROUPS: AdminNavGroup[] = [
     items: [
       { href: '/warehouse/stock', label: 'Qoldiqlar', permission: 'warehouse.view', ready: true },
       {
+        href: '/warehouse/picking',
+        label: 'Yig‘ish',
+        permission: 'warehouse.view',
+        ready: true,
+      },
+      {
         href: '/warehouse/movements',
         label: 'Harakatlar',
         permission: 'warehouse.view',

@@ -105,7 +105,7 @@ Claude Code updates this list. `[x]` = done and merged.
 
 **Phase 3**
 - [x] S30 Warehouse schema + stock + movements
-- [ ] S31 Reservations + picking + packing
+- [x] S31 Reservations + picking + packing
 - [ ] S32 Delivery domain + drivers + assignment
 - [ ] S33 Driver PWA
 - [ ] S34 Admin logistics screens
