@@ -54,7 +54,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30 ombor.
+    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -69,6 +69,7 @@ describe('admin navigatsiyasi', () => {
       '/pricing',
       '/dealers',
       '/warehouse/stock',
+      '/warehouse/picking',
       '/warehouse/movements',
       '/system/settings',
     ]);

@@ -56,6 +56,36 @@ describe('Admin orders (e2e)', () => {
       [method](`${base}${path}`)
       .set('Authorization', `Bearer ${tokens[role]}`);
 
+  /*
+    OMBOR QOLDIG'I — S31 DAN KEYIN SHART.
+
+    `CONFIRMED -> RESERVED` endi HAQIQIY zaxira oladi va qoldiq
+    yetmasa `409` qaytaradi (`docs/WAREHOUSE-POLICY.md`). Ya'ni
+    holat mashinasini "bo'sh" sinab bo'lmaydi: bu sinovlar ilgari
+    ombor umuman yo'q paytda yozilgan edi.
+
+    Qoldiq SEED dagi standart omborga yoziladi. To'plamlar
+    bir-biriga xalaqit bermaydi: qator (ombor + variant) bo'yicha
+    alohida va har bir to'plamning O'Z varianti bor.
+  */
+  const stockUp = async (quantity = 10_000) => {
+    const warehouse = await prisma.warehouse.findFirstOrThrow({
+      where: { deletedAt: null, isActive: true },
+      orderBy: { isDefault: 'desc' },
+      select: { id: true },
+    });
+
+    await prisma.stockMovement.create({
+      data: {
+        warehouseId: warehouse.id,
+        productVariantId: variantId,
+        type: 'IN',
+        quantity,
+        reference: 'E2E setup',
+      },
+    });
+  };
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(ThrottlerStorage)
@@ -161,11 +191,36 @@ describe('Admin orders (e2e)', () => {
       .expect(201);
 
     orderId = order.body.id as string;
+
+    await stockUp();
   });
 
   afterAll(async () => {
     const orders = await prisma.order.findMany({ where: { dealerId }, select: { id: true } });
     const orderIds = orders.map((o) => o.id);
+
+    /*
+      OMBOR IZLARI — jurnal QATORLARI o'chirilmaydi (S30), shuning
+      uchun trigger vaqtincha uzib qo'yiladi. Bu qoidani buzish
+      emas, uning kuchini tasdiqlaydi: oddiy yo'l bilan o'chirib
+      BO'LMAYDI.
+    */
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "stock_movements" DISABLE TRIGGER stock_movement_no_delete',
+    );
+    await prisma.stockReservation.deleteMany({ where: { productVariantId: variantId } });
+    await prisma.stockMovement.deleteMany({ where: { productVariantId: variantId } });
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "stock_movements" ENABLE TRIGGER stock_movement_no_delete',
+    );
+
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "warehouse_stock" DISABLE TRIGGER warehouse_stock_guard',
+    );
+    await prisma.warehouseStock.deleteMany({ where: { productVariantId: variantId } });
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "warehouse_stock" ENABLE TRIGGER warehouse_stock_guard',
+    );
 
     await prisma.orderStatusHistory.deleteMany({ where: { orderId: { in: orderIds } } });
     await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });

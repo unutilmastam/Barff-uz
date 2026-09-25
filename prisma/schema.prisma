@@ -406,6 +406,7 @@ model ProductVariant {
 
   stock          WarehouseStock[]
   stockMovements StockMovement[]
+  reservations   StockReservation[]
 
   /// Eng kam buyurtma miqdori (dona). `null` — cheklov yo'q.
   minOrderQuantity Int?
@@ -1241,8 +1242,9 @@ model Order {
    */
   idempotencyKey String?
 
-  items   OrderItem[]
-  history OrderStatusHistory[]
+  items        OrderItem[]
+  history      OrderStatusHistory[]
+  reservations StockReservation[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1287,6 +1289,8 @@ model OrderItem {
   /// Qaysi qoida qo'llangani — nizo chiqsa javob shu yerda.
   appliedRuleId   String? @db.Uuid
   appliedRuleName String?
+
+  reservations StockReservation[]
 
   createdAt DateTime @default(now())
 
@@ -1448,10 +1452,11 @@ model Warehouse {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  stock            WarehouseStock[]
-  movements        StockMovement[]  @relation("MovementWarehouse")
+  stock             WarehouseStock[]
+  movements         StockMovement[]    @relation("MovementWarehouse")
   /// Ko'chirishning IKKINCHI tomoni (`TRANSFER`).
-  relatedMovements StockMovement[]  @relation("MovementRelatedWarehouse")
+  relatedMovements  StockMovement[]    @relation("MovementRelatedWarehouse")
+  stockReservations StockReservation[]
 
   @@index([isActive])
   @@map("warehouses")
@@ -1543,4 +1548,67 @@ model StockMovement {
   @@index([productVariantId, createdAt])
   @@index([type, createdAt])
   @@map("stock_movements")
+}
+
+/// Zaxira holati.
+///
+/// `ACTIVE` — tovar buyurtma uchun ushlab turilibdi.
+/// `FULFILLED` — qadoqlandi va ombordan CHIQDI.
+/// `RELEASED` — bekor qilindi yoki muddati o'tdi; tovar qaytib bo'shadi.
+enum ReservationStatus {
+  ACTIVE
+  FULFILLED
+  RELEASED
+}
+
+/// Buyurtma uchun ushlab turilgan tovar (CLAUDE.md §7).
+///
+/// ZAXIRA — QOLDIQ EMAS. Tovar omborda turibdi (`quantity`
+/// o'zgarmaydi), lekin boshqa buyurtmaga berib bo'lmaydi
+/// (`reservedQuantity` oshadi). Ikkalasini aralashtirish S30 da
+/// ataylab oldini olingan.
+///
+/// Har bir zaxira `stock_movements` dagi `RESERVED` qatori bilan
+/// birga yaratiladi va bittasisiz ikkinchisi bo'lmaydi: qoldiq
+/// faqat jurnal orqali o'zgaradi.
+model StockReservation {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// Qaysi POZITSIYA uchun. Bitta buyurtmada bir xil variant ikki
+  /// marta bo'lishi mumkin emas (savat buni birlashtiradi), lekin
+  /// pozitsiyaga bog'lash yig'ish varaqasini aniq qiladi.
+  orderItemId String    @db.Uuid
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  warehouseId String    @db.Uuid
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  productVariantId String         @db.Uuid
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+
+  quantity Int
+
+  status ReservationStatus @default(ACTIVE)
+
+  /// Shu paytdan keyin zaxira bo'shatilishi mumkin.
+  ///
+  /// Hozircha uni REJALI ish emas, xodim yoki admin endpoint'i
+  /// bo'shatadi (`POST /warehouse/reservations/release-expired`).
+  /// Rejalashtirgich S41 da qo'shiladi — o'shangacha muddat
+  /// O'ZI-O'ZIDAN bo'shatmaydi va buni yashirmaslik kerak.
+  expiresAt DateTime?
+
+  releasedAt  DateTime?
+  fulfilledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId, status])
+  @@index([warehouseId, productVariantId, status])
+  @@index([status, expiresAt])
+  @@map("stock_reservations")
 }

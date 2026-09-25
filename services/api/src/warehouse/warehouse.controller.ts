@@ -19,6 +19,7 @@ import { type RequestContext } from '../auth/auth.service';
 import { type AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import { ReservationsService } from './reservations.service';
 import { WarehouseService } from './warehouse.service';
 import {
   LowStockThresholdDto,
@@ -43,7 +44,10 @@ import {
 @ApiTags('warehouse')
 @Controller('warehouse')
 export class WarehouseController {
-  constructor(private readonly warehouse: WarehouseService) {}
+  constructor(
+    private readonly warehouse: WarehouseService,
+    private readonly reservations: ReservationsService,
+  ) {}
 
   private context(request: RequestWithUser): RequestContext {
     const userAgent = request.headers['user-agent'];
@@ -184,6 +188,94 @@ export class WarehouseController {
   ) {
     return this.warehouse.recordMovement(
       { ...dto, type: 'ADJUSTMENT' },
+      { id: user.id, email: user.email },
+      this.context(request),
+    );
+  }
+
+  // ------------------------------------------------------- zaxira va yig'ish
+
+  /**
+   * Yig'ilishi kerak bo'lgan buyurtmalar.
+   *
+   * `:id` MARSHRUTIDAN OLDIN turishi shart — aks holda `queue`
+   * so'zi buyurtma id si sifatida qabul qilinardi. Bu S28 da
+   * o'lchab topilgan tuzoq (`/admin/orders/dealers`).
+   */
+  @Get('picking/queue')
+  @Permissions('warehouse.view')
+  @ApiOperation({ summary: "Yig'ish navbati" })
+  pickingQueue() {
+    return this.reservations.pickingQueue();
+  }
+
+  @Get('picking/:orderId')
+  @Permissions('warehouse.view')
+  @ApiOperation({ summary: "Yig'ish varaqasi" })
+  @ApiResponse({ status: 404, type: ApiErrorDto, description: 'Buyurtma topilmadi' })
+  pickingList(@Param('orderId', ParseUUIDPipe) orderId: string) {
+    return this.reservations.pickingList(orderId);
+  }
+
+  @Get('reservations/:orderId')
+  @Permissions('warehouse.view')
+  @ApiOperation({ summary: 'Buyurtma zaxiralari' })
+  reservationsFor(@Param('orderId', ParseUUIDPipe) orderId: string) {
+    return this.reservations.listByOrder(orderId);
+  }
+
+  /**
+   * Zaxiraga olish — QO'LDA.
+   *
+   * Odatdagi yo'l — buyurtmani `RESERVED` holatiga o'tkazish
+   * (`PATCH /admin/orders/:id/status`), zaxira esa o'sha
+   * o'tishning YONDOSH TA'SIRI. Bu endpoint zaxira bo'shatilgandan
+   * keyin QAYTA olish uchun: buyurtma allaqachon `RESERVED` da
+   * turgan bo'lsa, holat o'zgarmaydi va yuqoridagi yo'l ishlamaydi.
+   */
+  @Post('reservations/:orderId')
+  @Permissions('warehouse.manage')
+  @ApiOperation({ summary: 'Buyurtmani zaxiraga olish' })
+  @ApiResponse({ status: 409, type: ApiErrorDto, description: 'Qoldiq yetmadi yoki zaxira bor' })
+  reserve(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.reservations.reserveOrder(
+      orderId,
+      { id: user.id, email: user.email },
+      this.context(request),
+    );
+  }
+
+  @Post('reservations/:orderId/release')
+  @Permissions('warehouse.manage')
+  @ApiOperation({ summary: 'Zaxirani bo‘shatish' })
+  release(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.reservations.releaseOrder(
+      orderId,
+      { id: user.id, email: user.email },
+      this.context(request),
+      'Qo‘lda bo‘shatildi',
+    );
+  }
+
+  /**
+   * Muddati o'tgan zaxiralarni bo'shatadi.
+   *
+   * REJALI ISH EMAS — buni xodim yoki tashqi `cron` chaqiradi
+   * (`docs/WAREHOUSE-POLICY.md` §5). Rejalashtirgich S41 da.
+   */
+  @Post('reservations-release-expired')
+  @Permissions('warehouse.manage')
+  @ApiOperation({ summary: "Muddati o'tgan zaxiralarni bo'shatish" })
+  releaseExpired(@CurrentUser() user: AuthenticatedUser, @Req() request: RequestWithUser) {
+    return this.reservations.releaseExpired(
       { id: user.id, email: user.email },
       this.context(request),
     );

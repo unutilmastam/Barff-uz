@@ -14,6 +14,7 @@ import { CartService } from '../cart/cart.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReservationsService } from '../warehouse/reservations.service';
 import { OrderNumberService } from './order-number.service';
 
 export interface SubmitOrderInput {
@@ -74,6 +75,7 @@ export class OrdersService {
     private readonly numbers: OrderNumberService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
+    private readonly reservations: ReservationsService,
   ) {}
 
   // ===========================================================================
@@ -387,6 +389,27 @@ export class OrdersService {
         message: `${order.status} dan ${to} ga o'tish mumkin emas`,
         code: 'ORDER_STATUS_INVALID_TRANSITION',
       });
+    }
+
+    /*
+      OMBOR TA'SIRI HOLAT O'ZGARISHIDAN OLDIN (S31).
+
+      Tartib ataylab shunday: zaxira olinmasa (qoldiq yetmasa),
+      buyurtma `RESERVED` ga O'TMASLIGI kerak. Teskari tartibda
+      buyurtma "zaxiraga olindi" deb ko'rinib, aslida hech narsa
+      ushlab turilmagan bo'lardi — va buni faqat yig'ish paytida
+      omborchi payqardi.
+
+      Qoidalar `docs/WAREHOUSE-POLICY.md` da.
+    */
+    if (to === 'RESERVED') {
+      await this.reservations.reserveOrder(id, actor, ctx);
+    } else if (to === 'PACKED') {
+      await this.reservations.fulfilOrder(id, actor, ctx);
+    } else if (to === 'CANCELLED') {
+      // Zaxira bo'lmasa jim o'tadi — bekor qilish har qanday
+      // holatdan kelishi mumkin.
+      await this.reservations.releaseOrder(id, actor, ctx, note ?? 'Buyurtma bekor qilindi');
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
