@@ -132,7 +132,10 @@ export class DealerCatalogService {
         ? []
         : await this.pricing.quote(
             variantIds.map((variantId) => ({ variantId, quantity: 1 })),
-            { dealerId },
+            // Narxsiz variant butun katalogni yiqitmaydi — u
+            // "narx belgilanmagan" bo'lib ko'rinadi (S30 da
+            // o'lchab topilgan nosozlik).
+            { dealerId, skipUnpriced: true },
           );
 
     const priceByVariant = new Map(quotes.map((quote) => [quote.variantId, quote]));

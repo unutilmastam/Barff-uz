@@ -54,7 +54,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 da CMS ekranlari, S23 da narx qoidalari, S29 da dilerlar qo'shildi.
+    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30 ombor.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -68,6 +68,8 @@ describe('admin navigatsiyasi', () => {
       '/orders',
       '/pricing',
       '/dealers',
+      '/warehouse/stock',
+      '/warehouse/movements',
       '/system/settings',
     ]);
   });

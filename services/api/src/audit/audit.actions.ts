@@ -32,6 +32,10 @@ export const AUDIT_ACTIONS = {
   ORDER_CREATED: 'order.created',
   ORDER_STATUS_CHANGED: 'order.status.changed',
   ORDER_NOTE_CHANGED: 'order.note.changed',
+  WAREHOUSE_CHANGED: 'warehouse.changed',
+  STOCK_MOVED: 'stock.moved',
+  STOCK_ADJUSTED: 'stock.adjusted',
+  STOCK_THRESHOLD_CHANGED: 'stock.threshold.changed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
