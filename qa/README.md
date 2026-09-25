@@ -21,12 +21,13 @@ cd qa && npm install
 
 Uchala xizmat ishlab turishi kerak:
 
-| Xizmat | Port | Buyruq                                        |
-| ------ | ---- | --------------------------------------------- |
-| API    | 3000 | `pnpm --filter @barff/api start`              |
-| Sayt   | 3001 | `pnpm --filter @barff/web start`              |
-| Admin  | 3002 | `PORT=3002 pnpm --filter @barff/admin start`  |
-| Diler  | 3003 | `PORT=3003 pnpm --filter @barff/dealer start` |
+| Xizmat    | Port | Buyruq                                          |
+| --------- | ---- | ----------------------------------------------- |
+| API       | 3000 | `pnpm --filter @barff/api start`                |
+| Sayt      | 3001 | `pnpm --filter @barff/web start`                |
+| Admin     | 3002 | `PORT=3002 pnpm --filter @barff/admin start`    |
+| Diler     | 3003 | `PORT=3003 pnpm --filter @barff/dealer start`   |
+| Haydovchi | 3004 | `PORT=3004 pnpm --filter @barff/delivery start` |
 
 Faza 2 skriptlari uchun sayt (3001) shart emas — diler arizasi
 portalning O'ZIDA (`/register`).
@@ -192,6 +193,7 @@ kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 | `npm run cleanup:p2`    | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
 | `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
 | `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
+| `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
 | `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
 | `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |
@@ -211,6 +213,30 @@ avvalgi yurishlar natijaga ta'sir qilmaydi.
 `picking-check.mjs` bundan tashqari bitta sinov dileri va bitta
 buyurtma qoldiradi. Ularni `cleanup-phase2.mjs` olmaydi (prefiks
 boshqacha) — kerak bo'lsa bazadan qo'lda tozalanadi.
+
+**10. YANGI ILOVA — `API_CORS_ORIGINS` GA QO'SHILISHI SHART.**
+
+Haydovchi PWA'si qo'shilganda uning manzili (`localhost:3004`)
+ro'yxatda yo'q edi va kirish JIM ishlamadi: ekranda hech narsa
+ko'rinmadi, xato esa FAQAT brauzer konsolida edi
+(`No 'Access-Control-Allow-Origin' header`).
+
+Yangi ilova qo'shganda `.env` dagi `API_CORS_ORIGINS` ni ham
+yangilang. Ishlab chiqarish uchun ro'yxat
+`docs/DEPLOY-CPANEL.md` §6.1.1 da.
+
+**11. `driver-pwa-check.mjs` TARMOQNI O'ZI UZADI.**
+
+Shuning uchun konsolda `ERR_INTERNET_DISCONNECTED` KUTILGAN
+natija va u sanalmaydi. Boshqa har qanday xato sanaladi — aks
+holda sinov doim qizil bo'lib, haqiqiy xatolarni ko'mib
+yuborardi.
+
+Skript tayyor haydovchi va yetkazma talab qiladi:
+
+```bash
+DRIVER_EMAIL=... DRIVER_PASSWORD=... DELIVERY_ID=... npm run driver
+```
 
 ## O'LCHOV USULI HAQIDA
 

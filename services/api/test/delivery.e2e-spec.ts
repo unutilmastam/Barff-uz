@@ -541,6 +541,128 @@ describe('Delivery (e2e)', () => {
   });
 
   // ===========================================================================
+  // OFLAYN NAVBAT: AYNAN BIR MARTA (S33 DoD)
+  // ===========================================================================
+
+  /*
+    Haydovchi tarmoqsiz joyda tugma bossa, amal telefonda navbatga
+    tushadi. Aloqa tiklanganda u yuboriladi — lekin JAVOB
+    yo'qolishi mumkin, so'rov esa serverga YETIB BORGAN bo'lishi
+    mumkin. Navbat qayta yuboradi.
+
+    Kalitsiz ikkinchi urinish `ARRIVED -> ARRIVED` bo'lib ko'rinardi
+    va o'tish jadvali uni `409` bilan rad etardi: haydovchi
+    MUVAFFAQIYATLI amalni "xato" deb ko'rardi va yana bosardi.
+  */
+  it('takroriy yuborish amalni IKKINCHI marta QO‘LLAMAYDI', async () => {
+    const { delivery } = await makeReadyOrder();
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/assign`)
+      .send({ driverId })
+      .expect(200);
+
+    const key = `e2e-${STAMP}-takror`;
+    const body = { status: 'PICKED_UP', idempotencyKey: key };
+
+    const first = await as('DRIVER', 'patch', `/delivery/my/${delivery.id}/status`)
+      .send(body)
+      .expect(200);
+
+    // Aynan o'sha so'rov — telefon javobni olmagan deb hisoblaydi.
+    const second = await as('DRIVER', 'patch', `/delivery/my/${delivery.id}/status`)
+      .send(body)
+      .expect(200);
+
+    expect(first.body.status).toBe('PICKED_UP');
+    expect(second.body.status).toBe('PICKED_UP');
+
+    // HODISA BITTA — amal ikki marta yozilmagan.
+    const events = await prisma.deliveryEvent.count({
+      where: { deliveryId: delivery.id, toStatus: 'PICKED_UP' },
+    });
+    expect(events).toBe(1);
+  });
+
+  it('BIR VAQTDA yuborilgan ikki takror ham BITTA amal beradi', async () => {
+    const { delivery } = await makeReadyOrder();
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/assign`)
+      .send({ driverId })
+      .expect(200);
+
+    const key = `e2e-${STAMP}-poyga`;
+    const send = () =>
+      as('DRIVER', 'patch', `/delivery/my/${delivery.id}/status`).send({
+        status: 'PICKED_UP',
+        idempotencyKey: key,
+      });
+
+    /*
+      Ketma-ket yuborish OSON holat: ikkinchisi birinchining
+      yozuvini ko'radi. Qiyini — POYGA: ikkalasi ham "bunday kalit
+      yo'q" deb xulosa qiladi va yagona indeks ikkinchisini rad
+      etadi. O'shanda ham javob MUVAFFAQIYATLI bo'lishi kerak.
+    */
+    const [a, b] = await Promise.all([send(), send()]);
+
+    expect([a.status, b.status]).toEqual([200, 200]);
+
+    const events = await prisma.deliveryEvent.count({
+      where: { deliveryId: delivery.id, toStatus: 'PICKED_UP' },
+    });
+    expect(events).toBe(1);
+  });
+
+  it('BOSHQA kalit — BOSHQA amal', async () => {
+    const { delivery } = await makeReadyOrder();
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/assign`)
+      .send({ driverId })
+      .expect(200);
+
+    await as('DRIVER', 'patch', `/delivery/my/${delivery.id}/status`)
+      .send({ status: 'PICKED_UP', idempotencyKey: `e2e-${STAMP}-a` })
+      .expect(200);
+
+    // Kalit boshqacha — bu HAQIQIY keyingi qadam, takror emas.
+    await as('DRIVER', 'patch', `/delivery/my/${delivery.id}/status`)
+      .send({ status: 'IN_TRANSIT', idempotencyKey: `e2e-${STAMP}-b` })
+      .expect(200);
+
+    const row = await prisma.delivery.findUniqueOrThrow({
+      where: { id: delivery.id },
+      select: { status: true },
+    });
+    expect(row.status).toBe('IN_TRANSIT');
+  });
+
+  it('kalit YETKAZMA ichida yagona — boshqa yetkazmada bir xil kalit ishlaydi', async () => {
+    const one = await makeReadyOrder();
+    const two = await makeReadyOrder();
+
+    await as('LOGISTICS', 'patch', `/delivery/${one.delivery.id}/assign`)
+      .send({ driverId })
+      .expect(200);
+    await as('LOGISTICS', 'patch', `/delivery/${two.delivery.id}/assign`)
+      .send({ driverId })
+      .expect(200);
+
+    const key = `e2e-${STAMP}-umumiy`;
+
+    await as('DRIVER', 'patch', `/delivery/my/${one.delivery.id}/status`)
+      .send({ status: 'PICKED_UP', idempotencyKey: key })
+      .expect(200);
+
+    // Ikkinchi yetkazma — o'sha kalit, lekin BOSHQA ish.
+    await as('DRIVER', 'patch', `/delivery/my/${two.delivery.id}/status`)
+      .send({ status: 'PICKED_UP', idempotencyKey: key })
+      .expect(200);
+
+    const row = await prisma.delivery.findUniqueOrThrow({
+      where: { id: two.delivery.id },
+      select: { status: true },
+    });
+    expect(row.status).toBe('PICKED_UP');
+  });
+
+  // ===========================================================================
   // PARK
   // ===========================================================================
 

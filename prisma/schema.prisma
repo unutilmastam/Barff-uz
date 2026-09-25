@@ -1816,12 +1816,25 @@ model DeliveryEvent {
 
   note String?
 
+  /**
+   * Takrorga qarshi kalit — HAYDOVCHI TELEFONIDAN keladi (S33).
+   * Oflayn navbat amalni qayta yuborishi mumkin: javob yo'qolgan,
+   * lekin so'rov SERVERGA YETIB BORGAN. Kalitsiz bu ikkinchi marta
+   * qo'llanishga urinardi va haydovchi "xato" ko'rardi — aslida
+   * hammasi joyida edi.
+   * Yagonalik YETKAZMA ICHIDA: ikki xil yetkazmada bir xil kalit
+   * bo'lishi zarar qilmaydi va telefon kalitni yetkazma bo'yicha
+   * yasaydi.
+   */
+  idempotencyKey String?
+
   /// Tizim o'zgartirgan bo'lsa `null` (masalan buyurtma bekor qilinganda).
   actorId String? @db.Uuid
   actor   User?   @relation("DeliveryEventActor", fields: [actorId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
+  @@unique([deliveryId, idempotencyKey])
   @@index([deliveryId, createdAt])
   @@map("delivery_events")
 }
