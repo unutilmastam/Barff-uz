@@ -325,4 +325,67 @@ jobs:
           echo "XATO: diler portali ko'tarilmadi"
           docker logs barff-dealer-ci
           docker rm -f barff-dealer-ci
+
+      - name: Haydovchi PWA tasvirini qurish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/delivery/Dockerfile
+          push: false
+          load: true
+          tags: barff-delivery:ci
+
+      - name: Haydovchi tasviri root'dan ishlamasligini tekshirish
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id barff-delivery:ci -u)
+          if [ "$USER_ID" = "0" ]; then
+            echo "Tasvir root'dan ishlayapti" >&2
+            exit 1
+          fi
+
+      - name: Haydovchi PWA ko'tarilishi va PWA fayllari borligini tekshirish
+        run: |
+          docker run -d --name barff-delivery-ci -p 3004:3004 barff-delivery:ci
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://127.0.0.1:3004/login; then
+              echo "Haydovchi PWA javob berdi"
+              break
+            fi
+            if [ "$i" = "30" ]; then
+              docker logs barff-delivery-ci
+              docker rm -f barff-delivery-ci
+              exit 1
+            fi
+            sleep 2
+          done
+
+          # XIZMAT ISHCHISI VA MANIFEST BO'LMASA PWA O'RNATILMAYDI.
+          #
+          # `public/` Next'ning standalone chiqishiga KIRMAYDI va uni
+          # nusxalashni unutish JIM buziladigan holat: ilova
+          # ishlayotgandek ko'rinadi, lekin oflayn ishlamaydi.
+          curl -fsS -o /dev/null http://127.0.0.1:3004/sw.js || {
+            echo "sw.js topilmadi — PWA o'rnatilmaydi" >&2
+            docker rm -f barff-delivery-ci
+            exit 1
+          }
+          curl -fsS -o /dev/null http://127.0.0.1:3004/icon-192.png || {
+            echo "ikonka topilmadi" >&2
+            docker rm -f barff-delivery-ci
+            exit 1
+          }
+          curl -fsS http://127.0.0.1:3004/manifest.webmanifest | grep -q standalone || {
+            echo "manifest noto'g'ri" >&2
+            docker rm -f barff-delivery-ci
+            exit 1
+          }
+
+          # Haydovchi ilovasi ham qidiruvga tushmaydi.
+          curl -fsS -D - -o /dev/null http://127.0.0.1:3004/login | grep -qi "x-robots-tag: noindex" || {
+            echo "X-Robots-Tag yo'q" >&2
+            docker rm -f barff-delivery-ci
+            exit 1
+          }
+
+          docker rm -f barff-delivery-ci
           exit 1

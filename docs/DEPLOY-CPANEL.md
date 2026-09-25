@@ -28,7 +28,7 @@ Quyidagilar shu repoda **haqiqatda yurgizib** tekshirildi, taxmin emas:
 1. `Setup Node.js App` qaysi Node versiyalarini beradi — kamida **20**
    kerak.
 2. Tarifda operativ xotira va jarayon limiti qancha — bu yerda **to'rtta**
-   Node ilovasi birga ishlaydi (api, web, admin, dealer).
+   Node ilovasi birga ishlaydi (api, web, admin, dealer, delivery).
 
 Ikkalasi ham cPanel'da ko'rinadi (§1). Yetmasa — o'sha provayderdan
 kichik VPS; kod o'zgarmaydi.
@@ -82,6 +82,7 @@ dist-cpanel/
   web/     barff.uz — ommaviy sayt
   admin/   admin.barff.uz — CMS
   dealer/  partner.barff.uz — diler portali
+  delivery/ delivery.barff.uz — haydovchi PWA'si
 ```
 
 `scripts/package-cpanel.mjs` nima qilishini va NEGA qo'lda
@@ -135,7 +136,7 @@ Yaratgandan keyin har biri uchun `Run NPM Install` tugmasini bosing.
 | `NODE_ENV`             | `production`                               |
 | `DATABASE_URL`         | §2 dagi ulanish satri                      |
 | `API_BASE_URL`         | `https://api.barff.uz`                     |
-| `API_CORS_ORIGINS`     | `https://barff.uz,https://admin.barff.uz`  |
+| `API_CORS_ORIGINS`     | §6.1.1 ga qarang                           |
 | `API_TRUST_PROXY_HOPS` | `1` (Cloudflare bo'lsa `2`)                |
 | `JWT_ACCESS_SECRET`    | tasodifiy, ≥32 belgi                       |
 | `JWT_REFRESH_SECRET`   | tasodifiy, ≥32 belgi, birinchisidan BOSHQA |
@@ -145,6 +146,22 @@ Yaratgandan keyin har biri uchun `Run NPM Install` tugmasini bosing.
 | `MEDIA_PUBLIC_URL`     | `https://api.barff.uz/api/v1/media/file`   |
 | `MEDIA_SIGNING_SECRET` | tasodifiy, ≥32 belgi                       |
 | `SWAGGER_ENABLED`      | `false`                                    |
+
+#### 6.1.1 `API_CORS_ORIGINS` — HAMMA ILOVA SHU YERDA BO'LISHI SHART
+
+```
+https://barff.uz,https://admin.barff.uz,https://partner.barff.uz,https://delivery.barff.uz
+```
+
+Ro'yxatda yo'q ilova API bilan UMUMAN gaplasha olmaydi va brauzer
+xatosi FAQAT konsolda ko'rinadi — ekranda esa "kirish
+ishlamayapti" deb ko'rinadi. Sabab topilguncha uzoq vaqt ketadi.
+
+Bu S33 da o'lchab aniqlandi: haydovchi ilovasi qo'shilganda uning
+manzili ro'yxatda yo'q edi va kirish JIM ishlamadi.
+
+`*` qo'llab-quvvatlanmaydi va bu ataylab: cookie bilan ishlaydigan
+so'rovda u umuman ruxsat etilmaydi (CLAUDE.md §12).
 
 Sirlarni yaratish (SSH `Terminal` da):
 
@@ -176,7 +193,7 @@ uchun fayl tizimi adapteri tanlanadi va rasmlar diskda saqlanadi.
 > bilan QAYTA YIG'ISH kerak (§3). Serverdagi qiymat faqat server
 > tomonidagi o'qish uchun.
 
-### 6.3 admin va dealer
+### 6.3 admin, dealer va delivery
 
 Ikkalasi uchun bir xil:
 
@@ -213,7 +230,8 @@ admin panelda almashtiring.
 ## 8. Domenlar va SSL
 
 1. `Domains` → `barff.uz` ni addon domain sifatida qo'shing.
-2. Subdomenlar: `api.barff.uz`, `admin.barff.uz`, `partner.barff.uz`.
+2. Subdomenlar: `api.barff.uz`, `admin.barff.uz`, `partner.barff.uz`,
+   `delivery.barff.uz`.
 3. `SSL/TLS Status` → uchalasi uchun `Run AutoSSL`.
 4. Cloudflare ishlatilsa: DNS `Proxied`, SSL rejimi `Full (strict)`.
 
@@ -226,6 +244,11 @@ curl -s -o /dev/null -w "%{http_code}\n" https://api.barff.uz/api/v1/health
 curl -s -o /dev/null -w "%{http_code}\n" https://barff.uz/uz
 curl -s -o /dev/null -w "%{http_code}\n" https://admin.barff.uz/login
 curl -s -o /dev/null -w "%{http_code}\n" https://partner.barff.uz/login
+curl -s -o /dev/null -w "%{http_code}\n" https://delivery.barff.uz/login
+
+# PWA fayllari — bularsiz ilova telefonga O'RNATILMAYDI.
+curl -s -o /dev/null -w "%{http_code}\n" https://delivery.barff.uz/sw.js
+curl -s -o /dev/null -w "%{http_code}\n" https://delivery.barff.uz/manifest.webmanifest
 ```
 
 Hammasi `200` bo'lishi kerak.

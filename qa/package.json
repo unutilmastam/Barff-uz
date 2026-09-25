@@ -15,7 +15,8 @@
     "theme": "node theme.mjs",
     "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node theme.mjs && node perf.mjs && node e2e-phase1.mjs && node e2e-phase2.mjs",
     "warehouse": "node warehouse-check.mjs",
-    "picking": "node picking-check.mjs"
+    "picking": "node picking-check.mjs",
+    "driver": "node driver-pwa-check.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",
