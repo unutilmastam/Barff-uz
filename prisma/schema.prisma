@@ -67,6 +67,8 @@ model User {
   reviewedDealers Dealer[]             @relation("DealerReviewer")
   dealerEvents    DealerEvent[]        @relation("DealerEventActor")
   stockMovements  StockMovement[]      @relation("StockMovementActor")
+  driver          Driver?              @relation("DriverUser")
+  deliveryEvents  DeliveryEvent[]      @relation("DeliveryEventActor")
 
   @@index([isActive])
   @@index([createdAt])
@@ -265,6 +267,8 @@ model MediaAsset {
   productionSteps  ProductionStep[]  @relation("ProductionStepMedia")
   seoImages        SeoMetadata[]     @relation("SeoOgImage")
   homepageMedia    HomepageSection[] @relation("HomepageMedia")
+  deliveryProofs   Delivery[]        @relation("DeliveryProofPhoto")
+  deliverySigns    Delivery[]        @relation("DeliveryProofSignature")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1245,6 +1249,7 @@ model Order {
   items        OrderItem[]
   history      OrderStatusHistory[]
   reservations StockReservation[]
+  delivery     Delivery?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1611,4 +1616,231 @@ model StockReservation {
   @@index([warehouseId, productVariantId, status])
   @@index([status, expiresAt])
   @@map("stock_reservations")
+}
+
+// =============================================================================
+// YETKAZIB BERISH (CLAUDE.md §6)
+// =============================================================================
+
+enum DeliveryStatus {
+  CREATED
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+/// Haydovchi — FOYDALANUVCHI akkauntining kengaytmasi.
+///
+/// Alohida jadval, chunki haydovchining ishga oid ma'lumotlari bor
+/// (guvohnoma, biriktirilgan mashina) va ular `users` jadvaliga
+/// tegishli emas. Kirish huquqi esa `DRIVER` roli bilan beriladi —
+/// bu yozuvning O'ZI huquq bermaydi.
+model Driver {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  userId String @unique @db.Uuid
+  user   User   @relation("DriverUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Haydovchilik guvohnomasi raqami. Ixtiyoriy — hujjat keyin keladi.
+  licenseNumber String?
+
+  /// Odatdagi mashinasi. Har safar boshqacha bo'lishi mumkin,
+  /// shuning uchun yetkazmaga mashina ALOHIDA yoziladi.
+  vehicleId String?  @db.Uuid
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  isActive Boolean @default(true)
+  notes    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  deliveries Delivery[]
+  routes     DeliveryRoute[]
+
+  @@index([isActive])
+  @@map("drivers")
+}
+
+model Vehicle {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// Davlat raqami — hujjatlarda va yetkazma varaqasida ko'rinadi.
+  plateNumber String  @unique
+  model       String?
+
+  /// Yuk sig'imi (kg). Marshrut rejalashtirishda kerak bo'ladi (S42).
+  capacityKg Int?
+
+  isActive Boolean @default(true)
+  notes    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  drivers    Driver[]
+  deliveries Delivery[]
+  routes     DeliveryRoute[]
+
+  @@index([isActive])
+  @@map("vehicles")
+}
+
+/// Kunlik marshrut — bitta haydovchining bitta kundagi yo'li.
+///
+/// Marshrutni OPTIMALLASHTIRISH bu yerda YO'Q (`CLAUDE.md` §27:
+/// Faza 5). Hozircha u shunchaki yetkazmalarni guruhlaydi, shunda
+/// logist "bugun Samarqandga kim ketyapti" degan savolga javob
+/// oladi.
+model DeliveryRoute {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  code String @unique
+  name String
+
+  /// Qaysi kun uchun.
+  scheduledFor DateTime
+
+  driverId String? @db.Uuid
+  driver   Driver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+
+  vehicleId String?  @db.Uuid
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  notes String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  deliveries Delivery[]
+
+  @@index([scheduledFor])
+  @@index([driverId, scheduledFor])
+  @@map("delivery_routes")
+}
+
+/// Yetkazma.
+///
+/// BITTA BUYURTMAGA BITTA YETKAZMA (`orderId` yagona). Bu
+/// `docs/WAREHOUSE-POLICY.md` §2 dagi qaror bilan bog'liq: buyurtma
+/// bitta ombordan yig'iladi, ya'ni bitta jo'natma bo'ladi. Ikkiga
+/// bo'lish kerak bo'lsa, ikkalasi ham qayta ko'rib chiqiladi.
+///
+/// MANZIL NUSXA sifatida saqlanadi — buyurtmadagi kabi. Diler
+/// manzilini keyin o'zgartirsa yoki o'chirsa, tovar QAYERGA
+/// ketgani yo'qolmasligi kerak.
+///
+/// JONLI GPS YO'Q (`CLAUDE.md` §6). Koordinata maydonlari ataylab
+/// qo'shilmagan: ular bo'lsa, ularni to'ldirish talabi o'z-o'zidan
+/// paydo bo'lardi.
+model Delivery {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `DLV-2026-000001`.
+  number String @unique
+
+  orderId String @unique @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  status DeliveryStatus @default(CREATED)
+
+  driverId String? @db.Uuid
+  driver   Driver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+
+  vehicleId String?  @db.Uuid
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  routeId String?        @db.Uuid
+  route   DeliveryRoute? @relation(fields: [routeId], references: [id], onDelete: SetNull)
+
+  /// Manzil nusxasi.
+  shippingLabel   String
+  shippingRegion  String
+  shippingAddress String
+  contactName     String
+  contactPhone    String
+  shippingNotes   String?
+
+  /// Qaysi kunga rejalashtirilgan.
+  scheduledFor DateTime?
+
+  assignedAt  DateTime?
+  pickedUpAt  DateTime?
+  deliveredAt DateTime?
+
+  /// `FAILED` uchun SHART — nima uchun yetkazilmagani.
+  failureReason String?
+
+  /// Yetkazish tasdig'i (CLAUDE.md §6). Haydovchi PWA'sidan keladi (S33).
+  proofPhotoId String?     @db.Uuid
+  proofPhoto   MediaAsset? @relation("DeliveryProofPhoto", fields: [proofPhotoId], references: [id], onDelete: SetNull)
+
+  proofSignatureId String?     @db.Uuid
+  proofSignature   MediaAsset? @relation("DeliveryProofSignature", fields: [proofSignatureId], references: [id], onDelete: SetNull)
+
+  /// Kim qabul qildi.
+  receivedBy String?
+  proofNote  String?
+
+  /// Ichki izoh — DILERGA ko'rsatilmaydi (S28 dagi bilan bir xil qoida).
+  internalNote String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  events DeliveryEvent[]
+
+  @@index([status, createdAt])
+  @@index([driverId, status])
+  @@index([scheduledFor])
+  @@map("deliveries")
+}
+
+/// Yetkazma hodisalari — HAR BIR o'tish yoziladi (CLAUDE.md §23).
+model DeliveryEvent {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  deliveryId String   @db.Uuid
+  delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  fromStatus DeliveryStatus?
+  toStatus   DeliveryStatus
+
+  note String?
+
+  /// Tizim o'zgartirgan bo'lsa `null` (masalan buyurtma bekor qilinganda).
+  actorId String? @db.Uuid
+  actor   User?   @relation("DeliveryEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([deliveryId, createdAt])
+  @@map("delivery_events")
+}
+
+/// Umumiy raqam hisoblagichi.
+///
+/// `order_counters` dan FARQI: u faqat buyurtmalar uchun va
+/// o'zgartirilmaydi (ishlayotgan kodni qayta yozish `ROADMAP.md`
+/// §0 da taqiqlangan). Yangi ketma-ketliklar shu yerga qo'shiladi.
+///
+/// Oshirish ATOMAR: `INSERT ... ON CONFLICT DO UPDATE RETURNING`.
+/// "O'qi -> +1 -> yoz" yondashuvida bir vaqtda kelgan ikkita
+/// yetkazma BIR XIL raqam olardi (S26 da o'lchab tekshirilgan).
+model SequenceCounter {
+  /// `delivery` kabi.
+  scope String
+  year  Int
+  value Int    @default(0)
+
+  @@id([scope, year])
+  @@map("sequence_counters")
 }

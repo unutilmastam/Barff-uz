@@ -1,6 +1,7 @@
 export * from './auth';
 export * from './content';
 export * from './dealer';
+export * from './delivery';
 export * from './lead';
 export * from './primitives';
 export * from './product';
