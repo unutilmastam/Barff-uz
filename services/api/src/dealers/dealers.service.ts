@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { type DealerStatus, type Prisma } from '@barff/db';
+import { Prisma, type DealerStatus } from '@barff/db';
 import { canTransitionDealer, isDealerActive } from '@barff/types';
 import { type DealerRegisterOutput } from '@barff/validation';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
@@ -73,23 +73,37 @@ export class DealersService {
   async register(input: DealerRegisterOutput, ctx: RequestContext) {
     const email = input.email.toLowerCase();
 
-    const [existingUser, existingTaxId] = await Promise.all([
+    /*
+      TELEFON HAM `@unique` — va u TEKSHIRILMASDAN qolgan edi.
+
+      Bu S29 da o'lchab topildi: ikkinchi ariza o'sha telefon bilan
+      kelganda `tx.user.create()` `P2002` bilan yiqildi va endpoint
+      `500` qaytardi. Ya'ni bitta ofisdan ikkinchi odam ariza
+      yuborsa, u "server xatosi" ko'rardi va nima qilishni bilmasdi.
+    */
+    const [existingUser, existingPhone, existingTaxId] = await Promise.all([
       this.prisma.user.findFirst({ where: { email }, select: { id: true } }),
+      this.prisma.user.findFirst({ where: { phone: input.phone }, select: { id: true } }),
       input.taxId !== undefined
         ? this.prisma.dealer.findFirst({ where: { taxId: input.taxId }, select: { id: true } })
         : Promise.resolve(null),
     ]);
 
     /*
-      Email band bo'lsa ham javob BIR XIL.
+      Email yoki telefon band bo'lsa ham javob BIR XIL.
 
       Aks holda bu endpoint akkaunt mavjudligini tekshirish vositasiga
       aylanardi: kim qaysi email bilan ro'yxatdan o'tganini aniqlash
       mumkin bo'lardi. Ariza "qabul qilindi" deb ko'rsatiladi, lekin
       yangi yozuv YARATILMAYDI.
+
+      Telefon ham AYNAN shu sababga ko'ra jim yutiladi: "bu raqam
+      band" javobi kimning raqami ro'yxatda borligini oshkor qilardi.
     */
-    if (existingUser !== null) {
-      this.logger.log(`Diler arizasi: email allaqachon band (${email})`);
+    if (existingUser !== null || existingPhone !== null) {
+      this.logger.log(
+        `Diler arizasi: ${existingUser !== null ? 'email' : 'telefon'} allaqachon band (${email})`,
+      );
       return { accepted: true };
     }
 
@@ -105,33 +119,20 @@ export class DealersService {
 
     const passwordHash = await this.passwords.hash(input.password);
 
-    const dealer = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email,
-          phone: input.phone,
-          passwordHash,
-          fullName: input.contactName,
-          // Akkaunt FAOL: diler o'z arizasi holatini ko'rishi kerak.
-          isActive: true,
-          roles: { create: { role: { connect: { code: 'DEALER' } } } },
-        },
-        select: { id: true },
-      });
+    /*
+      POYGA HIMOYASI.
 
-      return tx.dealer.create({
-        data: {
-          userId: user.id,
-          companyName: input.companyName,
-          ...(input.taxId !== undefined ? { taxId: input.taxId } : {}),
-          region: input.region,
-          businessType: input.businessType,
-          status: 'PENDING',
-          events: { create: { toStatus: 'PENDING', note: input.message ?? null } },
-        },
-        select: { id: true, companyName: true, region: true, businessType: true },
-      });
-    });
+      Yuqoridagi tekshiruv bilan `create` orasida oyna bor: ikkita
+      ariza BIR VAQTDA kelsa, ikkalasi ham "band emas" deb ko'radi va
+      ikkinchisi `P2002` bilan yiqiladi. Tekshiruvning o'zi yetarli
+      emas — javob shakli bir xil bo'lishi kerak.
+    */
+    const dealer = await this.createDealerAccount(input, email, passwordHash);
+
+    if (dealer === null) {
+      this.logger.log(`Diler arizasi: poygada band bo'ldi (${email})`);
+      return { accepted: true };
+    }
 
     await this.audit.record({
       action: AUDIT_ACTIONS.DEALER_REGISTERED,
@@ -156,6 +157,78 @@ export class DealersService {
     });
 
     return { accepted: true };
+  }
+
+  /**
+   * Akkaunt + tashkilotni BITTA tranzaksiyada yaratadi.
+   *
+   * `null` qaytsa — email yoki telefon poygada band bo'ldi. Chaqiruvchi
+   * buni "qabul qilindi" deb ko'rsatadi, chunki aks holda javob
+   * akkaunt bor-yo'qligini oshkor qilardi.
+   *
+   * STIR esa JIM YUTILMAYDI: u ommaviy ma'lumot va takrorlanishi
+   * haqiqiy xato, ya'ni yuqoridagi tekshiruv bilan bir xil `409`
+   * qaytadi. Barcha `P2002` larni bir xil ko'rib chiqish shu
+   * shartnomani JIMGINA buzardi — ariza "qabul qilindi" deb
+   * ko'rinib, hech qachon paydo bo'lmasdi.
+   */
+  private async createDealerAccount(
+    input: DealerRegisterOutput,
+    email: string,
+    passwordHash: string,
+  ) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: {
+            email,
+            phone: input.phone,
+            passwordHash,
+            fullName: input.contactName,
+            // Akkaunt FAOL: diler o'z arizasi holatini ko'rishi kerak.
+            isActive: true,
+            roles: { create: { role: { connect: { code: 'DEALER' } } } },
+          },
+          select: { id: true },
+        });
+
+        return tx.dealer.create({
+          data: {
+            userId: user.id,
+            companyName: input.companyName,
+            ...(input.taxId !== undefined ? { taxId: input.taxId } : {}),
+            region: input.region,
+            businessType: input.businessType,
+            status: 'PENDING',
+            events: { create: { toStatus: 'PENDING', note: input.message ?? null } },
+          },
+          select: { id: true, companyName: true, region: true, businessType: true },
+        });
+      });
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+        throw error;
+      }
+
+      /*
+        Qaysi cheklov buzilgani `meta.target` da. Prisma uni turli
+        shaklda beradi (maydon nomlari massivi yoki cheklov nomi),
+        shuning uchun matn sifatida qaraladi.
+      */
+      const target = JSON.stringify(error.meta?.['target'] ?? '');
+
+      if (target.includes('taxId') || target.includes('tax_id')) {
+        throw new ConflictException({
+          message: 'Bu STIR bilan ariza allaqachon mavjud',
+          code: 'DEALER_TAX_ID_EXISTS',
+        });
+      }
+
+      if (target.includes('email') || target.includes('phone')) return null;
+
+      // Boshqa har qanday takrorlanish — kutilmagan holat, yashirilmaydi.
+      throw error;
+    }
   }
 
   /**

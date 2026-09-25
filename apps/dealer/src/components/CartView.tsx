@@ -7,6 +7,7 @@ import { type Localized } from '@barff/types';
 import { Badge, Button, GlassCard, Input, MediaFrame } from '@barff/ui';
 import { ApiImage } from '@/components/ApiImage';
 import { QuantityStepper } from '@/components/QuantityStepper';
+import { Checkout } from '@/components/Checkout';
 import { ApiRequestError } from '@/lib/api-client';
 import {
   CART_KEY,
@@ -215,19 +216,13 @@ export function CartView() {
           </p>
         )}
 
-        {/*
-          Buyurtma berish S26 da. Tugmani hozir "ishlaydigan" qilib
-          ko'rsatish dilerni bosishga undab, keyin hech narsa
-          qilmasdi — shuning uchun u ATAYLAB o'chiq va sabab yozilgan.
-        */}
-        <Button disabled title="Buyurtma berish tez orada ochiladi">
-          Buyurtma berish — tez orada
-        </Button>
-
         <Button variant="ghost" size="sm" onClick={() => clear.mutate()} disabled={clear.isPending}>
           Savatni bo‘shatish
         </Button>
       </GlassCard>
+
+      {/* Rasmiylashtirish shu yerda — savat sahifasining O'ZIDA. */}
+      <Checkout cart={data} />
     </div>
   );
 }

@@ -166,6 +166,42 @@ describe('Dealers (e2e)', () => {
     expect(created).toBeNull();
   });
 
+  /*
+    TELEFON — S29 DA TOPILGAN HAQIQIY NOSOZLIK.
+
+    `User.phone` ham `@unique`, lekin ro'yxatdan o'tishda u
+    TEKSHIRILMASDI: ikkinchi ariza o'sha telefon bilan kelganda
+    `P2002` qo'lga olinmay `500` ga aylanardi. Bitta ofisdan
+    ikkinchi odam ariza yuborsa, u "server xatosi" ko'rardi.
+
+    Javob emaildagi kabi JIM: "bu raqam band" degan javob kimning
+    raqami ro'yxatda borligini oshkor qilardi.
+  */
+  it('band telefon uchun javob BIR XIL — `500` emas', async () => {
+    const body = registration('phone-1');
+
+    await request(app.getHttpServer()).post(`${base}/dealers/register`).send(body).expect(202);
+
+    const second = {
+      ...registration('phone-2'),
+      // Aynan o'sha telefon, boshqa email va kompaniya.
+      phone: body.phone,
+    };
+
+    const response = await request(app.getHttpServer())
+      .post(`${base}/dealers/register`)
+      .send(second)
+      .expect(202);
+
+    expect(response.body).toEqual({ accepted: true });
+
+    // YANGI yozuv yaratilmagan — jim yutildi, lekin yutib yuborilmadi.
+    const created = await prisma.dealer.findFirst({
+      where: { companyName: second.companyName },
+    });
+    expect(created).toBeNull();
+  });
+
   it("takroriy STIR ochiq xato beradi — u ommaviy ma'lumot", async () => {
     const taxId = String(100_000_000 + (STAMP % 800_000_000)).slice(0, 9);
 

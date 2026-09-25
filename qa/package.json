@@ -3,14 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Faza 1 QA to'plami — brauzerda yuriladigan tekshiruvlar",
+  "description": "Faza 1-2 QA to'plami — brauzerda yuriladigan tekshiruvlar",
   "scripts": {
     "e2e": "node e2e-phase1.mjs",
+    "e2e:p2": "node e2e-phase2.mjs",
+    "load:p2": "node load-phase2.mjs",
+    "cleanup:p2": "node cleanup-phase2.mjs",
     "perf": "node perf.mjs",
     "a11y": "node a11y-axe.mjs",
     "a11y:keyboard": "node a11y-keyboard.mjs",
     "theme": "node theme.mjs",
-    "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node theme.mjs && node perf.mjs && node e2e-phase1.mjs"
+    "all": "node a11y-axe.mjs && node a11y-keyboard.mjs && node theme.mjs && node perf.mjs && node e2e-phase1.mjs && node e2e-phase2.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

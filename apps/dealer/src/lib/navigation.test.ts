@@ -46,8 +46,16 @@ describe('diler navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S24 da shell, S25 da katalog va savat; buyurtmalar S26+ da.
-    expect(ready).toEqual(['/', '/catalog', '/cart', '/addresses', '/profile', '/support']);
+    // S24 shell, S25 katalog va savat, S27 buyurtmalar.
+    expect(ready).toEqual([
+      '/',
+      '/catalog',
+      '/cart',
+      '/orders',
+      '/addresses',
+      '/profile',
+      '/support',
+    ]);
   });
 
   it('havolalar takrorlanmaydi', () => {
