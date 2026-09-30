@@ -6,11 +6,12 @@ import { DeliveryController } from './delivery.controller';
 import { DeliveryNumberService } from './delivery-number.service';
 import { DeliveryService } from './delivery.service';
 import { FleetService } from './fleet.service';
+import { RoutesService } from './routes.service';
 
 @Module({
   imports: [PrismaModule, AuditModule, NotificationsModule],
   controllers: [DeliveryController],
-  providers: [DeliveryService, FleetService, DeliveryNumberService],
+  providers: [DeliveryService, FleetService, RoutesService, DeliveryNumberService],
   // Buyurtma `READY_FOR_DELIVERY` ga o'tganda yetkazma tug'iladi.
   exports: [DeliveryService],
 })

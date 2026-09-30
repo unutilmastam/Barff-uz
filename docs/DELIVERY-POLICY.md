@@ -151,3 +151,46 @@ Buyurtma `PACKED -> READY_FOR_DELIVERY` ga o'tganda, AVTOMATIK.
 Qo'lda yaratish endpointi yo'q: yetkazmasiz `READY_FOR_DELIVERY`
 buyurtma — hech kim ko'rmaydigan buyurtma. Manzil o'sha paytda
 buyurtmadan NUSXA olinadi.
+
+---
+
+## 8. MARSHRUT — REJA, BIRIKTIRISH EMAS (S34)
+
+Marshrutda ham haydovchi bor, yetkazmada ham. Yetkazmani
+marshrutga qo'shish uni AVTOMATIK biriktirsa, "kim olib ketyapti"
+degan savolga IKKITA javob bo'lardi: marshrutdagi haydovchi
+kasal bo'lib, bitta yetkazma boshqasiga o'tkazilsa, qaysi biri
+to'g'ri ekani ko'rinmasdi.
+
+Shuning uchun:
+
+- **Marshrut** — kim, qaysi kun, qaysi yo'nalish. REJA.
+- **Biriktirish** — har bir yetkazmada ALOHIDA va OSHKORA.
+
+Logist bitta amal bilan butun marshrutni biriktira oladi
+(`POST /delivery/routes/:id/assign`), lekin:
+
+1. U ALLAQACHON biriktirilganlarga TEGMAYDI. Logist bitta
+   yetkazmani ataylab boshqa haydovchiga bergan bo'lishi mumkin,
+   va bu amal o'sha qarorni jim bekor qilmaydi.
+2. Har bir yetkazma odatdagi `assign` yo'lidan o'tadi — tarix,
+   audit va `CREATED -> ASSIGNED` o'tishi bir xil bo'ladi.
+
+Marshrutdan chiqarish yetkazmaning O'ZIGA tegmaydi: haydovchi va
+holat joyida qoladi. Guruhdan chiqarish — rejaning o'zgarishi,
+ishning bekor qilinishi emas.
+
+Yopilgan yetkazma (`DELIVERED`, `CANCELLED`) marshrutga
+qo'shilmaydi: qo'shishdan maqsad yo'q va u kunlik hisobni
+buzardi.
+
+**Nomzodlar ro'yxati SERVERDA filtrlanadi** (`unrouted=true`,
+`openOnly=true`). Mijozda filtrlash sahifalashni buzardi:
+sahifadan yaroqsizlari olib tashlanib, ro'yxat to'liq emasligi
+ko'rinmasdi. Shu sababdan taxtadagi "faqat ochiq ishlar" ham
+serverga ko'chirildi.
+
+`status` va `openOnly` bitta ustunga tegadi, shuning uchun
+ustunlik ANIQ belgilangan: `status` berilgan bo'lsa u yutadi, va
+ekranda tugma o'chiriladi — aks holda yonib turgan tugma
+ishlayotgandek ko'rinardi.

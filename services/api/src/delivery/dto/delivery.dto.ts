@@ -2,7 +2,10 @@ import {
   deliveryAssignSchema,
   deliveryListQuerySchema,
   deliveryNoteSchema,
+  deliveryRouteAttachSchema,
+  deliveryRouteQuerySchema,
   deliveryRouteSchema,
+  deliveryRouteUpdateSchema,
   deliveryStatusSchema,
   driverSchema,
   driverUpdateSchema,
@@ -20,3 +23,6 @@ export class DeliveryStatusDto extends createZodDto(deliveryStatusSchema) {}
 export class DeliveryListQueryDto extends createZodDto(deliveryListQuerySchema) {}
 export class DeliveryNoteDto extends createZodDto(deliveryNoteSchema) {}
 export class DeliveryRouteDto extends createZodDto(deliveryRouteSchema) {}
+export class DeliveryRouteUpdateDto extends createZodDto(deliveryRouteUpdateSchema) {}
+export class DeliveryRouteAttachDto extends createZodDto(deliveryRouteAttachSchema) {}
+export class DeliveryRouteQueryDto extends createZodDto(deliveryRouteQuerySchema) {}

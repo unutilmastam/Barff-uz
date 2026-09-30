@@ -84,6 +84,10 @@ export const deliveryListQuerySchema = paginationQuerySchema.extend({
   region: z.string().trim().min(1).max(120).optional(),
   search: z.string().trim().min(1).max(120).optional(),
   unassigned: z.coerce.boolean().optional(),
+  /** Marshrutga qo'shilmaganlar — marshrutga nomzodlar ro'yxati uchun. */
+  unrouted: z.coerce.boolean().optional(),
+  /** Yopilmaganlar (`DELIVERED`/`CANCELLED` emas). */
+  openOnly: z.coerce.boolean().optional(),
 });
 
 export const deliveryNoteSchema = z.object({
@@ -97,6 +101,23 @@ export const deliveryRouteSchema = z.object({
   driverId: z.uuid().nullable().optional(),
   vehicleId: z.uuid().nullable().optional(),
   notes: z.string().trim().max(500).optional(),
+});
+
+export const deliveryRouteUpdateSchema = deliveryRouteSchema.partial();
+
+/**
+ * Marshrutga yetkazma qo'shish.
+ *
+ * Ro'yxat CHEKLANGAN: cheksiz ro'yxat bitta so'rov bilan butun
+ * bazani yangilash imkonini berardi.
+ */
+export const deliveryRouteAttachSchema = z.object({
+  deliveryIds: z.array(z.uuid()).min(1).max(100),
+});
+
+/** Kun bo'yicha filtr — marshrutlar kunlik guruh. */
+export const deliveryRouteQuerySchema = z.object({
+  date: z.coerce.date().optional(),
 });
 
 /** Haydovchi kontakti — profil ko'rsatish uchun. */

@@ -104,6 +104,31 @@ CSS=$(curl -s http://localhost:3001/uz | grep -o '/_next/static/css/[a-z0-9]*\.c
 curl -s -o /dev/null -w "%{http_code}\n" "http://localhost:3001$CSS"
 ```
 
+**1b. `output: 'standalone'` SERVERINI TO'G'RIDAN-TO'G'RI ISHGA
+TUSHIRMANG.**
+
+`node .next/standalone/apps/admin/server.js` ko'tariladi va `/login`
+`200` qaytaradi — lekin `.next/static` va `public` u yerga
+KO'CHIRILMAGAN bo'lsa, HAMMA chunk `404` bo'ladi. Sahifa HTML sifatida
+to'g'ri ko'rinadi, React esa umuman ishga tushmaydi: forma oddiy GET
+bo'lib yuboriladi va manzilda `?email=...&password=...` paydo bo'ladi.
+
+Ya'ni PAROL brauzer tarixiga va server jurnaliga tushadi. Lokal
+tekshiruvda bu bezarar, lekin xulosa aniq: bu serverni qo'lda
+ishlatmang. Tekshiruvlar uchun har doim:
+
+```bash
+cd apps/admin && npx next start --port 3002
+```
+
+Tekshirish — sahifa emas, CHUNK:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  "http://localhost:3002$(curl -s http://localhost:3002/login \
+   | grep -o '/_next/static/chunks/webpack-[a-z0-9]*\.js' | head -1)"
+```
+
 **2. `POST /leads` soatiga 5 ta.** Bu spamga qarshi TO'G'RI cheklov
 (S14), lekin sinovni takroran yurgizganda `429` beradi. API jarayonini
 qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
@@ -194,6 +219,8 @@ kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 | `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
 | `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
 | `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
+| `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                 |
+| `npm run driver:shots`  | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga)                                     |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
 | `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
 | `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |

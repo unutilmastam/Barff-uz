@@ -48,3 +48,9 @@ Thumbs.db
 # u bir marta xatolik bilan repozitoriyga tushib ketgan — kod emas,
 # lokal kesh nusxasi.
 *.rdb
+
+# Lokal media saqlagichi (`MEDIA_ROOT`). Fayl tizimi adapteri ishga
+# tushganda (S3 sozlanmagan lokal muhit) yuklangan fayllar shu yerga
+# tushadi — foydalanuvchi kontenti, manba emas. Sinovlar ham shu
+# katalogga yozadi.
+.media/
