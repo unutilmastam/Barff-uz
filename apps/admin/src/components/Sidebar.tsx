@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { activeHref } from '@/lib/nav-active';
 import { type AdminNavGroup } from '@/lib/navigation';
 
 /**
@@ -13,6 +14,7 @@ import { type AdminNavGroup } from '@/lib/navigation';
  */
 export function Sidebar({ groups }: { groups: AdminNavGroup[] }) {
   const pathname = usePathname();
+  const current = activeHref(groups, pathname);
 
   return (
     <nav aria-label="Asosiy menyu" className="flex flex-col gap-6">
@@ -24,9 +26,8 @@ export function Sidebar({ groups }: { groups: AdminNavGroup[] }) {
 
           <ul className="mt-2 flex flex-col gap-0.5">
             {group.items.map((item) => {
-              // `/` faqat aynan mos kelganda faol; qolganlari prefiks
-              // bo'yicha, ya'ni ichki sahifada ham ota bo'lim yonadi.
-              const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+              // Faol bo'lim BITTA: eng aniq mos keluvchi (`activeHref`).
+              const active = item.href === current;
 
               /*
                 Qurilmagan bo'lim HAVOLA EMAS. U 404 berardi, va Next

@@ -15,6 +15,9 @@ const STAMP = Date.now();
 const SLUG = `e2e-dlv-${STAMP}`;
 const L = (text: string) => ({ uz: text, ru: text, en: text });
 
+/** Marshrut kodlari shu prefiks bilan — tozalash shunga tayanadi. */
+const ROUTE_PREFIX = `RT${String(STAMP).slice(-8)}`;
+
 const STAFF = {
   ADMIN: { email: `${SLUG}-admin@barff.uz`, password: 'E2E-Dlv-Admin-2026' },
   LOGISTICS: { email: `${SLUG}-log@barff.uz`, password: 'E2E-Dlv-Log-2026' },
@@ -58,7 +61,11 @@ describe('Delivery (e2e)', () => {
     return res.body.accessToken as string;
   };
 
-  const as = (role: keyof typeof STAFF, method: 'get' | 'post' | 'patch' | 'put', path: string) =>
+  const as = (
+    role: keyof typeof STAFF,
+    method: 'get' | 'post' | 'patch' | 'put' | 'delete',
+    path: string,
+  ) =>
     request(app.getHttpServer())
       [method](`${base}${path}`)
       .set('Authorization', `Bearer ${tokens[role]}`);
@@ -240,6 +247,7 @@ describe('Delivery (e2e)', () => {
     });
     await prisma.dealer.deleteMany({ where: { id: dealerId } });
 
+    await prisma.deliveryRoute.deleteMany({ where: { code: { startsWith: ROUTE_PREFIX } } });
     await prisma.driver.deleteMany({ where: { id: { in: [driverId, driver2Id] } } });
     await prisma.vehicle.deleteMany({ where: { id: vehicleId } });
 
@@ -264,7 +272,11 @@ describe('Delivery (e2e)', () => {
     await prisma.product.deleteMany({ where: { categoryId } });
     await prisma.productCategory.deleteMany({ where: { id: categoryId } });
     await prisma.auditLog.deleteMany({
-      where: { entity: { in: ['order', 'dealer', 'delivery', 'driver', 'vehicle', 'warehouse'] } },
+      where: {
+        entity: {
+          in: ['order', 'dealer', 'delivery', 'delivery_route', 'driver', 'vehicle', 'warehouse'],
+        },
+      },
     });
 
     const emails = [...Object.values(STAFF).map((s) => s.email), `${SLUG}-dealer@barff.uz`];
@@ -690,6 +702,277 @@ describe('Delivery (e2e)', () => {
       .expect(409);
 
     expect(response.body.code).toBe('VEHICLE_PLATE_EXISTS');
+  });
+
+  // ===========================================================================
+  // MARSHRUTLAR (S34)
+  // ===========================================================================
+
+  /**
+   * MARSHRUT BIRIKTIRMAYDI.
+   *
+   * Marshrutda ham haydovchi bor, yetkazmada ham. Qo'shish
+   * biriktirish ham bo'lsa, "kim olib ketyapti" degan savolga
+   * ikkita javob paydo bo'lardi.
+   */
+  it('marshrutga qoshish yetkazmani BIRIKTIRMAYDI', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({
+        code: `${ROUTE_PREFIX}A`,
+        name: 'Chilonzor yo‘nalishi',
+        scheduledFor: '2026-10-01',
+        driverId,
+      })
+      .expect(201);
+
+    await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/deliveries`)
+      .send({ deliveryIds: [delivery.id] })
+      .expect(201);
+
+    const row = await prisma.delivery.findUniqueOrThrow({
+      where: { id: delivery.id },
+      select: { routeId: true, driverId: true, status: true },
+    });
+
+    expect(row.routeId).toBe(route.body.id);
+    expect(row.driverId).toBeNull();
+    expect(row.status).toBe('CREATED');
+  });
+
+  /**
+   * "HAMMASINI BIRIKTIRISH" — FAQAT BIRIKTIRILMAGANLARGA.
+   *
+   * Logist bitta yetkazmani ataylab boshqa haydovchiga bergan
+   * bo'lishi mumkin; bu amal o'sha qarorni JIM bekor qilmasligi
+   * kerak.
+   */
+  it('marshrutni biriktirish MAVJUD biriktirishni buzmaydi', async () => {
+    const bos = await makeReadyOrder();
+    const band = await makeReadyOrder();
+
+    // Bittasi ataylab BOSHQA haydovchiga berilgan.
+    await as('LOGISTICS', 'patch', `/delivery/${band.delivery.id}/assign`)
+      .send({ driverId: driver2Id })
+      .expect(200);
+
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({
+        code: `${ROUTE_PREFIX}B`,
+        name: 'Yunusobod yo‘nalishi',
+        scheduledFor: '2026-10-02',
+        driverId,
+      })
+      .expect(201);
+
+    await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/deliveries`)
+      .send({ deliveryIds: [bos.delivery.id, band.delivery.id] })
+      .expect(201);
+
+    const result = await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/assign`).expect(
+      201,
+    );
+
+    expect(result.body.assigned).toBe(1);
+
+    const rows = await prisma.delivery.findMany({
+      where: { id: { in: [bos.delivery.id, band.delivery.id] } },
+      select: { id: true, driverId: true, status: true },
+    });
+
+    const bosRow = rows.find((row) => row.id === bos.delivery.id);
+    const bandRow = rows.find((row) => row.id === band.delivery.id);
+
+    expect(bosRow?.driverId).toBe(driverId);
+    expect(bosRow?.status).toBe('ASSIGNED');
+    // Boshqa haydovchi O'ZGARMAGAN.
+    expect(bandRow?.driverId).toBe(driver2Id);
+  });
+
+  it('haydovchisiz marshrutni biriktirib bolmaydi', async () => {
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({
+        code: `${ROUTE_PREFIX}C`,
+        name: 'Haydovchisiz',
+        scheduledFor: '2026-10-03',
+      })
+      .expect(201);
+
+    const response = await as(
+      'LOGISTICS',
+      'post',
+      `/delivery/routes/${route.body.id}/assign`,
+    ).expect(400);
+
+    expect(response.body.code).toBe('ROUTE_DRIVER_MISSING');
+  });
+
+  it('YOPILGAN yetkazma marshrutga qoshilmaydi', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/status`)
+      .send({ status: 'CANCELLED' })
+      .expect(200);
+
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({
+        code: `${ROUTE_PREFIX}D`,
+        name: 'Yopilgan sinovi',
+        scheduledFor: '2026-10-04',
+      })
+      .expect(201);
+
+    const response = await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/deliveries`)
+      .send({ deliveryIds: [delivery.id] })
+      .expect(400);
+
+    expect(response.body.code).toBe('DELIVERY_CLOSED');
+  });
+
+  it('marshrut kodi TAKRORLANMAYDI', async () => {
+    await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({ code: `${ROUTE_PREFIX}E`, name: 'Birinchi', scheduledFor: '2026-10-05' })
+      .expect(201);
+
+    const response = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({ code: `${ROUTE_PREFIX}E`, name: 'Ikkinchi', scheduledFor: '2026-10-05' })
+      .expect(409);
+
+    expect(response.body.code).toBe('ROUTE_CODE_EXISTS');
+  });
+
+  /**
+   * SANA — KUN CHEGARASI BO'YICHA.
+   *
+   * `scheduledFor` vaqtli ustun; tenglik bilan solishtirish faqat
+   * yarim tundagi yozuvni topardi.
+   */
+  it('marshrutlar KUN boyicha filtrlanadi', async () => {
+    await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({
+        code: `${ROUTE_PREFIX}F`,
+        name: 'Kunduzgi',
+        scheduledFor: '2026-10-06T14:30:00.000Z',
+      })
+      .expect(201);
+
+    const same = await as('LOGISTICS', 'get', '/delivery/routes?date=2026-10-06').expect(200);
+    expect(same.body.some((row: { code: string }) => row.code === `${ROUTE_PREFIX}F`)).toBe(true);
+
+    const other = await as('LOGISTICS', 'get', '/delivery/routes?date=2026-10-07').expect(200);
+    expect(other.body.some((row: { code: string }) => row.code === `${ROUTE_PREFIX}F`)).toBe(false);
+  });
+
+  it('marshrutdan chiqarish yetkazmaning OZIGA tegmaydi', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({ code: `${ROUTE_PREFIX}G`, name: 'Chiqarish', scheduledFor: '2026-10-08', driverId })
+      .expect(201);
+
+    await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/deliveries`)
+      .send({ deliveryIds: [delivery.id] })
+      .expect(201);
+    await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/assign`).expect(201);
+
+    await as(
+      'LOGISTICS',
+      'delete',
+      `/delivery/routes/${route.body.id}/deliveries/${delivery.id}`,
+    ).expect(200);
+
+    const row = await prisma.delivery.findUniqueOrThrow({
+      where: { id: delivery.id },
+      select: { routeId: true, driverId: true, status: true },
+    });
+
+    expect(row.routeId).toBeNull();
+    // Biriktirish va holat JOYIDA qoladi.
+    expect(row.driverId).toBe(driverId);
+    expect(row.status).toBe('ASSIGNED');
+  });
+
+  /**
+   * `openOnly` — SERVERDA.
+   *
+   * Avval bu mijozda edi va SAHIFALASHNI buzardi: sahifadan
+   * yopilganlari olib tashlanib, "jami" eski qiymatda qolardi.
+   */
+  it('openOnly YOPILGANLARNI chiqarmaydi', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/status`)
+      .send({ status: 'CANCELLED' })
+      .expect(200);
+
+    const open = await as(
+      'LOGISTICS',
+      'get',
+      `/delivery/assignments?limit=100&openOnly=true&search=${delivery.number}`,
+    ).expect(200);
+
+    expect(open.body.items).toHaveLength(0);
+    expect(open.body.meta.total).toBe(0);
+
+    // Filtrsiz — O'SHA yetkazma joyida.
+    const all = await as(
+      'LOGISTICS',
+      'get',
+      `/delivery/assignments?limit=100&search=${delivery.number}`,
+    ).expect(200);
+
+    expect(all.body.items).toHaveLength(1);
+  });
+
+  /** ANIQ HOLAT `openOnly` dan USTUN — ikkalasi bitta ustunga tegadi. */
+  it('aniq holat openOnly dan ustun', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    await as('LOGISTICS', 'patch', `/delivery/${delivery.id}/status`)
+      .send({ status: 'CANCELLED' })
+      .expect(200);
+
+    const response = await as(
+      'LOGISTICS',
+      'get',
+      `/delivery/assignments?limit=100&openOnly=true&status=CANCELLED&search=${delivery.number}`,
+    ).expect(200);
+
+    expect(response.body.items).toHaveLength(1);
+  });
+
+  it('unrouted MARSHRUTDAGILARNI chiqarmaydi', async () => {
+    const { delivery } = await makeReadyOrder();
+
+    const before = await as(
+      'LOGISTICS',
+      'get',
+      `/delivery/assignments?limit=100&unrouted=true&search=${delivery.number}`,
+    ).expect(200);
+    expect(before.body.items).toHaveLength(1);
+
+    const route = await as('LOGISTICS', 'post', '/delivery/routes')
+      .send({ code: `${ROUTE_PREFIX}H`, name: 'Filtr sinovi', scheduledFor: '2026-10-10' })
+      .expect(201);
+
+    await as('LOGISTICS', 'post', `/delivery/routes/${route.body.id}/deliveries`)
+      .send({ deliveryIds: [delivery.id] })
+      .expect(201);
+
+    const after = await as(
+      'LOGISTICS',
+      'get',
+      `/delivery/assignments?limit=100&unrouted=true&search=${delivery.number}`,
+    ).expect(200);
+    expect(after.body.items).toHaveLength(0);
+  });
+
+  /** `delivery.manage` yo'q rol marshrut yarata olmaydi (CLAUDE.md §3). */
+  it('OMBOR roli marshrut yarata olmaydi', async () => {
+    await as('WAREHOUSE', 'post', '/delivery/routes')
+      .send({ code: `${ROUTE_PREFIX}X`, name: 'Ruxsatsiz', scheduledFor: '2026-10-09' })
+      .expect(403);
   });
 
   it('autentifikatsiyasiz kirib bo‘lmaydi', async () => {

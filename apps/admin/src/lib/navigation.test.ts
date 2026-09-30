@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { type Permission } from '@barff/types';
+import { activeHref } from './nav-active';
 import { ALL_NAV_GROUPS, visibleNav } from './navigation';
 import { type AdminSession } from './session';
 
@@ -54,7 +55,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor.
+    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor, S34 logistika.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -71,13 +72,70 @@ describe('admin navigatsiyasi', () => {
       '/warehouse/stock',
       '/warehouse/picking',
       '/warehouse/movements',
+      '/logistics',
+      '/logistics/routes',
+      '/logistics/fleet',
       '/system/settings',
     ]);
+  });
+
+  /**
+   * Park sahifasi `delivery.manage` talab qiladi.
+   *
+   * `delivery.view` bilan ochilgan bo'lim bo'sh nomzod ro'yxatini
+   * ko'rsatardi: sabab 403 ekani ko'rinmasdi.
+   */
+  it('Park bolimi delivery.manage talab qiladi', () => {
+    const hrefs = visibleNav(session(['delivery.view'])).flatMap((group) =>
+      group.items.map((item) => item.href),
+    );
+
+    expect(hrefs).toContain('/logistics');
+    expect(hrefs).not.toContain('/logistics/fleet');
+    expect(hrefs).not.toContain('/logistics/routes');
   });
 
   it('havolalar takrorlanmaydi', () => {
     const hrefs = ALL_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.href));
 
     expect(new Set(hrefs).size).toBe(hrefs.length);
+  });
+});
+
+describe('faol bolim', () => {
+  const groups = ALL_NAV_GROUPS;
+
+  /**
+   * FAOL BO'LIM BITTA.
+   *
+   * `startsWith` bilan «Park» sahifasida «Yetkazish» ham yonardi:
+   * menyuda ikkita `aria-current="page"` bo'lib, ekran o'quvchi
+   * foydalanuvchi qayerdaligini aytmay qolardi.
+   */
+  it('eng aniq mos keluvchi tanlanadi', () => {
+    expect(activeHref(groups, '/logistics/fleet')).toBe('/logistics/fleet');
+    expect(activeHref(groups, '/logistics/routes')).toBe('/logistics/routes');
+    expect(activeHref(groups, '/logistics')).toBe('/logistics');
+  });
+
+  it('ichki sahifada ota bolim yonadi', () => {
+    expect(activeHref(groups, '/orders/01a0f0a6-0000-7000-8000-000000000000')).toBe('/orders');
+    expect(activeHref(groups, '/warehouse/picking/abc')).toBe('/warehouse/picking');
+  });
+
+  /** `/` faqat AYNAN mos kelganda — aks holda u hamma joyda yonardi. */
+  it('bosh sahifa faqat aynan mos kelganda', () => {
+    expect(activeHref(groups, '/')).toBe('/');
+    expect(activeHref(groups, '/orders')).toBe('/orders');
+  });
+
+  /** Segment chegarasi: `/logistics` `/logistics-arxiv` ni yoqmaydi. */
+  it('segment chegarasi hisobga olinadi', () => {
+    expect(activeHref(groups, '/logistics-arxiv')).toBeNull();
+  });
+
+  /** Qurilmagan bo'lim havola emas — u yona olmaydi. */
+  it('qurilmagan bolim faol bolmaydi', () => {
+    expect(activeHref(groups, '/system/users')).toBeNull();
   });
 });

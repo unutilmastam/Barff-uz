@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -21,10 +22,15 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { DeliveryService } from './delivery.service';
 import { FleetService } from './fleet.service';
+import { RoutesService } from './routes.service';
 import {
   DeliveryAssignDto,
   DeliveryListQueryDto,
   DeliveryNoteDto,
+  DeliveryRouteAttachDto,
+  DeliveryRouteDto,
+  DeliveryRouteQueryDto,
+  DeliveryRouteUpdateDto,
   DeliveryStatusDto,
   DriverDto,
   DriverUpdateDto,
@@ -51,6 +57,7 @@ export class DeliveryController {
   constructor(
     private readonly delivery: DeliveryService,
     private readonly fleet: FleetService,
+    private readonly routes: RoutesService,
   ) {}
 
   private context(request: RequestWithUser): RequestContext {
@@ -230,7 +237,111 @@ export class DeliveryController {
       region: query.region,
       search: query.search,
       unassigned: query.unassigned,
+      unrouted: query.unrouted,
+      openOnly: query.openOnly,
     });
+  }
+
+  // ===========================================================================
+  // MARSHRUTLAR
+  // ===========================================================================
+
+  /*
+    MARSHRUT YO'LLARI `:id` DAN OLDIN.
+
+    Nest birinchi mos kelgan marshrutni oladi, ya'ni `@Get(':id')`
+    pastda turmasa `GET /delivery/routes` "routes" ni UUID deb
+    o'qib, `400` qaytarardi.
+  */
+  @Get('routes')
+  @Permissions('delivery.view')
+  @ApiOperation({ summary: 'Marshrutlar (kun bo‘yicha)' })
+  @ApiZodQuery(DeliveryRouteQueryDto)
+  listRoutes(@Query() query: DeliveryRouteQueryDto) {
+    return this.routes.list(query.date);
+  }
+
+  @Post('routes')
+  @Permissions('delivery.manage')
+  @ApiOperation({ summary: 'Marshrut yaratish' })
+  @ApiZodBody(DeliveryRouteDto)
+  @ApiResponse({ status: 409, type: ApiErrorDto, description: 'Kod band' })
+  createRoute(
+    @Body() dto: DeliveryRouteDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.routes.create(dto, { id: user.id, email: user.email }, this.context(request));
+  }
+
+  @Get('routes/:id')
+  @Permissions('delivery.view')
+  @ApiOperation({ summary: 'Marshrut tafsiloti' })
+  @ApiResponse({ status: 404, type: ApiErrorDto, description: 'Topilmadi' })
+  findRoute(@Param('id', ParseUUIDPipe) id: string) {
+    return this.routes.findOne(id);
+  }
+
+  @Patch('routes/:id')
+  @Permissions('delivery.manage')
+  @ApiOperation({ summary: 'Marshrutni tahrirlash' })
+  @ApiZodBody(DeliveryRouteUpdateDto)
+  updateRoute(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DeliveryRouteUpdateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.routes.update(id, dto, { id: user.id, email: user.email }, this.context(request));
+  }
+
+  @Post('routes/:id/deliveries')
+  @Permissions('delivery.manage')
+  @ApiOperation({ summary: 'Yetkazmalarni marshrutga qo‘shish' })
+  @ApiZodBody(DeliveryRouteAttachDto)
+  @ApiResponse({ status: 400, type: ApiErrorDto, description: 'Yopilgan yetkazma' })
+  attachToRoute(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DeliveryRouteAttachDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.routes.attach(
+      id,
+      dto.deliveryIds,
+      { id: user.id, email: user.email },
+      this.context(request),
+    );
+  }
+
+  @Delete('routes/:id/deliveries/:deliveryId')
+  @Permissions('delivery.manage')
+  @ApiOperation({ summary: 'Yetkazmani marshrutdan chiqarish' })
+  detachFromRoute(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('deliveryId', ParseUUIDPipe) deliveryId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.routes.detach(
+      id,
+      deliveryId,
+      { id: user.id, email: user.email },
+      this.context(request),
+    );
+  }
+
+  /** Marshrut haydovchisini BIRIKTIRILMAGAN yetkazmalariga biriktiradi. */
+  @Post('routes/:id/assign')
+  @Permissions('delivery.assign')
+  @ApiOperation({ summary: 'Marshrutni biriktirish' })
+  @ApiResponse({ status: 400, type: ApiErrorDto, description: 'Haydovchi belgilanmagan' })
+  assignRoute(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.routes.assignAll(id, { id: user.id, email: user.email }, this.context(request));
   }
 
   @Get(':id')

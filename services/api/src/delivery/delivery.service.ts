@@ -205,14 +205,33 @@ export class DeliveryService {
     region?: string | undefined;
     search?: string | undefined;
     unassigned?: boolean | undefined;
+    unrouted?: boolean | undefined;
+    openOnly?: boolean | undefined;
   }) {
     const request = toPageRequest(query);
 
     const where: Prisma.DeliveryWhereInput = {
       deletedAt: null,
+      /*
+        "OCHIQ" — SERVERDA.
+
+        Bu ro'yxat SHARTI (`notIn`), bitta holat emas, va uni
+        mijozda qo'llash sahifalashni buzardi: 20 qatorlik
+        sahifadan yopilganlari olib tashlanib, 12 ta qolardi va
+        "keyingi" tugmasi boshqa yozuvlarni ko'rsatardi.
+
+        ANIQ HOLAT USTUN: `status` berilgan bo'lsa u `openOnly` ni
+        ALMASHTIRADI (pastda). Ikkalasi bitta ustunga yozadi, va
+        tartibni tasodifga qoldirish "filtr ishlamayapti" degan
+        xatoni tug'dirardi.
+      */
+      ...(query.openOnly === true
+        ? { status: { notIn: ['DELIVERED', 'CANCELLED'] as DeliveryStatus[] } }
+        : {}),
       ...(query.status !== undefined ? { status: query.status } : {}),
       ...(query.driverId !== undefined ? { driverId: query.driverId } : {}),
       ...(query.unassigned === true ? { driverId: null } : {}),
+      ...(query.unrouted === true ? { routeId: null } : {}),
       ...(query.region !== undefined && query.region.length > 0
         ? { shippingRegion: { contains: query.region, mode: 'insensitive' } }
         : {}),

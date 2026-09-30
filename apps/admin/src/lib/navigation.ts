@@ -98,6 +98,28 @@ const GROUPS: AdminNavGroup[] = [
     ],
   },
   {
+    label: 'Logistika',
+    items: [
+      { href: '/logistics', label: 'Yetkazish', permission: 'delivery.view', ready: true },
+      /*
+        PARK — `delivery.manage`, `delivery.view` emas.
+
+        Sahifaning butun mazmuni — profil ochish va tahrirlash, va
+        u `drivers/candidates` ni o'qiydi; ikkisi ham serverda
+        `delivery.manage` talab qiladi. `view` bilan qo'yilsa,
+        bo'limga kirgan foydalanuvchi bo'sh nomzod ro'yxatini
+        ko'rardi va sababi 403 ekanini bilmasdi.
+      */
+      {
+        href: '/logistics/routes',
+        label: 'Marshrutlar',
+        permission: 'delivery.manage',
+        ready: true,
+      },
+      { href: '/logistics/fleet', label: 'Park', permission: 'delivery.manage', ready: true },
+    ],
+  },
+  {
     label: 'Tizim',
     items: [
       { href: '/system/users', label: 'Foydalanuvchilar', permission: 'users.view', ready: false },

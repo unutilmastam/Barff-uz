@@ -108,7 +108,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S31 Reservations + picking + packing
 - [x] S32 Delivery domain + drivers + assignment
 - [x] S33 Driver PWA
-- [ ] S34 Admin logistics screens
+- [x] S34 Admin logistics screens
 - [ ] S35 Phase 3 QA — **PHASE 3 GATE**
 
 **Phase 4**
