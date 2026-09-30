@@ -325,6 +325,7 @@ jobs:
           echo "XATO: diler portali ko'tarilmadi"
           docker logs barff-dealer-ci
           docker rm -f barff-dealer-ci
+          exit 1
 
       - name: Haydovchi PWA tasvirini qurish
         uses: docker/build-push-action@v6
@@ -388,4 +389,3 @@ jobs:
           }
 
           docker rm -f barff-delivery-ci
-          exit 1
