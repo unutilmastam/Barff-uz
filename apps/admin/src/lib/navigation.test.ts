@@ -55,7 +55,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor, S34 logistika.
+    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor, S34 logistika, S36 moliya.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -72,6 +72,8 @@ describe('admin navigatsiyasi', () => {
       '/warehouse/stock',
       '/warehouse/picking',
       '/warehouse/movements',
+      '/finance/invoices',
+      '/finance/payments',
       '/logistics',
       '/logistics/routes',
       '/logistics/fleet',
@@ -93,6 +95,23 @@ describe('admin navigatsiyasi', () => {
     expect(hrefs).toContain('/logistics');
     expect(hrefs).not.toContain('/logistics/fleet');
     expect(hrefs).not.toContain('/logistics/routes');
+  });
+
+  /**
+   * Moliya bo'limlari ALOHIDA ruxsat talab qiladi.
+   *
+   * Buyurtmani ko'rish huquqi pul ko'rish huquqini bermaydi:
+   * ombor xodimi buyurtmani ko'radi, lekin dilerning qarzini
+   * KO'RMASLIGI kerak (`CLAUDE.md` §3).
+   */
+  it('moliya bolimlari alohida ruxsat talab qiladi', () => {
+    const hrefs = visibleNav(session(['orders.view'])).flatMap((group) =>
+      group.items.map((item) => item.href),
+    );
+
+    expect(hrefs).toContain('/orders');
+    expect(hrefs).not.toContain('/finance/invoices');
+    expect(hrefs).not.toContain('/finance/payments');
   });
 
   it('havolalar takrorlanmaydi', () => {

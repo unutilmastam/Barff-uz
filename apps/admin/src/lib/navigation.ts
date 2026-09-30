@@ -98,6 +98,18 @@ const GROUPS: AdminNavGroup[] = [
     ],
   },
   {
+    label: 'Moliya',
+    items: [
+      {
+        href: '/finance/invoices',
+        label: 'Hisob-fakturalar',
+        permission: 'invoices.view',
+        ready: true,
+      },
+      { href: '/finance/payments', label: 'To‘lovlar', permission: 'payments.view', ready: true },
+    ],
+  },
+  {
     label: 'Logistika',
     items: [
       { href: '/logistics', label: 'Yetkazish', permission: 'delivery.view', ready: true },

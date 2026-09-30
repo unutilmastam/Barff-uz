@@ -129,6 +129,32 @@ curl -s -o /dev/null -w "%{http_code}\n" \
    | grep -o '/_next/static/chunks/webpack-[a-z0-9]*\.js' | head -1)"
 ```
 
+**1g. KONTEYNER QAYTA ISHGA TUSHSA, POSTGRES VA REDIS O'CHIQ
+QOLADI.**
+
+Ikkalasi ham avtomatik ko'tarilmaydi va nosozlik chalg'ituvchi
+ko'rinadi:
+
+- Postgres o'chiq → `prisma migrate` `P1001` beradi;
+- Redis o'chiq → `public-cache.e2e-spec.ts` dagi BITTA sinov
+  yiqiladi (`expected 1 to be 2`) va u "kesh buzilgan" degan
+  xulosaga olib boradi.
+
+Ikkinchisiga aldandim: toza `HEAD` da ham yiqilishini ko'rib
+"mening o'zgarishim emas" dedim va to'g'ri edim, lekin sabab
+Redis ekanini keyinroq topdim.
+
+```bash
+service postgresql start
+redis-server --daemonize yes
+```
+
+Tekshirish:
+
+```bash
+pg_isready -h 127.0.0.1 -p 5432 && redis-cli ping
+```
+
 **2. `POST /leads` soatiga 5 ta.** Bu spamga qarshi TO'G'RI cheklov
 (S14), lekin sinovni takroran yurgizganda `429` beradi. API jarayonini
 qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
@@ -234,6 +260,7 @@ Xato bo'lsa: `pnpm format` (yoki `npx prettier --write .`).
 | `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
 | `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
 | `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
+| `npm run billing`       | Moliya: hisob-faktura berish, to‘lov, balans raqami, CSV, diler ko‘rinishi                   |
 | `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                  |
 | `npm run driver:shots`  | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga)                                     |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |

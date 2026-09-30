@@ -45,6 +45,13 @@ export const AUDIT_ACTIONS = {
   DELIVERY_NOTE_CHANGED: 'delivery.note.changed',
   ROUTE_CHANGED: 'delivery.route.changed',
   ROUTE_DELIVERIES_CHANGED: 'delivery.route.deliveries.changed',
+  INVOICE_CREATED: 'invoice.created',
+  INVOICE_ISSUED: 'invoice.issued',
+  INVOICE_CANCELLED: 'invoice.cancelled',
+  INVOICE_CHANGED: 'invoice.changed',
+  PAYMENT_RECORDED: 'payment.recorded',
+  PAYMENT_ALLOCATED: 'payment.allocated',
+  CREDIT_LIMIT_CHANGED: 'dealer.credit_limit.changed',
   DRIVER_CHANGED: 'driver.changed',
   VEHICLE_CHANGED: 'vehicle.changed',
 } as const;

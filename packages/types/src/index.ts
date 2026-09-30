@@ -1,3 +1,4 @@
+export * from './billing';
 export * from './common';
 export * from './dealers';
 export * from './delivery';

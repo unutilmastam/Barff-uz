@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, type OrderStatus } from '@barff/db';
-import { canTransitionOrder } from '@barff/types';
+import { canTransitionOrder, creditAvailable, exceedsCreditLimit } from '@barff/types';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { type RequestContext } from '../auth/auth.service';
@@ -14,9 +14,21 @@ import { CartService } from '../cart/cart.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PaymentsService } from '../billing/payments.service';
 import { DeliveryService } from '../delivery/delivery.service';
 import { ReservationsService } from '../warehouse/reservations.service';
 import { OrderNumberService } from './order-number.service';
+
+/**
+ * Tiyindagi summani ko'rsatish uchun.
+ *
+ * `@barff/utils` dagi `formatMoney` MIJOZ uchun; bu yerda
+ * XATO MATNI quriladi va u xodimga ham, dilerga ham bir xil
+ * ko'rinishi kerak.
+ */
+function formatMinor(minor: number): string {
+  return `${(minor / 100).toLocaleString('uz-UZ', { maximumFractionDigits: 2 })} so'm`;
+}
 
 export interface SubmitOrderInput {
   addressId: string;
@@ -78,6 +90,7 @@ export class OrdersService {
     private readonly notifications: NotificationsService,
     private readonly reservations: ReservationsService,
     private readonly delivery: DeliveryService,
+    private readonly billing: PaymentsService,
   ) {}
 
   // ===========================================================================
@@ -149,6 +162,43 @@ export class OrdersService {
       (sum, line) => sum + (line.basePrice - line.unitPrice) * line.quantity,
       0,
     );
+
+    /*
+      KREDIT LIMITI — BUYURTMA YARATILISHIDAN OLDIN.
+
+      Tekshiruv yaratilgandan KEYIN bo'lsa, limitdan oshgan
+      buyurtma bazaga tushib, keyin bekor qilinishi kerak
+      bo'lardi — va bekor qilish yiqilsa, u qolib ketardi.
+
+      QAROR: BLOKLANADI, belgilanmaydi (`docs/BILLING-POLICY.md`
+      §4). Sabab: "belgilangan" buyurtma baribir kimningdir
+      qo'lda ko'rib chiqishini talab qiladi, ya'ni ish
+      kamaymaydi — lekin tovar zaxiraga olinib bo'lgan bo'lardi.
+
+      LIMIT SOZLANMAGAN BO'LSA TEKSHIRILMAYDI (`null`). Haqiqiy
+      siyosat BARFF dan kelmagan (Q14, Q17) va uni o'ylab topish
+      bugungi hamma dilerni bloklab qo'yardi.
+    */
+    const dealerCredit = await this.prisma.dealer.findUnique({
+      where: { id: dealerId },
+      select: { creditLimit: true },
+    });
+
+    if (dealerCredit?.creditLimit != null) {
+      const balance = await this.billing.balance(dealerId);
+
+      if (exceedsCreditLimit(dealerCredit.creditLimit, balance.outstanding, subtotal - discount)) {
+        const available = creditAvailable(dealerCredit.creditLimit, balance.outstanding) ?? 0;
+
+        throw new BadRequestException({
+          message:
+            `Kredit limiti yetmaydi. Limit ${formatMinor(dealerCredit.creditLimit)}, ` +
+            `joriy qarz ${formatMinor(balance.outstanding)}, ` +
+            `qolgan ${formatMinor(available)}, buyurtma ${formatMinor(subtotal - discount)}.`,
+          code: 'CREDIT_LIMIT_EXCEEDED',
+        });
+      }
+    }
 
     /*
       POYGA HOLATI — va u O'LCHAB topildi.
