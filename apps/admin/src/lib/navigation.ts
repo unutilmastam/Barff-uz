@@ -132,6 +132,10 @@ const GROUPS: AdminNavGroup[] = [
     ],
   },
   {
+    label: 'Hisobotlar',
+    items: [{ href: '/reports', label: 'Hisobotlar', permission: 'reports.view', ready: true }],
+  },
+  {
     label: 'Tizim',
     items: [
       { href: '/system/users', label: 'Foydalanuvchilar', permission: 'users.view', ready: false },

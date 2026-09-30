@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { type Prisma } from '@barff/db';
 import { PrismaService } from '../prisma/prisma.service';
+import { CSV_BOM, csvRow } from '../reports/export/csv';
 
 /**
  * CSV eksport — buxgalteriya uchun (CLAUDE.md §22).
@@ -77,12 +78,12 @@ export class BillingExportService {
           bilan boshqacha o'qishi mumkin edi. Tiyin — butun son
           va u bir ma'noli.
         */
-        String(invoice.subtotal),
-        String(invoice.discount),
-        String(invoice.taxAmount),
-        String(invoice.total),
-        String(allocated),
-        String(invoice.total - allocated),
+        invoice.subtotal,
+        invoice.discount,
+        invoice.taxAmount,
+        invoice.total,
+        allocated,
+        invoice.total - allocated,
         invoice.currency,
       ];
     });
@@ -147,9 +148,9 @@ export class BillingExportService {
         payment.receivedAt.toISOString().slice(0, 10),
         payment.method,
         payment.reference ?? '',
-        String(payment.amount),
-        String(allocated),
-        String(payment.amount - allocated),
+        payment.amount,
+        allocated,
+        payment.amount - allocated,
         payment.allocations.map((row) => row.invoice.number).join(' '),
         payment.currency,
       ];
@@ -175,19 +176,15 @@ export class BillingExportService {
 }
 
 /**
- * CSV qatori.
+ * CSV — umumiy yordamchi bilan (`reports/export/csv.ts`).
  *
- * QO'SH TIRNOQ HAR DOIM QO'YILADI va ichidagisi ikkilantiriladi.
- * Shartli qo'yish ("faqat vergul bo'lsa") kompaniya nomida
- * tirnoq yoki yangi qator bo'lgan holatni buzardi — va bunday
- * nom haqiqatda uchraydi.
- *
- * BOM QO'SHILADI: usiz Excel UTF-8 ni o'zbekcha harflar bilan
- * noto'g'ri o'qiydi va `so‘m` `soâ€˜m` bo'lib chiqadi.
+ * Avval bu yerda o'z `escape` funksiyasi bor edi va u FORMULA
+ * IN'EKSIYASIDAN himoya qilmasdi: dilerning kompaniya nomini o'zi
+ * kiritadi (ochiq ariza formasi), `=HYPERLINK(...)` bilan boshlangan
+ * nom buxgalterning Excel'ida formula sifatida ochilardi. S37
+ * hisobotlarini yozganda topildi; endi ikkalasi bitta funksiyadan
+ * foydalanadi.
  */
-function toCsv(header: string[], rows: string[][]): string {
-  const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
-  const lines = [header, ...rows].map((row) => row.map(escape).join(','));
-
-  return `\uFEFF${lines.join('\r\n')}\r\n`;
+function toCsv(header: string[], rows: (string | number)[][]): string {
+  return CSV_BOM + csvRow(header) + rows.map((row) => csvRow(row)).join('');
 }

@@ -188,14 +188,36 @@ if (created !== null) {
     `${before.outstanding} -> ${after.outstanding}`,
   );
 
-  const invoice = await (
-    await admin.page.request.get(`${API}/billing/invoices/${created.id}`)
-  ).json();
+  /*
+    TAQSIMOT ESKISIDAN BOSHLANADI (`docs/BILLING-POLICY.md` §6).
+
+    Bu yerda men avval "yangi yaratgan hujjatim yopildi" deb
+    tekshirgandim va u FAQAT dilerda boshqa ochiq hujjat bo'lmagan
+    holda o'tardi: oldingi yurishdan qolgan hujjat bo'lsa, to'lov
+    ESKISIGA ketadi — siyosat aynan shunday. Skript ikkinchi yurishda
+    yiqildi; aybdor ilova emas, tekshiruv edi.
+
+    Endi to'lovning O'ZI so'raladi: u qaysi hujjatlarni yopgani va
+    ular holati taqsimotga mos yangilanganmi.
+  */
+  const list = await (await admin.page.request.get(`${API}/billing/payments?limit=1`)).json();
+  const payment = list.items?.[0];
+  const allocated = (payment?.allocations ?? []).reduce((sum, row) => sum + row.amount, 0);
+
   check(
-    invoice.status === 'PARTIALLY_PAID' || invoice.status === 'PAID',
-    'hujjat holati TAQSIMOTDAN yangilandi',
-    invoice.status,
+    allocated === Math.round(majorHalf * 100),
+    'tolov AVTOMATIK taqsimlandi (eskisidan boshlab)',
+    `${allocated} tiyin, ${payment?.allocations?.length ?? 0} ta hujjat`,
   );
+
+  let statusOk = (payment?.allocations ?? []).length > 0;
+  for (const row of payment?.allocations ?? []) {
+    const target = await (
+      await admin.page.request.get(`${API}/billing/invoices/${row.invoice.id}`)
+    ).json();
+    if (target.status !== 'PARTIALLY_PAID' && target.status !== 'PAID') statusOk = false;
+  }
+  check(statusOk, 'yopilgan hujjatlarning holati TAQSIMOTDAN yangilandi');
 }
 
 // ---------------------------------------------------------------- CSV
@@ -207,6 +229,25 @@ if (csv.ok()) {
   check(text.includes('jami_tiyin'), 'CSV sarlavhasida TIYIN ochiq yozilgan');
   check(text.charCodeAt(0) === 0xfeff, 'CSV da BOM bor (Excel uchun)');
 }
+
+/*
+  CSV TUGMASI — HAQIQATAN BOSILADI.
+
+  Yuqorida CSV faqat API orqali olingan edi va tugmaning o'zi
+  tekshirilmagan edi. Natijada tugma brauzerda `404` bergan xato
+  S37 da topildi (`downloadFile` noto'g'ri manzilga so'rov yuborgan).
+*/
+await admin.page.goto(`${ADMIN}/finance/invoices`, { waitUntil: 'networkidle' });
+await admin.page.waitForTimeout(1000);
+const [csvDownload] = await Promise.all([
+  admin.page.waitForEvent('download', { timeout: 15000 }).catch(() => null),
+  admin.page.getByRole('button', { name: 'CSV', exact: true }).click(),
+]);
+check(
+  csvDownload !== null && csvDownload.suggestedFilename() === 'hisob-fakturalar.csv',
+  'CSV TUGMASI fayl yukladi',
+  csvDownload?.suggestedFilename() ?? 'yuklanmadi',
+);
 
 // ---------------------------------------------------------------- diler
 const dealer = await open(DEALER, 'qa3-diler@barff.uz', STAFF_PASSWORD, 'diler', {

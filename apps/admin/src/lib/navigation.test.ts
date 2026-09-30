@@ -55,7 +55,7 @@ describe('admin navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor, S34 logistika, S36 moliya.
+    // S19 CMS, S23 narx qoidalari, S29 dilerlar, S30-S31 ombor, S34 logistika, S36 moliya, S37 hisobotlar.
     expect(ready).toEqual([
       '/',
       '/content/news',
@@ -77,6 +77,7 @@ describe('admin navigatsiyasi', () => {
       '/logistics',
       '/logistics/routes',
       '/logistics/fleet',
+      '/reports',
       '/system/settings',
     ]);
   });

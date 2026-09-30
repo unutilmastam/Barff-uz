@@ -25,7 +25,8 @@ export class ApiRequestError extends Error {
   }
 }
 
-function baseUrl(): string {
+/** API manzili. Fayl yuklash ham shundan foydalanadi (`download.ts`) — ikkita manba ajralib ketmasin. */
+export function baseUrl(): string {
   const url = process.env['NEXT_PUBLIC_API_BASE_URL'];
   // Sozlanmagan bo'lsa lokal API. Production build'da bu qiymat majburiy
   // beriladi (S40), shuning uchun bu yerda jim ravishda noto'g'ri manzilga

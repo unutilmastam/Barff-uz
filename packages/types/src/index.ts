@@ -6,5 +6,6 @@ export * from './leads';
 export * from './orders';
 export * from './permissions';
 export * from './public-api';
+export * from './reports';
 export * from './roles';
 export * from './stock';

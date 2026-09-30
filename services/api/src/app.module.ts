@@ -16,6 +16,7 @@ import { LeadsModule } from './leads/leads.module';
 import { OrdersModule } from './orders/orders.module';
 import { BillingModule } from './billing/billing.module';
 import { DeliveryModule } from './delivery/delivery.module';
+import { ReportsModule } from './reports/reports.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { PricingModule } from './pricing/pricing.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -64,6 +65,7 @@ import { UsersModule } from './users/users.module';
     WarehouseModule,
     DeliveryModule,
     BillingModule,
+    ReportsModule,
     HealthModule,
   ],
   providers: [

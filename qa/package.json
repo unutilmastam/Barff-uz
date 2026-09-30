@@ -22,7 +22,8 @@
     "seed:staff": "node seed-staff.mjs",
     "e2e:p3": "node e2e-phase3.mjs",
     "reconcile:p3": "node reconcile-phase3.mjs",
-    "billing": "node billing-check.mjs"
+    "billing": "node billing-check.mjs",
+    "reports": "node reports-check.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

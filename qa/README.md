@@ -200,6 +200,32 @@ Tekshirish:
 pg_isready -h 127.0.0.1 -p 5432 && redis-cli ping
 ```
 
+**1h. YUKLAB OLISH TUGMASINI HAQIQATAN BOSING.**
+
+S36 da CSV faqat API orqali (`page.request.get`) olingan edi. Tugmaning
+o'zi tekshirilmagan edi va u brauzerda `404` bergan: `downloadFile`
+o'z bazaviy manzilini qo'yib olgan (`?? ''`), boshqa hamma so'rov esa
+`apiFetch` ning `baseUrl()` dan foydalanadi. S37 da topildi.
+
+Umumiy qoida: **API dan olingan fayl tugma ishlaydi degani EMAS.**
+Tugma boshqa yo'ldan boradi (brauzer `fetch`, cookie, CORS,
+bazaviy manzil). `page.waitForEvent('download')` bilan tugmani
+bosing.
+
+**1i. `openpyxl` — XLSX uchun HAQIQIY o'quvchi.**
+
+`reports-check.mjs` faylni `openpyxl` bilan ochadi (`pip install
+openpyxl`). Sinovdagi zip o'quvchini men yozganman va u yozuvchi
+bilan bir xil xatoga ega bo'lishi mumkin; `openpyxl` mustaqil.
+
+**1j. `pkill -f next-server` O'Z SHELLINGIZNI HAM O'LDIRADI.**
+
+Buyruq matnida `next-server` so'zi bor va `pkill -f` butun buyruq
+qatorini qidiradi — shu jumladan o'zingiz yurgizayotgan shellni.
+Natija: chiqish kodi `144`, keyingi buyruqlar bajarilmaydi. Server
+va build jarayonini ALOHIDA buyruqlarda bajaring yoki PID bo'yicha
+o'ldiring.
+
 **2. `POST /leads` soatiga 5 ta.** Bu spamga qarshi TO'G'RI cheklov
 (S14), lekin sinovni takroran yurgizganda `429` beradi. API jarayonini
 qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
@@ -309,6 +335,7 @@ Xato bo'lsa: `pnpm format` (yoki `npx prettier --write .`).
 | `npm run e2e:p3`       | Faza 3 zanjiri: buyurtma → zaxira → yig‘ish → qadoqlash → biriktirish → topshirish           |
 | `npm run reconcile:p3` | Yarashtirish: qoldiq ↔ harakat jurnali ↔ zaxira ↔ buyurtma ↔ yetkazma                        |
 
+| `npm run reports` | Hisobotlar: filtrlar hisobotga qarab, XLSX'ni HAQIQIY o‘quvchi (`openpyxl`) bilan ochish, yuklab olish tugmasi |
 | `npm run billing` | Moliya: hisob-faktura berish, to‘lov, balans raqami, CSV, diler ko‘rinishi |
 | `npm run logistics` | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati |
 | `npm run driver:shots` | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga) |

@@ -1,3 +1,5 @@
+import { baseUrl } from './api-client';
+
 /**
  * Faylni YUKLAB OLISH — oddiy havola bilan emas.
  *
@@ -12,9 +14,18 @@
  * xato bo'lsa u KO'RINADI.
  */
 export async function downloadFile(path: string, filename: string): Promise<void> {
-  const base = process.env['NEXT_PUBLIC_API_BASE_URL'] ?? '';
+  /*
+    BAZAVIY MANZIL `apiFetch` BILAN BIR XIL (`baseUrl()`).
 
-  const response = await fetch(`${base}${path}`, { credentials: 'include' });
+    Avval bu yerda `process.env[...] ?? ''` turardi. O'zgaruvchi
+    build paytida berilmasa u bo'sh qator bo'lib qolardi va so'rov API
+    ga emas, ADMIN'ning o'z manziliga ketib `404` olardi — boshqa
+    hamma so'rov esa `apiFetch` orqali to'g'ri ishlardi.
+
+    S36 dagi CSV tugmasi ham shu sababli brauzerda ishlamagan; men uni
+    faqat API orqali tekshirgan edim, tugmani bosib ko'rmagan edim.
+  */
+  const response = await fetch(`${baseUrl()}${path}`, { credentials: 'include' });
 
   if (!response.ok) {
     throw new Error(`Yuklab bo‘lmadi (HTTP ${response.status})`);
