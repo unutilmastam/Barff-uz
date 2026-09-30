@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { type DeliveryStatus, type OrderStatus, type Prisma } from '@barff/db';
+import { Prisma, type DeliveryStatus, type OrderStatus } from '@barff/db';
 import { canTransitionDelivery, canTransitionOrder } from '@barff/types';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
@@ -452,6 +452,18 @@ export class DeliveryService {
       proofNote?: string | undefined;
       /** Haydovchi chaqirayotgan bo'lsa — ruxsat toraytiriladi. */
       asDriver?: string | undefined;
+      /**
+       * OFLAYN NAVBAT KALITI (S33).
+       *
+       * Haydovchi tarmoqsiz joyda tugma bossa, amal telefonda
+       * navbatga tushadi va aloqa tiklanganda yuboriladi. Javob
+       * yo'qolsa navbat QAYTA yuboradi — so'rov esa serverga
+       * YETIB BORGAN bo'lishi mumkin.
+       *
+       * Kalitsiz bu ikkinchi marta qo'llanishga urinardi va
+       * haydovchi "xato" ko'rardi, aslida hammasi joyida edi.
+       */
+      idempotencyKey?: string | undefined;
     } = {},
   ) {
     const delivery = await this.prisma.delivery.findFirst({
@@ -466,6 +478,27 @@ export class DeliveryService {
 
     if (delivery === null) {
       throw new NotFoundException({ message: 'Yetkazma topilmadi', code: 'DELIVERY_NOT_FOUND' });
+    }
+
+    /*
+      TAKRORIY YUBORISH — AMAL QAYTA QO'LLANMAYDI.
+
+      Tekshiruv o'tish qoidalaridan OLDIN: takroriy so'rov
+      `ARRIVED -> ARRIVED` bo'lib ko'rinadi va o'tish jadvali uni
+      rad etardi (`409`). Haydovchi esa muvaffaqiyatli amalni
+      "xato" deb ko'rardi va uni yana bosardi.
+    */
+    if (options.idempotencyKey !== undefined) {
+      const seen = await this.prisma.deliveryEvent.findFirst({
+        where: { deliveryId: id, idempotencyKey: options.idempotencyKey },
+        select: { id: true },
+      });
+
+      if (seen !== null) {
+        this.logger.log(`Takroriy yuborish e'tiborsiz qoldirildi: ${delivery.number}`);
+
+        return this.findOne(id);
+      }
     }
 
     if (options.asDriver !== undefined && !DRIVER_ALLOWED.includes(to)) {
@@ -491,39 +524,63 @@ export class DeliveryService {
 
     const now = new Date();
 
-    const updated = await this.prisma.$transaction(async (tx) => {
-      const row = await tx.delivery.update({
-        where: { id },
-        data: {
-          status: to,
-          ...(to === 'ASSIGNED' ? { assignedAt: now } : {}),
-          ...(to === 'PICKED_UP' ? { pickedUpAt: now } : {}),
-          ...(to === 'DELIVERED' ? { deliveredAt: now } : {}),
-          ...(options.failureReason !== undefined ? { failureReason: options.failureReason } : {}),
-          ...(options.receivedBy !== undefined ? { receivedBy: options.receivedBy } : {}),
-          ...(options.proofNote !== undefined ? { proofNote: options.proofNote } : {}),
-        },
-        select: DELIVERY_SELECT,
-      });
-
-      await tx.deliveryEvent.create({
-        data: {
-          deliveryId: id,
-          fromStatus: delivery.status,
-          toStatus: to,
-          ...(options.note !== undefined
-            ? { note: options.note }
-            : options.failureReason !== undefined
-              ? { note: options.failureReason }
+    const updated = await this.prisma
+      .$transaction(async (tx) => {
+        const row = await tx.delivery.update({
+          where: { id },
+          data: {
+            status: to,
+            ...(to === 'ASSIGNED' ? { assignedAt: now } : {}),
+            ...(to === 'PICKED_UP' ? { pickedUpAt: now } : {}),
+            ...(to === 'DELIVERED' ? { deliveredAt: now } : {}),
+            ...(options.failureReason !== undefined
+              ? { failureReason: options.failureReason }
               : {}),
-          ...(actor !== null ? { actorId: actor.id } : {}),
-        },
+            ...(options.receivedBy !== undefined ? { receivedBy: options.receivedBy } : {}),
+            ...(options.proofNote !== undefined ? { proofNote: options.proofNote } : {}),
+          },
+          select: DELIVERY_SELECT,
+        });
+
+        await tx.deliveryEvent.create({
+          data: {
+            deliveryId: id,
+            fromStatus: delivery.status,
+            toStatus: to,
+            ...(options.note !== undefined
+              ? { note: options.note }
+              : options.failureReason !== undefined
+                ? { note: options.failureReason }
+                : {}),
+            ...(options.idempotencyKey !== undefined
+              ? { idempotencyKey: options.idempotencyKey }
+              : {}),
+            ...(actor !== null ? { actorId: actor.id } : {}),
+          },
+        });
+
+        await this.syncOrder(tx, delivery.orderId, to, actor);
+
+        return row;
+      })
+      .catch(async (error: unknown) => {
+        /*
+        POYGA: ikkita bir xil so'rov BIR VAQTDA kelsa, yuqoridagi
+        tekshiruv ikkalasini ham o'tkazib yuboradi va yagona
+        indeks ikkinchisini rad etadi. O'shanda ham javob
+        MUVAFFAQIYATLI bo'lishi kerak — amal baribir qo'llangan.
+      */
+        const duplicate =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002' &&
+          options.idempotencyKey !== undefined;
+
+        if (!duplicate) throw error;
+
+        this.logger.log(`Poygada takroriy yuborish: ${delivery.number}`);
+
+        return this.findOne(id);
       });
-
-      await this.syncOrder(tx, delivery.orderId, to, actor);
-
-      return row;
-    });
 
     await this.audit.record({
       action: AUDIT_ACTIONS.DELIVERY_STATUS_CHANGED,

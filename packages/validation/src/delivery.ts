@@ -62,6 +62,14 @@ export const deliveryStatusSchema = z
     failureReason: z.string().trim().max(1000).optional(),
     receivedBy: z.string().trim().max(120).optional(),
     proofNote: z.string().trim().max(1000).optional(),
+    /**
+     * Oflayn navbat kaliti (S33).
+     *
+     * Telefon uni amal YARATILGANDA yasaydi va qayta yuborishda
+     * O'ZGARTIRMAYDI — aks holda takrorga qarshi himoya umuman
+     * ishlamasdi.
+     */
+    idempotencyKey: z.string().trim().min(8).max(100).optional(),
   })
   .refine(
     (value) =>

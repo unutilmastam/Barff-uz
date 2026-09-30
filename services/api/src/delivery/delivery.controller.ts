@@ -119,6 +119,7 @@ export class DeliveryController {
         failureReason: dto.failureReason,
         receivedBy: dto.receivedBy,
         proofNote: dto.proofNote,
+        idempotencyKey: dto.idempotencyKey,
         asDriver: user.id,
       },
     );
@@ -275,6 +276,7 @@ export class DeliveryController {
         failureReason: dto.failureReason,
         receivedBy: dto.receivedBy,
         proofNote: dto.proofNote,
+        idempotencyKey: dto.idempotencyKey,
       },
     );
   }
