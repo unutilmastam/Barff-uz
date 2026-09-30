@@ -346,7 +346,22 @@ function AssignDialog({
   onClose: () => void;
   onSubmit: (body: Record<string, unknown>) => void;
 }) {
-  const [driverId, setDriverId] = useState(drivers[0]?.id ?? '');
+  /*
+    HAYDOVCHI OLDINDAN TANLANMAYDI.
+
+    Avval bu yerda birinchi haydovchi tanlab qo'yilardi va oynani
+    tez yopgan logist yukni TASODIFAN o'shanga berardi — ro'yxatda
+    birinchi turgani, ishi eng yengili emas.
+
+    Buni S35 darvozasi topdi: sinov aniq bir haydovchini tanlagan
+    deb o'ylab tugmani bosdi, yetkazma esa BOSHQASIGA ketdi.
+
+    Bu yerda odam manzilga BORADI — standart qiymat qo'yiladigan
+    joy emas. Xuddi «bajarilmadi» dagi «qayta urinish» tugmasi
+    kabi: bir bosish bilan xatoni takrorlash oson bo'lmasligi
+    kerak.
+  */
+  const [driverId, setDriverId] = useState('');
   const [vehicleId, setVehicleId] = useState('');
   const [scheduledFor, setScheduledFor] = useState('');
 
@@ -395,6 +410,8 @@ function AssignDialog({
             label="Haydovchi"
             value={driverId}
             onValueChange={setDriverId}
+            placeholder="Tanlang"
+            hint="Tanlanmaguncha biriktirib bo‘lmaydi."
             options={drivers.map((driver) => ({
               value: driver.id,
               label: `${driver.user.fullName}${driver.vehicle !== null ? ` — ${driver.vehicle.plateNumber}` : ''}`,
