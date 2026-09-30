@@ -175,7 +175,10 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
     ['Buyurtma', data.order?.number],
     ['Diler', data.order?.dealer?.companyName],
     ['Pozitsiya', data.order?._count?.items?.toString()],
-    ['Summa', data.order?.total !== undefined ? money(data.order.total, data.order.currency) : null],
+    [
+      'Summa',
+      data.order?.total !== undefined ? money(data.order.total, data.order.currency) : null,
+    ],
     ['Rejalashtirilgan', data.scheduledFor != null ? formatDateTime(data.scheduledFor) : null],
     ['Biriktirildi', data.assignedAt != null ? formatDateTime(data.assignedAt) : null],
     ['Olindi', data.pickedUpAt != null ? formatDateTime(data.pickedUpAt) : null],
@@ -390,8 +393,8 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
             <GlassCard className="flex flex-col gap-3 p-5">
               <h2 className="display-4">Holatni o‘zgartirish</h2>
               <p className="text-sm text-[var(--color-fg-subtle)]">
-                Odatda holatni HAYDOVCHI o‘zgartiradi. Bu yerdagi tugmalar — u ishlay olmagan
-                holat uchun.
+                Odatda holatni HAYDOVCHI o‘zgartiradi. Bu yerdagi tugmalar — u ishlay olmagan holat
+                uchun.
               </p>
 
               {failing ? (

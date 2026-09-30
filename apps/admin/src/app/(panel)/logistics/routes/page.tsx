@@ -198,7 +198,8 @@ export default function RoutesPage() {
       <div className="flex flex-col gap-4">
         {(routes.data ?? []).map((route) => {
           const unassigned = route.deliveries.filter(
-            (row) => row.driver === null && row.status !== 'DELIVERED' && row.status !== 'CANCELLED',
+            (row) =>
+              row.driver === null && row.status !== 'DELIVERED' && row.status !== 'CANCELLED',
           ).length;
 
           return (
@@ -250,9 +251,7 @@ export default function RoutesPage() {
               )}
 
               {route.deliveries.length === 0 ? (
-                <p className="text-sm text-[var(--color-fg-subtle)]">
-                  Yetkazma qo‘shilmagan.
-                </p>
+                <p className="text-sm text-[var(--color-fg-subtle)]">Yetkazma qo‘shilmagan.</p>
               ) : (
                 <ul className="flex flex-col divide-y divide-[var(--color-line)]">
                   {route.deliveries.map((row) => (
@@ -512,9 +511,7 @@ function AttachDialog({
       {open.isPending && <p className="text-sm text-[var(--color-fg-subtle)]">Yuklanmoqda…</p>}
 
       {!open.isPending && candidates.length === 0 && (
-        <p className="text-sm text-[var(--color-fg-muted)]">
-          Marshrutsiz yangi yetkazma yo‘q.
-        </p>
+        <p className="text-sm text-[var(--color-fg-muted)]">Marshrutsiz yangi yetkazma yo‘q.</p>
       )}
 
       <ul className="flex flex-col divide-y divide-[var(--color-line)]">

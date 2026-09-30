@@ -335,7 +335,7 @@ export class DeliveryController {
   @Post('routes/:id/assign')
   @Permissions('delivery.assign')
   @ApiOperation({ summary: 'Marshrutni biriktirish' })
-  @ApiResponse({ status: 400, type: ApiErrorDto, description: "Haydovchi belgilanmagan" })
+  @ApiResponse({ status: 400, type: ApiErrorDto, description: 'Haydovchi belgilanmagan' })
   assignRoute(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,

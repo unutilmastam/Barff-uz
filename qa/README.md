@@ -208,6 +208,21 @@ cd qa && node cleanup-phase2.mjs
 U FAQAT `Faza2 Sinov ` va `Yuk Sinov ` bilan boshlanadigan
 kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 
+## DARVOZADAN OLDIN: `pnpm format:check`
+
+S34 da CI aynan shu yerda qizil bo'ldi. Men `lint`, `typecheck`,
+`test` va `build` ni yurgizib, `format:check` ni O'TKAZIB
+YUBORGANDIM — to'rttasi ham yashil edi, CI esa to'qqizta faylda
+formatlash xatosi topdi.
+
+Prettier ALOHIDA qadam va `lint` uni tekshirmaydi. To'liq to'plam:
+
+```bash
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build
+```
+
+Xato bo'lsa: `pnpm format` (yoki `npx prettier --write .`).
+
 ## Skriptlar
 
 | Skript                  | Nimani o'lchaydi                                                                             |
@@ -219,7 +234,7 @@ kompaniyalarni oladi va audit jurnaliga TEGMAYDI (CLAUDE.md §23).
 | `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
 | `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
 | `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
-| `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                 |
+| `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                  |
 | `npm run driver:shots`  | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga)                                     |
 | `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
 | `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |

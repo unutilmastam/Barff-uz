@@ -274,15 +274,7 @@ describe('Delivery (e2e)', () => {
     await prisma.auditLog.deleteMany({
       where: {
         entity: {
-          in: [
-            'order',
-            'dealer',
-            'delivery',
-            'delivery_route',
-            'driver',
-            'vehicle',
-            'warehouse',
-          ],
+          in: ['order', 'dealer', 'delivery', 'delivery_route', 'driver', 'vehicle', 'warehouse'],
         },
       },
     });

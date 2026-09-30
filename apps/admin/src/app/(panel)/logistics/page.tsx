@@ -8,11 +8,7 @@ import { Badge, Button, Dialog, GlassCard, Input, Select } from '@barff/ui';
 import { formatPhone } from '@barff/utils';
 import { ApiRequestError, apiFetch } from '@/lib/api-client';
 import { DataTable } from '@/components/DataTable';
-import {
-  deliveryStatusLabel,
-  deliveryStatusTone,
-  needsAttention,
-} from '@/lib/delivery-labels';
+import { deliveryStatusLabel, deliveryStatusTone, needsAttention } from '@/lib/delivery-labels';
 import { formatDateTime } from '@/lib/order-labels';
 
 interface DeliveryRow {
@@ -303,9 +299,7 @@ export default function LogisticsPage() {
             key: 'status',
             header: 'Holat',
             cell: (row) => (
-              <Badge tone={deliveryStatusTone(row.status)}>
-                {deliveryStatusLabel(row.status)}
-              </Badge>
+              <Badge tone={deliveryStatusTone(row.status)}>{deliveryStatusLabel(row.status)}</Badge>
             ),
           },
           { key: 'createdAt', header: 'Yaratildi', cell: (row) => formatDateTime(row.createdAt) },

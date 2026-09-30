@@ -173,7 +173,8 @@ if ((await addButton.count()) > 0) {
 
     const same = before === after;
     console.log(`qoshilgandan keyin qator OZGARMADI: ${same}`);
-    if (!same) problems.push(`marshrutga qo‘shish yetkazmani o‘zgartirdi:\n${before}\n---\n${after}`);
+    if (!same)
+      problems.push(`marshrutga qo‘shish yetkazmani o‘zgartirdi:\n${before}\n---\n${after}`);
   } else {
     await page.getByRole('button', { name: 'Bekor qilish' }).click();
   }
