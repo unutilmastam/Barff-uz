@@ -129,6 +129,51 @@ curl -s -o /dev/null -w "%{http_code}\n" \
    | grep -o '/_next/static/chunks/webpack-[a-z0-9]*\.js' | head -1)"
 ```
 
+**1c. FAZA 3: PAROLLAR MUHIT O'ZGARUVCHISIDAN.**
+
+`seed-staff.mjs` va `e2e-phase3.mjs` `STAFF_PASSWORD` ni TALAB
+qiladi va standart qiymati YO'Q (`CLAUDE.md` §12). Kodga yozilgan
+parol repozitoriyga tushadi va u yerdan hamma muhitga ko'chadi.
+
+```bash
+cd qa
+STAFF_PASSWORD="Faza3-Lokal-Parol-2026" npm run seed:staff
+ADMIN_PASSWORD="..." STAFF_PASSWORD="Faza3-Lokal-Parol-2026" npm run e2e:p3
+npm run reconcile:p3
+```
+
+**1d. FAZA 3: SINOV VARIANTNI TASODIFAN TANLAMAYDI.**
+
+Dastlab skript katalogdagi BIRINCHI «Savatga» tugmasini bosardi.
+U API sinovlaridan qolgan, qoldig'i umuman yo'q variant bo'lib
+chiqdi: zaxira `409` berdi va zanjir shu yerda to'xtadi — sabab
+ilovada emas, SINOVDA edi.
+
+Endi variant OMBOR RO'YXATIDAN tanlanadi (qoldig'i va narxi bori)
+va katalogda aynan o'sha bosiladi. Qator miqdor tanlagichining
+yorlig'i bo'yicha topiladi (`Miqdor — <variant id boshi>`), matn
+bo'yicha emas.
+
+**1e. FAZA 3: QOLDIQ O'QILMASA — BU TEKSHIRUV EMAS.**
+
+`stockOf` avval `-1` qaytarardi va "qoldiq o'zgarmadi" tekshiruvi
+`-1 === -1` bo'lib O'TARDI — qoldiq umuman o'qilmagan bo'lsa ham.
+Ikkita tekshiruv NOTO'G'RI SABABDAN yashil edi. Endi `null`
+qaytadi va sinov shu yerda TO'XTAYDI.
+
+**1f. MEDIA E2E LOKALDA IKKITA XATO BERADI — BU MUHIT FARQI.**
+
+`test/media.e2e-spec.ts` dagi ikkita sinov (imzolangan havola va
+o'chirish) LOKALDA yiqiladi, CI'da esa o'tadi. Sabab kodda emas:
+
+- lokalda `.env` da `MEDIA_ROOT` bor, ya'ni FAYL TIZIMI adapteri
+  ishlaydi va havola `expires=` bermaydi;
+- CI'da `S3_*` berilgan va S3 adapteri ishlaydi.
+
+Buni toza `HEAD` da ham o'lchadim — o'sha ikki sinov o'sha yerda
+ham yiqiladi. Ya'ni "mening o'zgarishim buzdi" degan xulosa
+noto'g'ri bo'lardi. Qolgan sinovlar lokalda ham yashil.
+
 **1g. KONTEYNER QAYTA ISHGA TUSHSA, POSTGRES VA REDIS O'CHIQ
 QOLADI.**
 
@@ -251,23 +296,27 @@ Xato bo'lsa: `pnpm format` (yoki `npx prettier --write .`).
 
 ## Skriptlar
 
-| Skript                  | Nimani o'lchaydi                                                                             |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run e2e`           | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
-| `npm run e2e:p2`        | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
-| `npm run load:p2`       | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
-| `npm run cleanup:p2`    | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
-| `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
-| `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
-| `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
-| `npm run billing`       | Moliya: hisob-faktura berish, to‘lov, balans raqami, CSV, diler ko‘rinishi                   |
-| `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                  |
-| `npm run driver:shots`  | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga)                                     |
-| `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
-| `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
-| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |
-| `npm run theme`         | Ko'rinish almashtirgichi: tanlov, eslab qolish, FOUC, xotira bloklangan holat                |
-| `npm run all`           | Hammasi ketma-ket                                                                            |
+| Skript                 | Nimani o'lchaydi                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `npm run e2e`          | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
+| `npm run e2e:p2`       | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
+| `npm run load:p2`      | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
+| `npm run cleanup:p2`   | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
+| `npm run warehouse`    | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
+| `npm run picking`      | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
+| `npm run driver`       | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
+| `npm run seed:staff`   | Faza 3 uchun ombor, logist, haydovchi va tasdiqlangan diler akkauntlari                      |
+| `npm run e2e:p3`       | Faza 3 zanjiri: buyurtma → zaxira → yig‘ish → qadoqlash → biriktirish → topshirish           |
+| `npm run reconcile:p3` | Yarashtirish: qoldiq ↔ harakat jurnali ↔ zaxira ↔ buyurtma ↔ yetkazma                        |
+
+| `npm run billing` | Moliya: hisob-faktura berish, to‘lov, balans raqami, CSV, diler ko‘rinishi |
+| `npm run logistics` | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati |
+| `npm run driver:shots` | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga) |
+| `npm run perf` | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi |
+| `npm run a11y` | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
+| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang` |
+| `npm run theme` | Ko'rinish almashtirgichi: tanlov, eslab qolish, FOUC, xotira bloklangan holat |
+| `npm run all` | Hammasi ketma-ket |
 
 `npm run a11y -- <katalog>` ekran nusxalarini ham saqlaydi.
 
