@@ -163,8 +163,24 @@ describe('Reservations (e2e)', () => {
       .expect(201);
     warehouseId = warehouse.body.id as string;
 
+    /*
+      IKKINCHI OMBOR KODI CHIZIQCHA BILAN AJRATILGAN.
+
+      Avval u `E2ERES2` + oxirgi 5 raqam edi, birinchisi esa
+      `E2ERES` + oxirgi 6 raqam. Vaqt belgisining oxiridan 6-raqami
+      `2` bo'lgan har bir yurishda ikkalasi BIR XIL satr berardi
+      (`E2ERES` + `245611` = `E2ERES2` + `45611`) va ikkinchi ombor
+      `409` olardi.
+
+      Bu CI'ni o'n yurishdan birida qizil qilardi va sabab kodda
+      emas, SINOVNING O'ZIDA edi. Chiziqcha chegarani aniq qiladi.
+    */
     const second = await as('ADMIN', 'post', '/warehouse/warehouses')
-      .send({ code: `E2ERES2${String(STAMP).slice(-5)}`, name: 'E2E ikkinchi', region: 'Buxoro' })
+      .send({
+        code: `E2ERES2-${String(STAMP).slice(-6)}`,
+        name: 'E2E ikkinchi',
+        region: 'Buxoro',
+      })
       .expect(201);
     secondWarehouseId = second.body.id as string;
 
@@ -207,6 +223,16 @@ describe('Reservations (e2e)', () => {
   });
 
   afterAll(async () => {
+    /*
+      TAYYORGARLIK YIQILGAN BO'LSA TOZALASH O'TKAZIB YUBORILADI.
+
+      `dealerId` bo'sh satr bo'lib qolardi va `findMany` "noto'g'ri
+      UUID" bilan yiqilardi — natijada jurnalda HAQIQIY sabab
+      (`beforeAll` dagi `409`) ikkinchi, tushunarsiz xato ostida
+      ko'milib ketardi.
+    */
+    if (dealerId === '') return;
+
     const orders = await prisma.order.findMany({ where: { dealerId }, select: { id: true } });
     const orderIds = orders.map((o) => o.id);
 
