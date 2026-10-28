@@ -54,3 +54,6 @@ Thumbs.db
 # tushadi — foydalanuvchi kontenti, manba emas. Sinovlar ham shu
 # katalogga yozadi.
 .media/
+
+# Chiqarish sozlamalari (manzillar) — F01
+release.env

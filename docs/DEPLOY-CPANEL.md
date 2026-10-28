@@ -70,9 +70,16 @@ postgresql://FOYDALANUVCHI:PAROL@127.0.0.1:5432/BAZA
 
 ```bash
 pnpm install
-pnpm build
-pnpm package:cpanel
+cp release.env.example release.env   # va ichidagi manzillarni to'g'rilang
+pnpm release:cpanel
 ```
+
+`pnpm release:cpanel` uch ish qiladi: `release.env` ni **tekshiradi**
+(https bo'lmasa yoki `localhost` bo'lsa to'xtaydi), shu qiymatlar bilan
+**yig'adi**, so'ng paketlaydi. Paketlovchi oxirida bundle ichidan
+`localhost:PORT` qidiradi va topsa to'plamni rad etadi — ya'ni noto'g'ri
+manzil bilan yig'ilgan to'plam serverga yetib bormaydi. `release.env`
+repoga kirmaydi va unda sir yo'q.
 
 Natija — `dist-cpanel/` katalogi:
 
@@ -225,11 +232,13 @@ SSH `Terminal` da, API katalogida:
 ```bash
 cd ~/barff/api
 npm run db:deploy
+npm run db:seed      # rollar, ruxsatlar, sozlamalar va birinchi admin
 ```
 
-Birinchi adminni yaratish uchun `SEED_ADMIN_EMAIL`, `SEED_ADMIN_NAME`
-va `SEED_ADMIN_PASSWORD` ni **vaqtincha** qo'shib, seed'ni BIR MARTA
-yurgizing, so'ng `SEED_ADMIN_PASSWORD` ni olib tashlang va parolni
+`db:seed` to'plam ichida (`prisma/seed.cjs`) — `tsx` yoki manba kodi
+shart emas. U MOCK mahsulot yaratmaydi. Birinchi adminni yaratish uchun
+`SEED_ADMIN_EMAIL`, `SEED_ADMIN_NAME` va `SEED_ADMIN_PASSWORD` ni
+**vaqtincha** qo'shib, seed'ni BIR MARTA yurgizing, so'ng `SEED_ADMIN_PASSWORD` ni olib tashlang va parolni
 admin panelda almashtiring.
 
 ### 7.1 Mahsulotlar va suratlar
@@ -298,7 +307,7 @@ jarayon ishlab turibdi (`qa/README.md`, 1-tuzoq).
 
 ```bash
 # kompyuterda
-pnpm build && pnpm package:cpanel
+pnpm release:cpanel
 # serverga `dist-cpanel/*` ni yuklang, so'ng har bir ilovada:
 #   Run NPM Install → RESTART
 ```

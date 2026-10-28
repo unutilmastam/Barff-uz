@@ -13,7 +13,15 @@ export const dynamic = 'force-dynamic';
 function siteUrl(): string {
   const url = process.env['NEXT_PUBLIC_SITE_URL'];
 
-  return url !== undefined && url.length > 0 ? url : 'http://localhost:3001';
+  if (url !== undefined && url.length > 0) return url;
+
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'NEXT_PUBLIC_SITE_URL berilmagan (docs/DEPLOY-CPANEL.md §6, `pnpm release:cpanel`)',
+    );
+  }
+
+  return 'http://localhost:3001';
 }
 
 export default async function LoginPage() {

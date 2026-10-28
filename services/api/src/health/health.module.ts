@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppConfig } from '../config/app.config';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { HEALTH_INDICATORS, type HealthIndicator } from './health.types';
@@ -18,11 +19,31 @@ import { RedisHealthIndicator } from './indicators/redis.indicator';
     {
       provide: HEALTH_INDICATORS,
       useFactory: (
+        config: AppConfig,
         prisma: PrismaHealthIndicator,
         redis: RedisHealthIndicator,
-      ): HealthIndicator[] => [prisma, redis],
-      inject: [PrismaHealthIndicator, RedisHealthIndicator],
+      ): HealthIndicator[] => buildIndicators(config.redisUrl !== undefined, prisma, redis),
+      inject: [AppConfig, PrismaHealthIndicator, RedisHealthIndicator],
     },
   ],
 })
 export class HealthModule {}
+
+/**
+ * Redis FAQAT sozlangan bo'lsa tekshiriladi.
+ *
+ * cPanel'da Redis yo'q va u KERAK EMAS (`docs/OPEN-QUESTIONS.md` Q18;
+ * `REDIS_URL` kiritilmaydi). Avval indikator har doim ro'yxatda edi va
+ * shu sababli `/health/ready` u yerda DOIM `503` qaytarardi — tashqi
+ * monitor (`docs/RUNBOOK.md`) har daqiqada yolg'on signal berardi
+ * (F01 da paketni production rejimida ishga tushirib topildi).
+ *
+ * Sozlangan, lekin javob bermayotgan Redis esa baribir `degraded` beradi.
+ */
+export function buildIndicators(
+  redisConfigured: boolean,
+  prisma: HealthIndicator,
+  redis: HealthIndicator,
+): HealthIndicator[] {
+  return redisConfigured ? [prisma, redis] : [prisma];
+}

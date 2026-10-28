@@ -167,6 +167,27 @@ async function packApi() {
   await cp(join(from, 'dist'), join(target, 'dist'), { recursive: true });
   await cp(join(root, 'prisma'), join(target, 'prisma'), { recursive: true });
 
+  /*
+   * Birinchi ishga tushirish seed'i (rollar, ruxsatlar, admin).
+   *
+   * `prisma/seed.ts` — TypeScript va `tsx` bilan ishlaydi, serverda esa
+   * `tsx` yo'q. Seed paketga KIRMAGAN edi, ya'ni hosting'da bazada rol
+   * va ruxsat bo'lmasdi va hech kim tizimga kira olmasdi (F01 da topildi).
+   * Shuning uchun u oddiy JS ga yig'iladi; ishchi maydon paketlari va
+   * nativ modullar `external` — ular serverda `npm install` qilinadi.
+   */
+  const { build } = await import('esbuild');
+  await build({
+    entryPoints: [join(root, 'prisma', 'seed.ts')],
+    outfile: join(target, 'prisma', 'seed.cjs'),
+    bundle: true,
+    platform: 'node',
+    format: 'cjs',
+    target: 'node20',
+    external: ['@prisma/client', '@barff/*', 'argon2'],
+    logLevel: 'warning',
+  });
+
   // Zaxira va tiklash tekshiruvi skriptlari (`docs/BACKUP-RESTORE.md`).
   await mkdir(join(target, 'scripts'), { recursive: true });
   for (const name of ['db-backup.sh', 'db-restore-check.sh']) {
@@ -205,6 +226,7 @@ async function packApi() {
           start: 'node dist/main.js',
           postinstall: 'prisma generate --schema prisma/schema.prisma',
           'db:deploy': 'prisma migrate deploy --schema prisma/schema.prisma',
+          'db:seed': 'node prisma/seed.cjs',
           'catalog:import': 'CATALOG_DIR=./catalog node dist/cli/import-catalog.js',
         },
         dependencies: deps,
@@ -224,6 +246,50 @@ async function packApi() {
   );
 
   console.log('  ✓ api → dist-cpanel/api');
+}
+
+/**
+ * To'plamda `localhost` BAKILMAGANINI tekshiradi.
+ *
+ * `NEXT_PUBLIC_*` qurish paytida bundle'ga yoziladi. Lokal `.env` bilan
+ * qurilgan to'plam serverda ochiladi, lekin API'ga `localhost` ga so'rov
+ * ketadi va hamma narsa jim ishlamaydi. Shuning uchun paketlashdan keyin
+ * Next ilovalari ichida `localhost:<port>` qidiriladi va topilsa to'xtatiladi.
+ * `pnpm release:cpanel` buni avtomatik to'g'ri qiladi.
+ */
+async function assertNoLocalhost() {
+  if (process.env['ALLOW_LOCALHOST'] === '1') {
+    console.warn("OGOHLANTIRISH: ALLOW_LOCALHOST=1 — localhost tekshiruvi o'chirilgan.");
+    return;
+  }
+
+  const { readdir, readFile } = await import('node:fs/promises');
+  const pattern = /(?:localhost|127\.0\.0\.1):\d{4}/;
+  const offenders = [];
+
+  async function walk(dir) {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') continue;
+      const full = join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        await walk(full);
+      } else if (/\.(js|mjs|cjs|json|html|css|txt|map)$/.test(entry.name)) {
+        if (pattern.test(await readFile(full, 'utf8'))) offenders.push(full.replace(`${out}/`, ''));
+      }
+    }
+  }
+
+  for (const app of ['web', 'admin', 'dealer', 'delivery']) await walk(join(out, app));
+
+  if (offenders.length > 0) {
+    throw new Error(
+      `To'plamda lokal manzil BAKILGAN (${offenders.length} ta fayl, masalan ${offenders[0]}).\n` +
+        "Sabab: `pnpm build` lokal `.env` bilan yurgizilgan. To'g'ri yo'l:\n" +
+        "  cp release.env.example release.env   # manzillarni to'ldiring\n" +
+        '  pnpm release:cpanel',
+    );
+  }
 }
 
 async function main() {
@@ -249,6 +315,8 @@ async function main() {
       '',
     ].join('\n'),
   );
+
+  await assertNoLocalhost();
 
   console.log(`\nTayyor: ${out}`);
   console.log('Keyingi qadam: docs/DEPLOY-CPANEL.md');

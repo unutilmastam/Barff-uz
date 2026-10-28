@@ -11,8 +11,14 @@
 export function siteUrl(): string {
   const configured = process.env['NEXT_PUBLIC_SITE_URL'];
 
-  const value =
-    configured !== undefined && configured.length > 0 ? configured : 'http://localhost:3001';
+  if (configured !== undefined && configured.length > 0) return configured.replace(/\/+$/, '');
 
-  return value.replace(/\/+$/, '');
+  // Production'da jim `localhost` yo'q (api-client.ts dagi izohga qarang).
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'NEXT_PUBLIC_SITE_URL berilmagan (docs/DEPLOY-CPANEL.md §6, `pnpm release:cpanel`)',
+    );
+  }
+
+  return 'http://localhost:3001';
 }

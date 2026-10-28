@@ -17,6 +17,13 @@ WORKDIR /repo
 # pnpm dev -> prod o'tishida TTY so'ramasligi uchun.
 ENV CI=true
 
+# `NEXT_PUBLIC_*` qurish paytida bundle ichiga yoziladi. Standart qiymatlar
+# faqat build o'tishi uchun; haqiqiy qiymatni `--build-arg` bilan bering.
+ARG NEXT_PUBLIC_API_BASE_URL=https://api.example.invalid/api/v1
+ARG NEXT_PUBLIC_SITE_URL=https://example.invalid
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
+    NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
   pnpm install --frozen-lockfile

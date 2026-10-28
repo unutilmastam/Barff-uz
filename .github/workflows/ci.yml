@@ -108,6 +108,11 @@ jobs:
         #   1) turbo `@barff/db#build` orqali Prisma klientini yaratadi;
         #   2) seed `@barff/types` ni qurilgan `dist` dan import qiladi,
         #      ya'ni qurilmagan bo'lsa "module not found" bilan yiqiladi.
+        # `NEXT_PUBLIC_*` productionda majburiy (localhost'ga jim qaytmaydi);
+        # CI uchun faqat build o'tishi kerak, haqiqiy manzil emas.
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.example.invalid/api/v1
+          NEXT_PUBLIC_SITE_URL: https://example.invalid
         run: pnpm build
 
       - name: Migratsiyalar

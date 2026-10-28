@@ -20,7 +20,19 @@ export interface AdminSession {
 function baseUrl(): string {
   const url = process.env['NEXT_PUBLIC_API_BASE_URL'];
 
-  return url !== undefined && url.length > 0 ? url : 'http://localhost:3000/api/v1';
+  if (url !== undefined && url.length > 0) return url;
+
+  // PRODUCTION'DA JIM `localhost` YO'Q: qiymat qurish paytida bundle'ga yoziladi,
+  // berilmasa sayt serverda ochiladi-yu, API'ga `localhost` ga so'rov ketadi.
+  // `NODE_ENV` qurishda o'rniga qo'yiladi, shuning uchun quyidagi lokal
+  // zaxira production bundle'dan butunlay tushib ketadi (F01).
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'NEXT_PUBLIC_API_BASE_URL berilmagan (docs/DEPLOY-CPANEL.md §6, `pnpm release:cpanel`)',
+    );
+  }
+
+  return 'http://localhost:3000/api/v1';
 }
 
 /**
