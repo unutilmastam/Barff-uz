@@ -1,0 +1,588 @@
+{
+  "category": {
+    "slug": "sharbatlar",
+    "name": {
+      "uz": "Sharbatlar",
+      "ru": "Соки",
+      "en": "Juices"
+    }
+  },
+  "products": [
+    {
+      "slug": "anor-sharbati-350",
+      "sku": "BARFF-ANOR-350",
+      "name": {
+        "uz": "Anor sharbati 350 ml",
+        "ru": "Гранатовый сок 350 мл",
+        "en": "Pomegranate juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Anor",
+        "ru": "Гранат",
+        "en": "Pomegranate"
+      },
+      "variant": {
+        "sku": "BARFF-ANOR-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 10,
+      "images": [
+        {
+          "file": "anor-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Anor sharbati 350 ml — old tomoni",
+            "ru": "Гранатовый сок 350 мл — вид спереди",
+            "en": "Pomegranate juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "anor-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Anor sharbati 350 ml — orqa tomoni",
+            "ru": "Гранатовый сок 350 мл — вид сзади",
+            "en": "Pomegranate juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "anor-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Anor sharbati 350 ml — yotgan holatda",
+            "ru": "Гранатовый сок 350 мл — лёжа",
+            "en": "Pomegranate juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "olma-sharbati-350",
+      "sku": "BARFF-OLMA-350",
+      "name": {
+        "uz": "Olma sharbati 350 ml",
+        "ru": "Яблочный сок 350 мл",
+        "en": "Apple juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Olma",
+        "ru": "Яблоко",
+        "en": "Apple"
+      },
+      "variant": {
+        "sku": "BARFF-OLMA-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 20,
+      "images": [
+        {
+          "file": "olma-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Olma sharbati 350 ml — old tomoni",
+            "ru": "Яблочный сок 350 мл — вид спереди",
+            "en": "Apple juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "olma-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Olma sharbati 350 ml — orqa tomoni",
+            "ru": "Яблочный сок 350 мл — вид сзади",
+            "en": "Apple juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "olma-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Olma sharbati 350 ml — yotgan holatda",
+            "ru": "Яблочный сок 350 мл — лёжа",
+            "en": "Apple juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "olcha-sharbati-350",
+      "sku": "BARFF-OLCHA-350",
+      "name": {
+        "uz": "Olcha sharbati 350 ml",
+        "ru": "Вишнёвый сок 350 мл",
+        "en": "Cherry juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Olcha",
+        "ru": "Вишня",
+        "en": "Cherry"
+      },
+      "variant": {
+        "sku": "BARFF-OLCHA-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 30,
+      "images": [
+        {
+          "file": "olcha-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Olcha sharbati 350 ml — old tomoni",
+            "ru": "Вишнёвый сок 350 мл — вид спереди",
+            "en": "Cherry juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "olcha-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Olcha sharbati 350 ml — orqa tomoni",
+            "ru": "Вишнёвый сок 350 мл — вид сзади",
+            "en": "Cherry juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "olcha-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Olcha sharbati 350 ml — yotgan holatda",
+            "ru": "Вишнёвый сок 350 мл — лёжа",
+            "en": "Cherry juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "olcha-sharbati-1l",
+      "sku": "BARFF-OLCHA-1000",
+      "name": {
+        "uz": "Olcha sharbati 1 L",
+        "ru": "Вишнёвый сок 1 л",
+        "en": "Cherry juice 1 L"
+      },
+      "flavor": {
+        "uz": "Olcha",
+        "ru": "Вишня",
+        "en": "Cherry"
+      },
+      "variant": {
+        "sku": "BARFF-OLCHA-1000-01",
+        "volumeMl": 1000
+      },
+      "displayOrder": 40,
+      "images": [
+        {
+          "file": "olcha-sharbati-1l/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Olcha sharbati 1 L — old tomoni",
+            "ru": "Вишнёвый сок 1 л — вид спереди",
+            "en": "Cherry juice 1 L — front view"
+          }
+        },
+        {
+          "file": "olcha-sharbati-1l/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Olcha sharbati 1 L — orqa tomoni",
+            "ru": "Вишнёвый сок 1 л — вид сзади",
+            "en": "Cherry juice 1 L — back view"
+          }
+        },
+        {
+          "file": "olcha-sharbati-1l/angle.jpg",
+          "view": "angle",
+          "alt": {
+            "uz": "Olcha sharbati 1 L — yuqoridan ko'rinishi",
+            "ru": "Вишнёвый сок 1 л — вид сверху",
+            "en": "Cherry juice 1 L — view from above"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "mango-sharbati-350",
+      "sku": "BARFF-MANGO-350",
+      "name": {
+        "uz": "Mango sharbati 350 ml",
+        "ru": "Манговый сок 350 мл",
+        "en": "Mango juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Mango",
+        "ru": "Манго",
+        "en": "Mango"
+      },
+      "variant": {
+        "sku": "BARFF-MANGO-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 50,
+      "images": [
+        {
+          "file": "mango-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Mango sharbati 350 ml — old tomoni",
+            "ru": "Манговый сок 350 мл — вид спереди",
+            "en": "Mango juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "mango-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Mango sharbati 350 ml — orqa tomoni",
+            "ru": "Манговый сок 350 мл — вид сзади",
+            "en": "Mango juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "mango-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Mango sharbati 350 ml — yotgan holatda",
+            "ru": "Манговый сок 350 мл — лёжа",
+            "en": "Mango juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "mango-sharbati-1l",
+      "sku": "BARFF-MANGO-1000",
+      "name": {
+        "uz": "Mango sharbati 1 L",
+        "ru": "Манговый сок 1 л",
+        "en": "Mango juice 1 L"
+      },
+      "flavor": {
+        "uz": "Mango",
+        "ru": "Манго",
+        "en": "Mango"
+      },
+      "variant": {
+        "sku": "BARFF-MANGO-1000-01",
+        "volumeMl": 1000
+      },
+      "displayOrder": 60,
+      "images": [
+        {
+          "file": "mango-sharbati-1l/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Mango sharbati 1 L — old tomoni",
+            "ru": "Манговый сок 1 л — вид спереди",
+            "en": "Mango juice 1 L — front view"
+          }
+        },
+        {
+          "file": "mango-sharbati-1l/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Mango sharbati 1 L — orqa tomoni",
+            "ru": "Манговый сок 1 л — вид сзади",
+            "en": "Mango juice 1 L — back view"
+          }
+        },
+        {
+          "file": "mango-sharbati-1l/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Mango sharbati 1 L — yotgan holatda",
+            "ru": "Манговый сок 1 л — лёжа",
+            "en": "Mango juice 1 L — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "shaftoli-sharbati-350",
+      "sku": "BARFF-SHAFTOLI-350",
+      "name": {
+        "uz": "Shaftoli sharbati 350 ml",
+        "ru": "Персиковый сок 350 мл",
+        "en": "Peach juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Shaftoli",
+        "ru": "Персик",
+        "en": "Peach"
+      },
+      "variant": {
+        "sku": "BARFF-SHAFTOLI-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 70,
+      "images": [
+        {
+          "file": "shaftoli-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Shaftoli sharbati 350 ml — old tomoni",
+            "ru": "Персиковый сок 350 мл — вид спереди",
+            "en": "Peach juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "shaftoli-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Shaftoli sharbati 350 ml — orqa tomoni",
+            "ru": "Персиковый сок 350 мл — вид сзади",
+            "en": "Peach juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "shaftoli-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Shaftoli sharbati 350 ml — yotgan holatda",
+            "ru": "Персиковый сок 350 мл — лёжа",
+            "en": "Peach juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "apelsin-sharbati-350",
+      "sku": "BARFF-APELSIN-350",
+      "name": {
+        "uz": "Apelsin sharbati 350 ml",
+        "ru": "Апельсиновый сок 350 мл",
+        "en": "Orange juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Apelsin",
+        "ru": "Апельсин",
+        "en": "Orange"
+      },
+      "variant": {
+        "sku": "BARFF-APELSIN-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 80,
+      "images": [
+        {
+          "file": "apelsin-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Apelsin sharbati 350 ml — old tomoni",
+            "ru": "Апельсиновый сок 350 мл — вид спереди",
+            "en": "Orange juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "apelsin-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Apelsin sharbati 350 ml — orqa tomoni",
+            "ru": "Апельсиновый сок 350 мл — вид сзади",
+            "en": "Orange juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "apelsin-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Apelsin sharbati 350 ml — yotgan holatda",
+            "ru": "Апельсиновый сок 350 мл — лёжа",
+            "en": "Orange juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "qulupnay-ananas-sharbati-350",
+      "sku": "BARFF-QULUPNAY-ANANAS-350",
+      "name": {
+        "uz": "Qulupnay-ananas sharbati 350 ml",
+        "ru": "Клубнично-ананасовый сок 350 мл",
+        "en": "Strawberry-pineapple juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Qulupnay-ananas",
+        "ru": "Клубника-ананас",
+        "en": "Strawberry-pineapple"
+      },
+      "variant": {
+        "sku": "BARFF-QULUPNAY-ANANAS-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 90,
+      "images": [
+        {
+          "file": "qulupnay-ananas-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 350 ml — old tomoni",
+            "ru": "Клубнично-ананасовый сок 350 мл — вид спереди",
+            "en": "Strawberry-pineapple juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "qulupnay-ananas-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 350 ml — orqa tomoni",
+            "ru": "Клубнично-ананасовый сок 350 мл — вид сзади",
+            "en": "Strawberry-pineapple juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "qulupnay-ananas-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 350 ml — yotgan holatda",
+            "ru": "Клубнично-ананасовый сок 350 мл — лёжа",
+            "en": "Strawberry-pineapple juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "qulupnay-ananas-sharbati-1l",
+      "sku": "BARFF-QULUPNAY-ANANAS-1000",
+      "name": {
+        "uz": "Qulupnay-ananas sharbati 1 L",
+        "ru": "Клубнично-ананасовый сок 1 л",
+        "en": "Strawberry-pineapple juice 1 L"
+      },
+      "flavor": {
+        "uz": "Qulupnay-ananas",
+        "ru": "Клубника-ананас",
+        "en": "Strawberry-pineapple"
+      },
+      "variant": {
+        "sku": "BARFF-QULUPNAY-ANANAS-1000-01",
+        "volumeMl": 1000
+      },
+      "displayOrder": 100,
+      "images": [
+        {
+          "file": "qulupnay-ananas-sharbati-1l/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 1 L — old tomoni",
+            "ru": "Клубнично-ананасовый сок 1 л — вид спереди",
+            "en": "Strawberry-pineapple juice 1 L — front view"
+          }
+        },
+        {
+          "file": "qulupnay-ananas-sharbati-1l/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 1 L — orqa tomoni",
+            "ru": "Клубнично-ананасовый сок 1 л — вид сзади",
+            "en": "Strawberry-pineapple juice 1 L — back view"
+          }
+        },
+        {
+          "file": "qulupnay-ananas-sharbati-1l/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Qulupnay-ananas sharbati 1 L — yotgan holatda",
+            "ru": "Клубнично-ананасовый сок 1 л — лёжа",
+            "en": "Strawberry-pineapple juice 1 L — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "multifrukt-sharbati-350",
+      "sku": "BARFF-MULTIFRUKT-350",
+      "name": {
+        "uz": "Multifrukt sharbati 350 ml",
+        "ru": "Мультифруктовый сок 350 мл",
+        "en": "Multifruit juice 350 ml"
+      },
+      "flavor": {
+        "uz": "Multifrukt",
+        "ru": "Мультифрукт",
+        "en": "Multifruit"
+      },
+      "variant": {
+        "sku": "BARFF-MULTIFRUKT-350-01",
+        "volumeMl": 350
+      },
+      "displayOrder": 110,
+      "images": [
+        {
+          "file": "multifrukt-sharbati-350/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Multifrukt sharbati 350 ml — old tomoni",
+            "ru": "Мультифруктовый сок 350 мл — вид спереди",
+            "en": "Multifruit juice 350 ml — front view"
+          }
+        },
+        {
+          "file": "multifrukt-sharbati-350/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Multifrukt sharbati 350 ml — orqa tomoni",
+            "ru": "Мультифруктовый сок 350 мл — вид сзади",
+            "en": "Multifruit juice 350 ml — back view"
+          }
+        },
+        {
+          "file": "multifrukt-sharbati-350/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Multifrukt sharbati 350 ml — yotgan holatda",
+            "ru": "Мультифруктовый сок 350 мл — лёжа",
+            "en": "Multifruit juice 350 ml — lying down"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "multifrukt-sharbati-1l",
+      "sku": "BARFF-MULTIFRUKT-1000",
+      "name": {
+        "uz": "Multifrukt sharbati 1 L",
+        "ru": "Мультифруктовый сок 1 л",
+        "en": "Multifruit juice 1 L"
+      },
+      "flavor": {
+        "uz": "Multifrukt",
+        "ru": "Мультифрукт",
+        "en": "Multifruit"
+      },
+      "variant": {
+        "sku": "BARFF-MULTIFRUKT-1000-01",
+        "volumeMl": 1000
+      },
+      "displayOrder": 120,
+      "images": [
+        {
+          "file": "multifrukt-sharbati-1l/front.jpg",
+          "view": "front",
+          "alt": {
+            "uz": "Multifrukt sharbati 1 L — old tomoni",
+            "ru": "Мультифруктовый сок 1 л — вид спереди",
+            "en": "Multifruit juice 1 L — front view"
+          }
+        },
+        {
+          "file": "multifrukt-sharbati-1l/back.jpg",
+          "view": "back",
+          "alt": {
+            "uz": "Multifrukt sharbati 1 L — orqa tomoni",
+            "ru": "Мультифруктовый сок 1 л — вид сзади",
+            "en": "Multifruit juice 1 L — back view"
+          }
+        },
+        {
+          "file": "multifrukt-sharbati-1l/lying.jpg",
+          "view": "lying",
+          "alt": {
+            "uz": "Multifrukt sharbati 1 L — yotgan holatda",
+            "ru": "Мультифруктовый сок 1 л — лёжа",
+            "en": "Multifruit juice 1 L — lying down"
+          }
+        }
+      ]
+    }
+  ]
+}

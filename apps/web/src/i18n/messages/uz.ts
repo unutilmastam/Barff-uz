@@ -26,7 +26,7 @@ export const uz = {
     heroTitle: 'Tabiat tomchisi',
     heroSubtitle: "Zamonaviy ishlab chiqarish, qat'iy sifat nazorati.",
     heroCta: "Mahsulotlarni ko'rish",
-    heroBottleAlt: 'BARFF shishasi — vaqtinchalik maket',
+    heroBottleAlt: 'BARFF sharbat shishalari',
     heroSecondaryCta: "Hamkor bo'lish",
 
     statsEyebrow: 'Raqamlarda',
@@ -82,6 +82,7 @@ export const uz = {
     empty: "Mahsulotlar hali qo'shilmagan.",
     volume: 'Hajm',
     volumeUnit: 'ml',
+    volumeUnitLiter: 'L',
     perPack: 'Blokda',
     sku: 'Artikul',
     ingredients: 'Tarkibi',

@@ -225,6 +225,27 @@ va `SEED_ADMIN_PASSWORD` ni **vaqtincha** qo'shib, seed'ni BIR MARTA
 yurgizing, so'ng `SEED_ADMIN_PASSWORD` ni olib tashlang va parolni
 admin panelda almashtiring.
 
+### 7.1 Mahsulotlar va suratlar
+
+Haqiqiy katalog (nomlar, hajmlar, 36 ta fotosurat) alohida buyruq bilan
+yuklanadi:
+
+```bash
+cd ~/barff/api
+npm run catalog:import
+```
+
+- Surat yuklash quvuridan o'tadi (tur tekshiruvi, AVIF/WebP). Bu **bir
+  necha daqiqa** CPU oladi (bu muhitda ~7 daqiqa o'lchandi); SSH
+  seansini yopmang, kerak bo'lsa `nohup npm run catalog:import &`.
+- **Qayta yurgizish xavfsiz**: mavjud mahsulotga tegilmaydi (egasi
+  admin panelda tahrirlagan bo'lishi mumkin), rasm faqat hali rasmi
+  yo'q mahsulotga qo'shiladi.
+- Narx, tarkib, ozuqaviy qiymat va yaroqlilik muddati **kiritilmaydi** —
+  ularni BARFF admin panelda o'zi yozadi.
+- Saqlash sozlanmagan bo'lsa (`MEDIA_ROOT`, `MEDIA_PUBLIC_URL`,
+  `MEDIA_SIGNING_SECRET`) skript ishlamaydi — 6.1 bo'limiga qarang.
+
 ---
 
 ## 8. Domenlar va SSL

@@ -8,7 +8,7 @@ import { ApiImage } from '@/components/media/ApiImage';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
 import { getAllProductSlugs, getProduct } from '@/lib/content';
-import { formatMoney, text } from '@/lib/localized';
+import { formatMoney, formatVolume, text } from '@/lib/localized';
 import { buildMetadata } from '@/lib/seo';
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/structured-data';
 
@@ -131,7 +131,7 @@ export default async function ProductPage({
               {cover !== undefined ? (
                 <ApiImage
                   image={cover}
-                  alt={name}
+                  alt={text(cover.alt, locale, name)}
                   sizes="(max-width: 1024px) 90vw, 560px"
                   // Sahifaning eng katta rasmi — LCP nomzodi.
                   priority
@@ -151,7 +151,7 @@ export default async function ProductPage({
                     <MediaFrame ratio="square">
                       <ApiImage
                         image={image}
-                        alt={name}
+                        alt={text(image.alt, locale, name)}
                         sizes="120px"
                         className="h-full w-full object-cover"
                       />
@@ -191,7 +191,7 @@ export default async function ProductPage({
                       className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
                     >
                       <span className="font-medium">
-                        {variant.volumeMl} {messages.products.volumeUnit}
+                        {formatVolume(variant.volumeMl, messages.products)}
                         {variant.unitsPerPack !== null && (
                           <span className="ml-3 text-sm font-normal text-[var(--color-fg-muted)]">
                             {messages.products.perPack}: {variant.unitsPerPack}

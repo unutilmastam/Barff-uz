@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatMoney, text } from './localized';
+import { formatDate, formatMoney, formatVolume, text } from './localized';
 
 describe('text', () => {
   const value = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
@@ -44,5 +44,19 @@ describe('formatDate', () => {
 
   it('ISO sanani formatlaydi', () => {
     expect(formatDate('2026-03-15T10:00:00.000Z', 'en')).toContain('2026');
+  });
+});
+
+describe('formatVolume', () => {
+  const units = { volumeUnit: 'ml', volumeUnitLiter: 'L' };
+
+  it('1000 ml dan boshlab litrda ko‘rsatadi', () => {
+    expect(formatVolume(350, units)).toBe('350 ml');
+    expect(formatVolume(1000, units)).toBe('1 L');
+    expect(formatVolume(1500, units)).toBe('1,5 L');
+  });
+
+  it('rus tilidagi birlikni ishlatadi', () => {
+    expect(formatVolume(1000, { volumeUnit: 'мл', volumeUnitLiter: 'л' })).toBe('1 л');
   });
 });

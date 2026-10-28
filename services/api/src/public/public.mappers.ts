@@ -39,6 +39,7 @@ interface MediaRow {
   width?: number | null;
   height?: number | null;
   blurDataUrl?: string | null;
+  altText?: unknown;
   variants?: unknown;
 }
 
@@ -72,6 +73,7 @@ export function toPublicImage(
     width: media.width ?? null,
     height: media.height ?? null,
     blurDataUrl: media.blurDataUrl ?? null,
+    alt: (media.altText ?? null) as Localized | null,
     sources,
   };
 }

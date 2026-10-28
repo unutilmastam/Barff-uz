@@ -57,6 +57,7 @@ describe('tarjimalar', () => {
       'gallery.counter',
       // `ml` — o'lchov birligi qisqartmasi, o'zbekcha va inglizcha bir xil.
       'products.volumeUnit',
+      'products.volumeUnitLiter',
     ]);
 
     const uz = await getMessages('uz');

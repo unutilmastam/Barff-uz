@@ -21,7 +21,7 @@ export const ru: Messages = {
     heroTitle: 'Капля природы',
     heroSubtitle: 'Современное производство, строгий контроль качества.',
     heroCta: 'Смотреть продукцию',
-    heroBottleAlt: 'Бутылка BARFF — временный макет',
+    heroBottleAlt: 'Бутылки сока BARFF',
     heroSecondaryCta: 'Стать партнёром',
 
     statsEyebrow: 'В цифрах',
@@ -76,6 +76,7 @@ export const ru: Messages = {
     empty: 'Продукция пока не добавлена.',
     volume: 'Объём',
     volumeUnit: 'мл',
+    volumeUnitLiter: 'л',
     perPack: 'В упаковке',
     sku: 'Артикул',
     ingredients: 'Состав',

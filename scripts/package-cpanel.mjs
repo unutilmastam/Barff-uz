@@ -167,6 +167,9 @@ async function packApi() {
   await cp(join(from, 'dist'), join(target, 'dist'), { recursive: true });
   await cp(join(root, 'prisma'), join(target, 'prisma'), { recursive: true });
 
+  // Katalog (nomlar + mahsulot suratlari) `npm run catalog:import` uchun.
+  await cp(join(root, 'assets', 'product-photos'), join(target, 'catalog'), { recursive: true });
+
   for (const name of WORKSPACE_PACKAGES) {
     await packWorkspacePackage(name, target);
   }
@@ -196,6 +199,7 @@ async function packApi() {
           start: 'node dist/main.js',
           postinstall: 'prisma generate --schema prisma/schema.prisma',
           'db:deploy': 'prisma migrate deploy --schema prisma/schema.prisma',
+          'catalog:import': 'CATALOG_DIR=./catalog node dist/cli/import-catalog.js',
         },
         dependencies: deps,
         devDependencies: { prisma: pkg.devDependencies?.prisma ?? '^6.19.1' },

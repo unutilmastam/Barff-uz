@@ -2,6 +2,8 @@ import {
   productCategoryCreateSchema,
   productCategoryUpdateSchema,
   productCreateSchema,
+  productImageCreateSchema,
+  productImageUpdateSchema,
   productListQuerySchema,
   productPriceCreateSchema,
   productUpdateSchema,
@@ -21,3 +23,6 @@ export class ProductPriceCreateDto extends createZodDto(productPriceCreateSchema
 
 export class ProductCategoryCreateDto extends createZodDto(productCategoryCreateSchema) {}
 export class ProductCategoryUpdateDto extends createZodDto(productCategoryUpdateSchema) {}
+
+export class ProductImageCreateDto extends createZodDto(productImageCreateSchema) {}
+export class ProductImageUpdateDto extends createZodDto(productImageUpdateSchema) {}

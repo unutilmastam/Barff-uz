@@ -39,17 +39,35 @@ const FRUITS = [
   },
 ] as const;
 
+/**
+ * Hero suratlari — BARFF shishalarining haqiqiy fotosurati
+ * (`public/hero/`, manba: `assets/product-photos/`). Markaziy surat
+ * katta va oldinda, ikki yonidagisi biroz burilgan holda orqada.
+ */
+const HERO_BOTTLES = [
+  {
+    src: '/hero/anor.jpg',
+    main: false,
+    className: '-left-[3%] top-[10%] z-0 w-[42%] -rotate-6 aspect-[2/3]',
+  },
+  {
+    src: '/hero/olma.jpg',
+    main: false,
+    className: '-right-[3%] top-[14%] z-0 w-[42%] rotate-6 aspect-[2/3]',
+  },
+  {
+    src: '/hero/mango.jpg',
+    main: true,
+    className: 'left-1/2 top-0 z-10 w-[50%] -translate-x-1/2 aspect-[2/3]',
+  },
+] as const;
+
 export interface HeroCompositionProps {
-  /** Shisha rasmi. Berilmasa o'rindosh ramka chiziladi. */
-  bottleSrc?: string;
-  /** Shisha uchun matn — u BEZAK emas, sahifaning asosiy vizual fokusi. */
+  /** Markaziy surat uchun matn — u BEZAK emas, sahifaning asosiy vizual fokusi. */
   bottleAlt: string;
 }
 
-export function HeroComposition({
-  bottleSrc = '/products/placeholder-bottle-01.svg',
-  bottleAlt,
-}: HeroCompositionProps) {
+export function HeroComposition({ bottleAlt }: HeroCompositionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const enabled = useMotionEnabled();
 
@@ -197,20 +215,29 @@ export function HeroComposition({
       <div data-hero-bottle-enter>
         <div data-hero-bottle-float>
           <div data-hero-bottle-tilt className="[perspective:1200px] [transform-style:preserve-3d]">
-            <Image
-              src={bottleSrc}
-              alt={bottleAlt}
-              width={400}
-              height={720}
-              priority
-              sizes="(max-width: 768px) 60vw, 30vw"
-              /*
-                Desktopda o'lcham BALANDLIK bo'yicha cheklanadi:
-                kenglik bo'yicha berilsa, 400:720 nisbati hero'ni
-                ekran balandligidan oshirib yuboradi.
-              */
-              className="h-auto w-[min(52vw,13rem)] object-contain md:h-[min(58vh,28rem)] md:w-auto"
-            />
+            {/*
+              Uchta HAQIQIY mahsulot surati. O'lcham BALANDLIK bo'yicha
+              cheklanadi: kenglik bo'yicha berilsa, hero ekran balandligidan
+              oshib ketadi. Chetdagi ikkita surat — bezak (alt=""), asosiy
+              surat esa sahifaning vizual fokusi va matni bor.
+            */}
+            <div className="relative mx-auto h-[min(52vh,26rem)] w-[min(78vw,26rem)] md:h-[min(58vh,30rem)] md:w-[min(34vw,28rem)]">
+              {HERO_BOTTLES.map((bottle) => (
+                <div
+                  key={bottle.src}
+                  className={`absolute overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-[var(--color-ink-800)] ${bottle.className}`}
+                >
+                  <Image
+                    src={bottle.src}
+                    alt={bottle.main ? bottleAlt : ''}
+                    fill
+                    priority={bottle.main}
+                    sizes="(max-width: 768px) 40vw, 18vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
