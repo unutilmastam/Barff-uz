@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BillingModule } from '../billing/billing.module';
 import { CartModule } from '../cart/cart.module';
 import { DealersModule } from '../dealers/dealers.module';
 import { DeliveryModule } from '../delivery/delivery.module';
@@ -12,7 +13,7 @@ import { OrdersService } from './orders.service';
 @Module({
   // `CartService` — buyurtma savatdan quriladi va shu yerda
   // bo'shatiladi; `DealersService` — `dealerId` sessiyadan.
-  imports: [CartModule, DealersModule, WarehouseModule, DeliveryModule],
+  imports: [CartModule, DealersModule, WarehouseModule, DeliveryModule, BillingModule],
   controllers: [DealerOrdersController, AdminOrdersController],
   providers: [OrdersService, OrderNumberService, AdminOrdersService],
   exports: [OrdersService],

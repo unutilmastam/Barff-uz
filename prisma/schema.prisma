@@ -62,13 +62,14 @@ model User {
   refreshFamilies RefreshTokenFamily[] @relation("UserRefreshFamilies")
 
   /// Diler akkaunti (faqat DEALER rolidagi foydalanuvchida bo'ladi).
-  dealer          Dealer?              @relation("DealerAccount")
-  orderStatuses   OrderStatusHistory[] @relation("OrderStatusActor")
-  reviewedDealers Dealer[]             @relation("DealerReviewer")
-  dealerEvents    DealerEvent[]        @relation("DealerEventActor")
-  stockMovements  StockMovement[]      @relation("StockMovementActor")
-  driver          Driver?              @relation("DriverUser")
-  deliveryEvents  DeliveryEvent[]      @relation("DeliveryEventActor")
+  dealer           Dealer?              @relation("DealerAccount")
+  orderStatuses    OrderStatusHistory[] @relation("OrderStatusActor")
+  reviewedDealers  Dealer[]             @relation("DealerReviewer")
+  dealerEvents     DealerEvent[]        @relation("DealerEventActor")
+  stockMovements   StockMovement[]      @relation("StockMovementActor")
+  recordedPayments Payment[]            @relation("PaymentRecorder")
+  driver           Driver?              @relation("DriverUser")
+  deliveryEvents   DeliveryEvent[]      @relation("DeliveryEventActor")
 
   @@index([isActive])
   @@index([createdAt])
@@ -946,6 +947,8 @@ model Dealer {
   priceRules PriceRule[]
   cart       Cart?
   orders     Order[]
+  invoices   Invoice[]
+  payments   Payment[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1250,6 +1253,7 @@ model Order {
   history      OrderStatusHistory[]
   reservations StockReservation[]
   delivery     Delivery?
+  invoice      Invoice?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1856,4 +1860,203 @@ model SequenceCounter {
 
   @@id([scope, year])
   @@map("sequence_counters")
+}
+
+// =============================================================================
+// PUL: HISOB-FAKTURA, TO'LOV, BALANS (CLAUDE.md §10, S36)
+// =============================================================================
+
+/// Hisob-faktura holati.
+///
+/// `DRAFT` — yaratildi, lekin hali BERILMAGAN: o'zgartirish mumkin.
+/// `ISSUED` dan keyin summalar MUZLAYDI — hujjat dilerga berilgan
+/// va uni jimgina o'zgartirish buxgalteriyani buzadi. Tuzatish
+/// yo'li bitta: bekor qilish va yangisini berish.
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+/// To'lov usuli. `OTHER` — hisobot uchun emas, yozuvni yo'qotmaslik uchun.
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  OFFSET
+  OTHER
+}
+
+/// Hisob-faktura (CLAUDE.md §10).
+///
+/// BITTA BUYURTMAGA BITTA HISOB-FAKTURA (`orderId` yagona) —
+/// yetkazma bilan bir xil qoida. Ikkitasi bo'lsa, diler bir
+/// ishni ikki marta to'lashi mumkin edi.
+///
+/// SUMMALAR BUYURTMADAN NUSXA OLINADI, havola bilan emas.
+/// Buyurtma narxi keyin o'zgarsa (tuzatish, qayta hisoblash),
+/// BERILGAN hisob-faktura o'zgarmasligi kerak: u dilerdagi
+/// qog'oz bilan mos kelishi shart.
+///
+/// SOLIQ HOZIRCHA NOL. QQS stavkasi va hisob-faktura shakli
+/// BARFF dan kelmagan (`docs/OPEN-QUESTIONS.md` Q17), shuning
+/// uchun `taxAmount` maydon sifatida BOR, lekin har doim `0` va
+/// hech qayerda hisoblanmaydi. Stavkani o'ylab topish — soliq
+/// hujjatini soxtalashtirish.
+model Invoice {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `INV-2026-000001`.
+  number String @unique
+
+  dealerId String @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Restrict)
+
+  /// Qaysi buyurtma uchun. `Restrict`: hisob-fakturasi bor
+  /// buyurtma o'chirilmaydi — moliyaviy iz yo'qolardi.
+  orderId String @unique @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  status InvoiceStatus @default(DRAFT)
+
+  /// Pozitsiyalar yig'indisi (tiyin).
+  subtotal  Int
+  /// Umumiy chegirma (tiyin).
+  discount  Int    @default(0)
+  /// Soliq (tiyin). HOZIRCHA HAR DOIM 0 — Q17.
+  taxAmount Int    @default(0)
+  /// To'lanishi kerak summa (tiyin).
+  total     Int
+  currency  String @default("UZS")
+
+  /// Berilgan sana. `null` — hali `DRAFT`.
+  issuedAt DateTime?
+  /// To'lov muddati.
+  dueAt    DateTime?
+
+  /// Bekor qilish sababi — dilerga ko'rsatiladi.
+  cancelReason String?
+
+  /// Ichki izoh — DILERGA KO'RSATILMAYDI.
+  internalNote String?
+
+  items       InvoiceItem[]
+  allocations PaymentAllocation[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([dealerId, createdAt])
+  @@index([status, createdAt])
+  @@index([issuedAt])
+  @@map("invoices")
+}
+
+/// Hisob-faktura pozitsiyasi — BUYURTMADAN NUSXA.
+///
+/// Mahsulot nomi va SKU ham nusxa olinadi: mahsulot keyin
+/// o'chirilsa yoki nomi o'zgarsa, berilgan hujjat o'zgarmasligi
+/// kerak.
+model InvoiceItem {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  invoiceId String  @db.Uuid
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  sku String
+  /// Buyurtmadagi bilan BIR XIL shakl: lokalizatsiyalangan `Json`.
+  /// Bitta tilga siqib qo'yilsa, hujjat boshqa tilda ochilganda
+  /// nomi buyurtmadagidan farq qilardi.
+  productName Json
+  volumeMl    Int?
+
+  quantity  Int
+  unitPrice Int
+  total     Int
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+/// To'lov (CLAUDE.md §10).
+///
+/// TO'LOV HISOB-FAKTURAGA EMAS, DILERGA tushadi. Sabab amaliy:
+/// diler ko'pincha bitta pul o'tkazmasi bilan bir nechta hisob-
+/// fakturani yopadi, yoki oldindan to'laydi. Qaysi hisob-faktura
+/// yopilgani ALOHIDA yoziladi (`PaymentAllocation`).
+///
+/// Shuning uchun taqsimlanmagan to'lov ham to'g'ri holat: u
+/// dilerning foydasiga balansda turadi.
+model Payment {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  /// `PAY-2026-000001`.
+  number String @unique
+
+  dealerId String @db.Uuid
+  dealer   Dealer @relation(fields: [dealerId], references: [id], onDelete: Restrict)
+
+  /// Tiyinda, MUSBAT. Qaytarish alohida yozuv emas — hozircha
+  /// qo'llab-quvvatlanmaydi va uni jimgina manfiy son bilan
+  /// qilish balansni tushunib bo'lmas holga keltirardi.
+  amount   Int
+  currency String @default("UZS")
+
+  method PaymentMethod
+
+  /// Bank o'tkazmasi raqami, kvitansiya raqami va hokazo.
+  reference String?
+
+  /// Pul QACHON kelgani — yozuv qachon kiritilgani emas.
+  receivedAt DateTime
+
+  note String?
+
+  /// Kim kiritdi. `SetNull`: xodim o'chirilsa to'lov qolaveradi.
+  recordedById String? @db.Uuid
+  recordedBy   User?   @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  allocations PaymentAllocation[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([dealerId, receivedAt])
+  @@index([receivedAt])
+  @@map("payments")
+}
+
+/// To'lovning hisob-fakturaga TAQSIMLANISHI.
+///
+/// Balans SHU JADVALDAN kelib chiqadi va hech qayerda
+/// saqlanmaydi (S36 DoD: "balance is derived and reconcilable").
+/// Saqlangan balans jurnaldan ajralib ketishi mumkin va u
+/// ajralganda qaysi biri to'g'ri ekani ko'rinmaydi — omborda ham
+/// shu sabab qoldiq harakat jurnalining PROYEKSIYASI qilingan
+/// (S30).
+model PaymentAllocation {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  paymentId String  @db.Uuid
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  invoiceId String  @db.Uuid
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  /// Tiyinda, MUSBAT.
+  amount Int
+
+  createdAt DateTime @default(now())
+
+  /// Bitta to'lovdan bitta hisob-fakturaga BITTA yozuv: aks holda
+  /// bir xil taqsimot ikki marta kiritilib, balans buzilardi.
+  @@unique([paymentId, invoiceId])
+  @@index([invoiceId])
+  @@map("payment_allocations")
 }

@@ -174,6 +174,58 @@ Buni toza `HEAD` da ham o'lchadim — o'sha ikki sinov o'sha yerda
 ham yiqiladi. Ya'ni "mening o'zgarishim buzdi" degan xulosa
 noto'g'ri bo'lardi. Qolgan sinovlar lokalda ham yashil.
 
+**1g. KONTEYNER QAYTA ISHGA TUSHSA, POSTGRES VA REDIS O'CHIQ
+QOLADI.**
+
+Ikkalasi ham avtomatik ko'tarilmaydi va nosozlik chalg'ituvchi
+ko'rinadi:
+
+- Postgres o'chiq → `prisma migrate` `P1001` beradi;
+- Redis o'chiq → `public-cache.e2e-spec.ts` dagi BITTA sinov
+  yiqiladi (`expected 1 to be 2`) va u "kesh buzilgan" degan
+  xulosaga olib boradi.
+
+Ikkinchisiga aldandim: toza `HEAD` da ham yiqilishini ko'rib
+"mening o'zgarishim emas" dedim va to'g'ri edim, lekin sabab
+Redis ekanini keyinroq topdim.
+
+```bash
+service postgresql start
+redis-server --daemonize yes
+```
+
+Tekshirish:
+
+```bash
+pg_isready -h 127.0.0.1 -p 5432 && redis-cli ping
+```
+
+**1h. YUKLAB OLISH TUGMASINI HAQIQATAN BOSING.**
+
+S36 da CSV faqat API orqali (`page.request.get`) olingan edi. Tugmaning
+o'zi tekshirilmagan edi va u brauzerda `404` bergan: `downloadFile`
+o'z bazaviy manzilini qo'yib olgan (`?? ''`), boshqa hamma so'rov esa
+`apiFetch` ning `baseUrl()` dan foydalanadi. S37 da topildi.
+
+Umumiy qoida: **API dan olingan fayl tugma ishlaydi degani EMAS.**
+Tugma boshqa yo'ldan boradi (brauzer `fetch`, cookie, CORS,
+bazaviy manzil). `page.waitForEvent('download')` bilan tugmani
+bosing.
+
+**1i. `openpyxl` — XLSX uchun HAQIQIY o'quvchi.**
+
+`reports-check.mjs` faylni `openpyxl` bilan ochadi (`pip install
+openpyxl`). Sinovdagi zip o'quvchini men yozganman va u yozuvchi
+bilan bir xil xatoga ega bo'lishi mumkin; `openpyxl` mustaqil.
+
+**1j. `pkill -f next-server` O'Z SHELLINGIZNI HAM O'LDIRADI.**
+
+Buyruq matnida `next-server` so'zi bor va `pkill -f` butun buyruq
+qatorini qidiradi — shu jumladan o'zingiz yurgizayotgan shellni.
+Natija: chiqish kodi `144`, keyingi buyruqlar bajarilmaydi. Server
+va build jarayonini ALOHIDA buyruqlarda bajaring yoki PID bo'yicha
+o'ldiring.
+
 **2. `POST /leads` soatiga 5 ta.** Bu spamga qarshi TO'G'RI cheklov
 (S14), lekin sinovni takroran yurgizganda `429` beradi. API jarayonini
 qayta ishga tushirish hisobni nolga qaytaradi — cheklov instansiya
@@ -270,25 +322,28 @@ Xato bo'lsa: `pnpm format` (yoki `npx prettier --write .`).
 
 ## Skriptlar
 
-| Skript                  | Nimani o'lchaydi                                                                             |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run e2e`           | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
-| `npm run e2e:p2`        | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
-| `npm run load:p2`       | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
-| `npm run cleanup:p2`    | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
-| `npm run warehouse`     | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
-| `npm run picking`       | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
-| `npm run driver`        | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
-| `npm run seed:staff`    | Faza 3 uchun ombor, logist, haydovchi va tasdiqlangan diler akkauntlari                      |
-| `npm run e2e:p3`        | Faza 3 zanjiri: buyurtma → zaxira → yig‘ish → qadoqlash → biriktirish → topshirish           |
-| `npm run reconcile:p3`  | Yarashtirish: qoldiq ↔ harakat jurnali ↔ zaxira ↔ buyurtma ↔ yetkazma                        |
-| `npm run logistics`     | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati                  |
-| `npm run driver:shots`  | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga)                                     |
-| `npm run perf`          | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi                           |
-| `npm run a11y`          | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
-| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang`                     |
-| `npm run theme`         | Ko'rinish almashtirgichi: tanlov, eslab qolish, FOUC, xotira bloklangan holat                |
-| `npm run all`           | Hammasi ketma-ket                                                                            |
+| Skript                 | Nimani o'lchaydi                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `npm run e2e`          | Uchta kritik oqim (`CLAUDE.md` §24): B2B ariza, admin kirishi, admin tahriri saytda          |
+| `npm run e2e:p2`       | Faza 2 zanjiri: ariza → tasdiq → kirish → manzil → savat → buyurtma → admin tasdig'i         |
+| `npm run load:p2`      | Katalog yuki, BIR VAQTDA berilgan buyurtmalar noyob raqam olishi, takroriy yuborish          |
+| `npm run cleanup:p2`   | Faza 2 sinov dilerlari, akkauntlari va buyurtmalarini o'chiradi                              |
+| `npm run warehouse`    | Ombor ekranlari: harakat yozish, sababsiz tuzatishning bloklanishi, jurnalning o'zgarmasligi |
+| `npm run picking`      | Yig'ish navbati va varaqasi; qadoqlashda qoldiqning RAQAM bilan kamayishi                    |
+| `npm run driver`       | Haydovchi PWA: PWA fayllari, 44px tugmalar, OFLAYN navbat va "aynan bir marta"               |
+| `npm run seed:staff`   | Faza 3 uchun ombor, logist, haydovchi va tasdiqlangan diler akkauntlari                      |
+| `npm run e2e:p3`       | Faza 3 zanjiri: buyurtma → zaxira → yig‘ish → qadoqlash → biriktirish → topshirish           |
+| `npm run reconcile:p3` | Yarashtirish: qoldiq ↔ harakat jurnali ↔ zaxira ↔ buyurtma ↔ yetkazma                        |
+
+| `npm run reports` | Hisobotlar: filtrlar hisobotga qarab, XLSX'ni HAQIQIY o‘quvchi (`openpyxl`) bilan ochish, yuklab olish tugmasi |
+| `npm run billing` | Moliya: hisob-faktura berish, to‘lov, balans raqami, CSV, diler ko‘rinishi |
+| `npm run logistics` | Admin logistika: taxta, tafsilot, park; mashina qo‘shish va nomzod ro‘yxati |
+| `npm run driver:shots` | Haydovchi PWA ekranlarining suratlari (`OUT` katalogiga) |
+| `npm run perf` | LCP / CLS / FCP / TTFB, bayt byudjeti, 3D va GSAP kechiktirilganmi |
+| `npm run a11y` | axe-core WCAG 2.1 A+AA, 15 marshrut × 2 o'lcham × **2 ko'rinish**, gorizontal skroll, `<h1>` |
+| `npm run a11y:keyboard` | Klaviatura bilan yurish, fokus ko'rinishi va tartibi, `alt`, `html lang` |
+| `npm run theme` | Ko'rinish almashtirgichi: tanlov, eslab qolish, FOUC, xotira bloklangan holat |
+| `npm run all` | Hammasi ketma-ket |
 
 `npm run a11y -- <katalog>` ekran nusxalarini ham saqlaydi.
 

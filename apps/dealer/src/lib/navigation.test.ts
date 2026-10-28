@@ -46,13 +46,15 @@ describe('diler navigatsiyasi', () => {
       group.items.filter((item) => item.ready).map((item) => item.href),
     );
 
-    // S24 shell, S25 katalog va savat, S27 buyurtmalar.
+    // S24 shell, S25 katalog va savat, S27 buyurtmalar, S36 moliya.
     expect(ready).toEqual([
       '/',
       '/catalog',
       '/cart',
       '/orders',
       '/addresses',
+      '/invoices',
+      '/balance',
       '/profile',
       '/support',
     ]);

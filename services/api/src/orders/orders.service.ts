@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, type OrderStatus } from '@barff/db';
-import { canTransitionOrder } from '@barff/types';
+import { canTransitionOrder, creditAvailable, exceedsCreditLimit } from '@barff/types';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { type RequestContext } from '../auth/auth.service';
@@ -14,9 +14,21 @@ import { CartService } from '../cart/cart.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PaymentsService } from '../billing/payments.service';
 import { DeliveryService } from '../delivery/delivery.service';
 import { ReservationsService } from '../warehouse/reservations.service';
 import { OrderNumberService } from './order-number.service';
+
+/**
+ * Tiyindagi summani ko'rsatish uchun.
+ *
+ * `@barff/utils` dagi `formatMoney` MIJOZ uchun; bu yerda
+ * XATO MATNI quriladi va u xodimga ham, dilerga ham bir xil
+ * ko'rinishi kerak.
+ */
+function formatMinor(minor: number): string {
+  return `${(minor / 100).toLocaleString('uz-UZ', { maximumFractionDigits: 2 })} so'm`;
+}
 
 export interface SubmitOrderInput {
   addressId: string;
@@ -78,7 +90,16 @@ export class OrdersService {
     private readonly notifications: NotificationsService,
     private readonly reservations: ReservationsService,
     private readonly delivery: DeliveryService,
+    private readonly billing: PaymentsService,
   ) {}
+
+  /** Dilerning shu kalit bilan yaratilgan buyurtmasi (takror aniqlash uchun). */
+  private findByKey(dealerId: string, idempotencyKey: string) {
+    return this.prisma.order.findFirst({
+      where: { dealerId, idempotencyKey },
+      select: ORDER_SELECT,
+    });
+  }
 
   // ===========================================================================
   // YUBORISH
@@ -99,10 +120,7 @@ export class OrdersService {
       — mijoz uchun bu "yuborildi" bilan bir xil ko'rinadi.
     */
     if (input.idempotencyKey !== undefined) {
-      const existing = await this.prisma.order.findFirst({
-        where: { dealerId, idempotencyKey: input.idempotencyKey },
-        select: ORDER_SELECT,
-      });
+      const existing = await this.findByKey(dealerId, input.idempotencyKey);
 
       if (existing !== null) {
         this.logger.log(`Takroriy yuborish e'tiborsiz qoldirildi: ${existing.number}`);
@@ -114,6 +132,26 @@ export class OrdersService {
     const cart = await this.cart.view(dealerId);
 
     if (cart.lines.length === 0) {
+      /*
+        BO'SH SAVAT — poyganing ikkinchi yuzi.
+
+        Ikki so'rov bir vaqtda kelsa, g'olib buyurtmani yaratib savatni
+        BO'SHATADI; yutqazgan so'rov esa takror tekshiruvdan keyin, lekin
+        savatni o'qishdan OLDIN yoki keyin kelib qolishi mumkin va bo'sh
+        savat ko'radi. Kalit berilgan bo'lsa, g'olib buyurtma shu paytga
+        kelib ko'rinadi — uni qaytaramiz. Aks holda diler 201 o'rniga 400
+        olardi va buyurtma yaratilganini bilmay QAYTA yuborardi.
+      */
+      if (input.idempotencyKey !== undefined) {
+        const winner = await this.findByKey(dealerId, input.idempotencyKey);
+
+        if (winner !== null) {
+          this.logger.log(`Poyga (bo'sh savat): mavjud buyurtma qaytarildi ${winner.number}`);
+
+          return { ...winner, duplicate: true };
+        }
+      }
+
       throw new BadRequestException({ message: "Savat bo'sh", code: 'CART_EMPTY' });
     }
 
@@ -149,6 +187,43 @@ export class OrdersService {
       (sum, line) => sum + (line.basePrice - line.unitPrice) * line.quantity,
       0,
     );
+
+    /*
+      KREDIT LIMITI — BUYURTMA YARATILISHIDAN OLDIN.
+
+      Tekshiruv yaratilgandan KEYIN bo'lsa, limitdan oshgan
+      buyurtma bazaga tushib, keyin bekor qilinishi kerak
+      bo'lardi — va bekor qilish yiqilsa, u qolib ketardi.
+
+      QAROR: BLOKLANADI, belgilanmaydi (`docs/BILLING-POLICY.md`
+      §4). Sabab: "belgilangan" buyurtma baribir kimningdir
+      qo'lda ko'rib chiqishini talab qiladi, ya'ni ish
+      kamaymaydi — lekin tovar zaxiraga olinib bo'lgan bo'lardi.
+
+      LIMIT SOZLANMAGAN BO'LSA TEKSHIRILMAYDI (`null`). Haqiqiy
+      siyosat BARFF dan kelmagan (Q14, Q17) va uni o'ylab topish
+      bugungi hamma dilerni bloklab qo'yardi.
+    */
+    const dealerCredit = await this.prisma.dealer.findUnique({
+      where: { id: dealerId },
+      select: { creditLimit: true },
+    });
+
+    if (dealerCredit?.creditLimit != null) {
+      const balance = await this.billing.balance(dealerId);
+
+      if (exceedsCreditLimit(dealerCredit.creditLimit, balance.outstanding, subtotal - discount)) {
+        const available = creditAvailable(dealerCredit.creditLimit, balance.outstanding) ?? 0;
+
+        throw new BadRequestException({
+          message:
+            `Kredit limiti yetmaydi. Limit ${formatMinor(dealerCredit.creditLimit)}, ` +
+            `joriy qarz ${formatMinor(balance.outstanding)}, ` +
+            `qolgan ${formatMinor(available)}, buyurtma ${formatMinor(subtotal - discount)}.`,
+          code: 'CREDIT_LIMIT_EXCEEDED',
+        });
+      }
+    }
 
     /*
       POYGA HOLATI — va u O'LCHAB topildi.
@@ -230,10 +305,7 @@ export class OrdersService {
 
         if (!isDuplicate || key === undefined) throw error;
 
-        const existing = await this.prisma.order.findFirst({
-          where: { dealerId, idempotencyKey: key },
-          select: ORDER_SELECT,
-        });
+        const existing = await this.findByKey(dealerId, key);
 
         /* c8 ignore next -- P2002 aynan shu indeksdan keladi */
         if (existing === null) throw error;

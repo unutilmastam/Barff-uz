@@ -49,8 +49,8 @@ const GROUPS: DealerNavGroup[] = [
   {
     label: 'Moliya',
     items: [
-      { href: '/invoices', label: 'Hisob-fakturalar', ready: false },
-      { href: '/balance', label: 'Balans va to‘lovlar', ready: false },
+      { href: '/invoices', label: 'Hisob-fakturalar', ready: true },
+      { href: '/balance', label: 'Balans va to‘lovlar', ready: true },
     ],
   },
   {

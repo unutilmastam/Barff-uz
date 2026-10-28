@@ -112,8 +112,8 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S35 Phase 3 QA — **PHASE 3 GATE**
 
 **Phase 4**
-- [ ] S36 Invoices + payments + balances
-- [ ] S37 Reports + exports
+- [x] S36 Invoices + payments + balances
+- [x] S37 Reports + exports
 - [ ] S38 Audit log + viewer
 - [ ] S39 Phase 4 QA — **PHASE 4 GATE**
 
