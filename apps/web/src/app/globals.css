@@ -218,3 +218,19 @@
     animation: barff-float 6.5s ease-in-out infinite;
   }
 }
+
+/* Bosh sahifa banneri: juda sekin "nafas olish" — bezak, kontentga ta'sir qilmaydi. */
+@keyframes barff-hero-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.045);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .barff-hero-drift {
+    animation: barff-hero-drift 18s ease-in-out infinite alternate;
+  }
+}

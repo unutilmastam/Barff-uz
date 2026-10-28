@@ -1,14 +1,12 @@
 import Link from 'next/link';
-import { type Locale, type PublicHomepageSection, type PublicProduct } from '@barff/types';
+import { type Locale, type PublicHomepageSection } from '@barff/types';
 import { Button } from '@barff/ui';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
-import { stageItems } from '@/lib/stage';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
-import { BottleStage3D } from '@/motion/BottleStage3D';
-import { HeroComposition } from '@/motion/HeroComposition';
+import { HeroBanner } from '@/components/home/HeroBanner';
 import { HeroField } from '@/motion/HeroField';
 import { Magnetic } from '@/motion/Magnetic';
 import { TextReveal } from '@/motion/TextReveal';
@@ -16,69 +14,77 @@ import { TextReveal } from '@/motion/TextReveal';
 /**
  * Bosh ekran.
  *
- * LCP elementi — SARLAVHA, effekt emas. Shuning uchun matn serverda
- * chiziladi va hech narsani kutmaydi; kompozitsiya esa yonida,
- * alohida ustunda turadi.
+ * LCP elementi — SARLAVHA va banner, effekt emas. Matn serverda
+ * chiziladi va hech narsani kutmaydi.
  *
- * Tartib 2026-08-26 qurilishidan: chapda yorliq → sarlavha → matn →
- * CTA, o'ngda shisha kompozitsiyasi. Sarlavha `TextReveal` bilan
- * qatorma-qator ko'tariladi, lekin harakat o'chiq bo'lsa ham u
- * JOYIDA turadi.
+ * Banner (B01) — BARFF taqdim etgan keng rasm: chapda bo'sh qorong'i
+ * joy, o'ngda shishalar. Shuning uchun matn chapga qo'yiladi. Rasm
+ * har doim QORONG'I, shuning uchun bo'lim mavzudan qat'i nazar
+ * `color-scheme: dark` bilan chiziladi — matn ranglari tokenlardan
+ * keladi va ikkala mavzuda ham bir xil o'qiladi (§16).
+ *
+ * CMS'da `hero` bo'limiga rasm biriktirilsa, o'sha rasm ishlatiladi;
+ * rasm bo'lmasa — repodagi banner. 3D shisha karuseli hero ostida
+ * alohida lavhada (`ProductStageSection`).
  */
 export function HeroSection({
   locale,
   messages,
   section,
-  products,
 }: {
   locale: Locale;
   messages: Messages;
   section: PublicHomepageSection | undefined;
-  /** Sahna uchun mahsulotlar; `null` — API javob bermadi. */
-  products: PublicProduct[] | null;
 }) {
-  // Kamida 3 ta shisha bo'lsa 3D sahna, aks holda oddiy kompozitsiya.
-  const stage = products === null ? [] : stageItems(products, locale);
   const title = text(section?.heading, locale, messages.home.heroTitle);
   const subtitle = text(section?.subheading, locale, messages.home.heroSubtitle);
   const ctaLabel = text(section?.ctaLabel, locale, messages.home.heroCta);
   const ctaHref = section?.ctaHref ?? `/${locale}/products`;
 
   return (
-    <section className="relative overflow-hidden border-b border-[var(--color-line)]">
-      {/*
-        WebGL zarracha maydoni — KONTENT ORTIDA va butunlay bezak.
-        `three` dinamik yuklanadi va faqat kuchli, keng ekranli,
-        WebGL'li qurilmada ishga tushadi; qolgan hamma joyda hero
-        tekis kompozitsiya bilan to'liq ishlaydi.
-      */}
-      <HeroField />
-      {section?.image != null && (
-        <div aria-hidden className="absolute inset-0">
+    <section
+      style={{ colorScheme: 'dark' }}
+      className="relative overflow-hidden border-b border-[var(--color-line)] bg-[var(--color-ink-900)] text-[var(--color-fg)]"
+    >
+      <div className="relative aspect-[808/704] w-full md:absolute md:inset-0 md:aspect-auto">
+        {section?.image != null ? (
           <ApiImage
             image={section.image}
-            alt=""
+            alt={messages.home.heroBottleAlt}
             sizes="100vw"
             priority
-            className="h-full w-full object-cover opacity-35"
+            className="h-full w-full object-cover object-[78%_center]"
           />
-          {/* Matn ustidagi kontrast fon rasmiga BOG'LIQ bo'lmasligi uchun. */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-ink-900)_15%,color-mix(in_oklab,var(--color-ink-900)_60%,transparent))]" />
-        </div>
-      )}
+        ) : (
+          <HeroBanner alt={messages.home.heroBottleAlt} />
+        )}
+
+        {/*
+          Matn ustidagi kontrast rasmga BOG'LIQ bo'lmasligi uchun: desktopda
+          chapdan, mobilda pastdan fon rangiga o'tadi.
+        */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-ink-900)_2%,transparent_55%)] md:bg-[linear-gradient(to_right,var(--color-ink-900)_6%,color-mix(in_oklab,var(--color-ink-900)_55%,transparent)_34%,transparent_62%)]"
+        />
+      </div>
+
+      {/* Banner ustidagi ambient zarrachalar: faqat kuchli keng ekranda, qolgan joyda banner o'zi yetarli. */}
+      <HeroField />
 
       <Container
         as="div"
-        // `minmax(0, 1fr)`: ustun ichidagi (masalan, uzun shisha nomi) kontent
-        // uni kengaytirib yubormasin — aks holda nom almashganda sarlavha
-        // qayta joylashadi (S-D01 da mobilda CLS 0,21 berdi).
-        className="relative grid min-h-[86vh] grid-cols-[minmax(0,1fr)] items-center gap-10 py-16 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-12"
+        className="relative -mt-14 py-10 md:mt-0 md:flex md:min-h-[86vh] md:items-center md:py-20"
       >
-        <div>
+        <div className="md:max-w-[min(36rem,50%)]">
           <p className="eyebrow text-[var(--color-fg-subtle)]">BARFF</p>
 
           {/* Sahifada bitta `<h1>` — ekran o'quvchida tuzilma to'g'ri o'qiladi. */}
-          <TextReveal as="h1" immediate className="display-1 mt-4 block">
+          <TextReveal
+            as="h1"
+            immediate
+            className="display-1 mt-4 block md:text-[length:clamp(3rem,6.2vw,6.25rem)]"
+          >
             {title}
           </TextReveal>
 
@@ -100,21 +106,6 @@ export function HeroSection({
             )}
           </div>
         </div>
-
-        {stage.length >= 3 ? (
-          <BottleStage3D
-            items={stage}
-            labels={{
-              region: messages.home.stageRegion,
-              prev: messages.home.stagePrev,
-              next: messages.home.stageNext,
-              open: messages.home.stageOpen,
-              counter: messages.home.stageCounter,
-            }}
-          />
-        ) : (
-          <HeroComposition bottleAlt={messages.home.heroBottleAlt} />
-        )}
       </Container>
     </section>
   );

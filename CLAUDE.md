@@ -315,6 +315,14 @@ shape, label and colours are never edited; the product colour is
 decoration only (§16); everything works without motion and without
 JavaScript; images are real `<img>` with alt text.
 
+**Hero banner (client-supplied, 2026-10-28).** The home hero is BARFF's own
+wide banner (`assets/hero/banner-source.jpg` -> `apps/web/public/hero/banner*`
+via `scripts/make-hero-banner.mjs`; a CMS `hero` image overrides it). The
+image is always dark, so the hero band is rendered with `color-scheme: dark`
+in BOTH themes; text colours still come from tokens. The 3D bottle carousel
+(`BottleStage3D`) sits directly below it (`ProductStageSection`), the WebGL
+particles (`HeroField`) stay on top as ambient depth. The banner is never edited.
+
 The WebGL layer runs only when motion is enabled, WebGL is present and
 the viewport is wide; `three` is dynamically imported. Everywhere else
 the hero is complete without it.

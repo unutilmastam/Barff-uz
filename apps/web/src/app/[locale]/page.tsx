@@ -4,6 +4,7 @@ import { FactorySection } from '@/components/home/FactorySection';
 import { HeroSection } from '@/components/home/HeroSection';
 import { MarqueeSection } from '@/components/home/MarqueeSection';
 import { NewsSection } from '@/components/home/NewsSection';
+import { ProductStageSection } from '@/components/home/ProductStageSection';
 import { PartnerCta } from '@/components/home/PartnerCta';
 import { ProcessSection } from '@/components/home/ProcessSection';
 import { ProductsSection } from '@/components/home/ProductsSection';
@@ -83,10 +84,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Kompaniya ma'lumoti — faqat bosh sahifada, bir marta. */}
       <JsonLd data={organizationJsonLd(locale, messages.meta.description)} />
 
-      <HeroSection
+      <HeroSection locale={locale} messages={messages} section={section('hero')} />
+
+      <ProductStageSection
         locale={locale}
         messages={messages}
-        section={section('hero')}
         products={products === null ? null : products.items}
       />
 
