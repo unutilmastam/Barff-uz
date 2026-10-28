@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { AppConfig } from './app.config';
@@ -13,7 +14,10 @@ import { localEnvFilePath } from './repo-root';
       // Yo'l fayl joylashuvidan hisoblanadi, CWD'dan emas: aks holda
       // ilova qaysi katalogdan ishga tushirilganiga qarab boshqa fayl
       // yuklanardi (yoki umuman yuklanmasdi).
-      envFilePath: localEnvFilePath(),
+      // Serverda (cPanel/VPS) `npm run setup` ilova ildiziga `.env` yozadi:
+      // `dist/config/` dan ikki pog'ona yuqori. Haqiqiy muhit o'zgaruvchilari
+      // fayldan USTUN turadi. Lokal ishlab chiqishda bu yo'l mavjud emas.
+      envFilePath: [...localEnvFilePath(), join(__dirname, '..', '..', '.env')],
       validate: validateEnv,
       cache: true,
     }),

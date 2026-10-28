@@ -1,5 +1,10 @@
 # BARFF — cPanel'ga joylash
 
+> **Barff.uz uchun qisqa, sinalgan yo'l: `docs/DEPLOY-BARFF-UZ.md`.** Quyida — batafsil
+> izohlar. Muhim o'zgarish (F02): API sirlari `npm run setup` bilan `api/.env` ga yoziladi
+> (§6 dagi UI jadvali shu yerga tengdosh), frontend ilovalar zip'dan ochilib
+> `npm install` qilinadi.
+
 Bu qo'llanma `hostmaster.uz` dagi cPanel hostingga mo'ljallangan.
 Imkoniyatlar auditi `docs/OPEN-QUESTIONS.md` Q18 da; bu yerda faqat
 QADAMLAR.

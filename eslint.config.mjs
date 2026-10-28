@@ -64,5 +64,11 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
     rules: { 'no-console': 'off' },
   },
+  {
+    // Serverga ko'chiriladigan CommonJS asbob (`api/tools/setup.cjs`): `require` ataylab.
+    files: ['scripts/**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs', globals: globals.node },
+    rules: { 'no-console': 'off', '@typescript-eslint/no-require-imports': 'off' },
+  },
   prettier,
 );

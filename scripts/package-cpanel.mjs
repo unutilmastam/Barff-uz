@@ -22,6 +22,7 @@
  * Ichida SIR YO'Q: `.env` fayllari SERVERDA, cPanel interfeysida
  * to'ldiriladi (`CLAUDE.md` §12).
  */
+import { execFileSync } from 'node:child_process';
 import { cp, mkdir, rm, writeFile, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,6 +61,27 @@ async function packNextApp(app) {
 
   const appRoot = join(target, 'apps', app);
 
+  /*
+   * `node_modules` PAKETGA KIRMAYDI — u serverda `npm install` bilan o'rnatiladi.
+   *
+   * Sabab (F02 da o'lchab topildi): pnpm standalone'da bog'liqliklar
+   * SIMVOLIK HAVOLALAR orqali ulanadi (`next` -> `.pnpm/next@x/node_modules/next`,
+   * qo'shnisi `styled-jsx`). Zip va cPanel File Manager havolalarni nusxaga
+   * aylantiradi, shunda qo'shni paketlar yo'qoladi va server
+   * `Cannot find module 'styled-jsx/package.json'` bilan yiqiladi. Oddiy
+   * `npm install` esa tekis, havolasiz daraxt yaratadi — hamma hostda ishlaydi.
+   * Bonus: zip ~120 MB dan ~15 MB ga tushadi (typescript/webpack/swc ham ketadi).
+   */
+  const { readdir } = await import('node:fs/promises');
+  async function stripNodeModules(dir) {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.name === 'node_modules') await rm(full, { recursive: true, force: true });
+      else if (entry.isDirectory()) await stripNodeModules(full);
+    }
+  }
+  await stripNodeModules(target);
+
   // Next ATAYLAB ko'chirmaydigan ikki katalog.
   await cp(join(from, '.next', 'static'), join(appRoot, '.next', 'static'), { recursive: true });
 
@@ -84,10 +106,30 @@ async function packNextApp(app) {
     ].join('\n'),
   );
 
-  // `type: module` bo'lmasa yuqoridagi `import` ishlamaydi.
+  /*
+   * `type: module` bo'lmasa yuqoridagi `import` ishlamaydi. Bog'liqliklar
+   * ANIQ versiya bilan: qurilgan kod aynan shu `next`/`react` bilan sinalgan.
+   */
+  const versionOf = async (name) =>
+    (await readJson(join(from, 'node_modules', name, 'package.json'))).version;
+
   await writeFile(
     join(target, 'package.json'),
-    JSON.stringify({ name: `barff-${app}`, private: true, type: 'module' }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        name: `barff-${app}`,
+        private: true,
+        type: 'module',
+        scripts: { start: 'node server.js' },
+        dependencies: {
+          next: await versionOf('next'),
+          react: await versionOf('react'),
+          'react-dom': await versionOf('react-dom'),
+        },
+      },
+      null,
+      2,
+    ) + '\n',
   );
 
   console.log(`  ✓ ${app} → dist-cpanel/${app}`);
@@ -185,6 +227,23 @@ async function packApi() {
     format: 'cjs',
     target: 'node20',
     external: ['@prisma/client', '@barff/*', 'argon2'],
+    // Serverda SSH muhitida o'zgaruvchilar yo'q: `api/.env` (npm run setup) o'qiladi.
+    // Haqiqiy muhit o'zgaruvchisi fayldan USTUN.
+    banner: {
+      js: [
+        '(() => { try {',
+        "const fs = require('node:fs'), path = require('node:path');",
+        "const file = path.join(__dirname, '..', '.env');",
+        "if (fs.existsSync(file)) for (const raw of fs.readFileSync(file, 'utf8').split('\\n')) {",
+        '  const line = raw.trim(); const eq = line.indexOf("=");',
+        "  if (line && !line.startsWith('#') && eq > 0) {",
+        '    const key = line.slice(0, eq).trim();',
+        '    if (process.env[key] === undefined) process.env[key] = line.slice(eq + 1).trim();',
+        '  }',
+        '}',
+        '} catch {} })();',
+      ].join('\n'),
+    },
     logLevel: 'warning',
   });
 
@@ -193,6 +252,10 @@ async function packApi() {
   for (const name of ['db-backup.sh', 'db-restore-check.sh']) {
     await cp(join(root, 'scripts', name), join(target, 'scripts', name));
   }
+
+  // Serverda sozlash asbobi (`npm run setup | env:check | env:scrub`).
+  await mkdir(join(target, 'tools'), { recursive: true });
+  await cp(join(root, 'scripts', 'server-setup.cjs'), join(target, 'tools', 'setup.cjs'));
 
   // Katalog (nomlar + mahsulot suratlari) `npm run catalog:import` uchun.
   await cp(join(root, 'assets', 'product-photos'), join(target, 'catalog'), { recursive: true });
@@ -226,6 +289,9 @@ async function packApi() {
           start: 'node dist/main.js',
           postinstall: 'prisma generate --schema prisma/schema.prisma',
           'db:deploy': 'prisma migrate deploy --schema prisma/schema.prisma',
+          setup: 'node tools/setup.cjs setup',
+          'env:check': 'node tools/setup.cjs check',
+          'env:scrub': 'node tools/setup.cjs scrub',
           'db:seed': 'node prisma/seed.cjs',
           'catalog:import': 'CATALOG_DIR=./catalog node dist/cli/import-catalog.js',
         },
@@ -292,6 +358,29 @@ async function assertNoLocalhost() {
   }
 }
 
+/**
+ * Har bir ilovani alohida zip'ga o'raydi (`dist-cpanel/upload/`).
+ *
+ * cPanel File Manager yuz minglab kichik faylni birma-bir yuklashdan ko'ra
+ * bitta zip'ni yuklab `Extract` qilishni ancha tezroq va ishonchli bajaradi.
+ * Zip tarkibi ilova papkasining O'ZI (ichida qo'shimcha katalog yo'q).
+ */
+function zipApps() {
+  const upload = join(out, 'upload');
+  execFileSync('mkdir', ['-p', upload]);
+
+  for (const app of ['api', 'web', 'admin', 'dealer', 'delivery']) {
+    try {
+      execFileSync('zip', ['-q', '-r', '-X', join(upload, `barff-${app}.zip`), '.'], {
+        cwd: join(out, app),
+      });
+      console.log(`  ✓ zip → dist-cpanel/upload/barff-${app}.zip`);
+    } catch {
+      console.warn(`  ! zip yo'q yoki yiqildi: ${app} — katalogni qo'lda yuklang`);
+    }
+  }
+}
+
 async function main() {
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
@@ -309,14 +398,18 @@ async function main() {
       "BARFF — cPanel joylash to'plami",
       '',
       "Bu katalog `scripts/package-cpanel.mjs` tomonidan yig'ilgan.",
-      "Ichida SIR YO'Q: `.env` qiymatlari cPanel interfeysida kiritiladi.",
+      "Ichida SIR YO'Q: sirlar serverda `npm run setup` bilan yaratiladi.",
       '',
-      'Qadamlar: repodagi `docs/DEPLOY-CPANEL.md`.',
+      "`upload/` ichida tayyor zip'lar: har birini cPanel File Manager orqali",
+      'tegishli papkaga yuklab `Extract` qiling (api -> ~/barff/api, ...).',
+      '',
+      'Qadamlar: repodagi `docs/DEPLOY-BARFF-UZ.md` (qisqa) va `docs/DEPLOY-CPANEL.md`.',
       '',
     ].join('\n'),
   );
 
   await assertNoLocalhost();
+  zipApps();
 
   console.log(`\nTayyor: ${out}`);
   console.log('Keyingi qadam: docs/DEPLOY-CPANEL.md');
