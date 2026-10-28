@@ -1,5 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { AdminUsersController } from './admin-users.controller';
+import { AdminUsersService } from './admin-users.service';
 import { UserRolesService } from './user-roles.service';
 import { UsersService } from './users.service';
 
@@ -11,7 +13,8 @@ import { UsersService } from './users.service';
 @Global()
 @Module({
   imports: [AuthModule],
-  providers: [UsersService, UserRolesService],
+  controllers: [AdminUsersController],
+  providers: [UsersService, UserRolesService, AdminUsersService],
   exports: [UsersService, UserRolesService],
 })
 export class UsersModule {}

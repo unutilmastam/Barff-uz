@@ -6,7 +6,7 @@ import { type RequestContext } from '../auth/auth.service';
 import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../public/cache/cache.service';
-import { runUnique } from './run-unique';
+import { runUnique } from '../common/run-unique';
 
 interface Actor {
   id: string;

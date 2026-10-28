@@ -138,7 +138,7 @@ const GROUPS: AdminNavGroup[] = [
   {
     label: 'Tizim',
     items: [
-      { href: '/system/users', label: 'Foydalanuvchilar', permission: 'users.view', ready: false },
+      { href: '/system/users', label: 'Xodimlar', permission: 'users.view', ready: true },
       {
         href: '/system/settings',
         label: 'Sozlamalar',

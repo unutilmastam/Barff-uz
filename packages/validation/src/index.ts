@@ -8,5 +8,6 @@ export * from './lead';
 export * from './primitives';
 export * from './product';
 export * from './reports';
+export * from './user';
 export * from './update-schema';
 export * from './warehouse';

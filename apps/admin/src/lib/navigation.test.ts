@@ -79,6 +79,7 @@ describe('admin navigatsiyasi', () => {
       '/logistics/routes',
       '/logistics/fleet',
       '/reports',
+      '/system/users',
       '/system/settings',
       '/system/audit',
     ]);
@@ -158,6 +159,15 @@ describe('faol bolim', () => {
 
   /** Qurilmagan bo'lim havola emas — u yona olmaydi. */
   it('qurilmagan bolim faol bolmaydi', () => {
-    expect(activeHref(groups, '/system/users')).toBeNull();
+    const draft = [
+      {
+        label: 'Reja',
+        items: [
+          { href: '/soon', label: 'Tez orada', permission: 'content.view' as const, ready: false },
+        ],
+      },
+    ];
+
+    expect(activeHref(draft, '/soon')).toBeNull();
   });
 });

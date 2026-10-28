@@ -7,7 +7,7 @@ import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { STORAGE_ADAPTER, type StorageAdapter } from '../media/storage/storage.adapter';
 import { CacheService } from '../public/cache/cache.service';
-import { runUnique } from './run-unique';
+import { runUnique } from '../common/run-unique';
 import { toPublicImage, toPublicProduct } from '../public/public.mappers';
 
 /**

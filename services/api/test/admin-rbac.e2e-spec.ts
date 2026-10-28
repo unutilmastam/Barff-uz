@@ -78,6 +78,7 @@ describe('Admin RBAC (e2e)', () => {
     { path: '/admin/content/settings', permission: 'settings.manage' },
     { path: '/admin/products', permission: 'products.view' },
     { path: '/admin/categories', permission: 'products.view' },
+    { path: '/admin/users', permission: 'users.view' },
     { path: '/admin/leads', permission: 'leads.view' },
     { path: '/media', permission: 'content.view' },
   ];
