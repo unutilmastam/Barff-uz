@@ -56,6 +56,10 @@ export const AUDIT_ACTIONS = {
   PAYMENT_ALLOCATED: 'payment.allocated',
   CREDIT_LIMIT_CHANGED: 'dealer.credit_limit.changed',
   REPORT_EXPORTED: 'report.exported',
+  AUDIT_EXPORTED: 'audit.exported',
+  PRODUCT_VARIANT_CREATED: 'product.variant.created',
+  PRODUCT_VARIANT_UPDATED: 'product.variant.updated',
+  PRODUCT_PRICE_CHANGED: 'product.price.changed',
   DRIVER_CHANGED: 'driver.changed',
   VEHICLE_CHANGED: 'vehicle.changed',
 } as const;

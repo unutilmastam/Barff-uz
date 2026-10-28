@@ -145,7 +145,7 @@ const GROUPS: AdminNavGroup[] = [
         permission: 'settings.manage',
         ready: true,
       },
-      { href: '/system/audit', label: 'Audit jurnali', permission: 'audit.view', ready: false },
+      { href: '/system/audit', label: 'Audit jurnali', permission: 'audit.view', ready: true },
     ],
   },
 ];

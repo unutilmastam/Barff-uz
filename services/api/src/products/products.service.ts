@@ -290,6 +290,8 @@ export class ProductsService {
   async addVariant(
     productId: string,
     data: Omit<Prisma.ProductVariantUncheckedCreateInput, 'productId'>,
+    actor: Actor | undefined,
+    ctx: RequestContext,
   ) {
     await this.findByIdAdmin(productId);
     const variant = await this.runUnique(() =>
@@ -297,27 +299,90 @@ export class ProductsService {
     );
     // Variant mahsulot javobining bir qismi — kesh eskiradi.
     await this.cache.invalidate('products');
+
+    await this.recordVariant(AUDIT_ACTIONS.PRODUCT_VARIANT_CREATED, variant, undefined, actor, ctx);
+
     return variant;
   }
 
-  async updateVariant(id: string, data: Prisma.ProductVariantUncheckedUpdateInput) {
-    await this.assertVariantExists(id);
+  async updateVariant(
+    id: string,
+    data: Prisma.ProductVariantUncheckedUpdateInput,
+    actor: Actor | undefined,
+    ctx: RequestContext,
+  ) {
+    const before = await this.assertVariantExists(id);
     const variant = await this.runUnique(() =>
       this.prisma.productVariant.update({ where: { id }, data }),
     );
     await this.cache.invalidate('products');
+
+    await this.recordVariant(AUDIT_ACTIONS.PRODUCT_VARIANT_UPDATED, variant, before, actor, ctx);
+
     return variant;
   }
 
+  /**
+   * Narx qo'shish — CLAUDE.md §23: narx o'zgarishi AUDIT qilinadigan amal.
+   *
+   * Eski narx o'chirilmaydi (yangi qator qo'shiladi), shuning uchun
+   * jurnalda oldingi faol narx ham `before` sifatida yoziladi: "narx
+   * qachon va kim tomonidan 12 000 dan 13 500 ga o'zgardi" savoliga
+   * javob jurnalning o'zidan olinadi.
+   */
   async addPrice(
     variantId: string,
     data: Omit<Prisma.ProductPriceUncheckedCreateInput, 'variantId'>,
+    actor: Actor | undefined,
+    ctx: RequestContext,
   ) {
-    await this.assertVariantExists(variantId);
+    const variant = await this.assertVariantExists(variantId);
+
+    const previous = await this.prisma.productPrice.findFirst({
+      where: { variantId, validTo: null },
+      orderBy: { validFrom: 'desc' },
+      select: { amount: true, currency: true },
+    });
+
     const price = await this.prisma.productPrice.create({ data: { ...data, variantId } });
     // Narx o'zgarishi eng sezgir holat: eski narx ko'rinib turishi mumkin emas.
     await this.cache.invalidate('products');
+
+    await this.audit.record({
+      action: AUDIT_ACTIONS.PRODUCT_PRICE_CHANGED,
+      entity: 'ProductVariant',
+      entityId: variantId,
+      ...(actor !== undefined ? { actorId: actor.id, actorEmail: actor.email } : {}),
+      before: previous,
+      after: { sku: variant.sku, amount: price.amount, currency: price.currency },
+      ...ctx,
+    });
+
     return price;
+  }
+
+  private async recordVariant(
+    action: string,
+    variant: { id: string; sku: string; volumeMl: number; isActive: boolean },
+    before: { sku: string; volumeMl: number; isActive: boolean } | undefined,
+    actor: Actor | undefined,
+    ctx: RequestContext,
+  ): Promise<void> {
+    const pick = (v: { sku: string; volumeMl: number; isActive: boolean }) => ({
+      sku: v.sku,
+      volumeMl: v.volumeMl,
+      isActive: v.isActive,
+    });
+
+    await this.audit.record({
+      action,
+      entity: 'ProductVariant',
+      entityId: variant.id,
+      ...(actor !== undefined ? { actorId: actor.id, actorEmail: actor.email } : {}),
+      ...(before !== undefined ? { before: pick(before) } : {}),
+      after: pick(variant),
+      ...ctx,
+    });
   }
 
   // --- Rasmlar ----------------------------------------------------------------
@@ -483,12 +548,14 @@ export class ProductsService {
     }
   }
 
-  private async assertVariantExists(id: string): Promise<void> {
+  private async assertVariantExists(id: string) {
     const variant = await this.prisma.productVariant.findFirst({ where: { id, deletedAt: null } });
 
     if (variant === null) {
       throw new NotFoundException({ message: 'Variant topilmadi', code: 'VARIANT_NOT_FOUND' });
     }
+
+    return variant;
   }
 
   /**

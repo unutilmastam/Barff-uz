@@ -37,4 +37,43 @@ describe('redact', () => {
     expect(redact(42)).toBe(42);
     expect(redact(null)).toBe(null);
   });
+
+  it('kalit nomida bo‘lak bor bo‘lsa ham yashiradi (passwordHash, mfaSecret, resetToken)', () => {
+    const out = redact({
+      passwordHash: '$2b$x',
+      mfaSecret: 'JBSWY3DP',
+      resetToken: 'r',
+      api_key: 'k',
+      'Set-Cookie': 'a=b',
+      email: 'a@b.uz',
+    });
+    expect(out).toEqual({
+      passwordHash: REDACTED,
+      mfaSecret: REDACTED,
+      resetToken: REDACTED,
+      api_key: REDACTED,
+      'Set-Cookie': REDACTED,
+      email: 'a@b.uz',
+    });
+  });
+
+  it('begunoh kalitdagi JWT va argon2 xeshni qiymat bo‘yicha yashiradi', () => {
+    const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl';
+    const out = redact({
+      note: jwt,
+      reason: '$argon2id$v=19$m=65536,t=3,p=4$abc$def',
+      list: [jwt],
+    });
+    expect(out).toEqual({ note: REDACTED, reason: REDACTED, list: [REDACTED] });
+  });
+
+  it('oddiy matnni va uzun raqamli qiymatni tegmaydi', () => {
+    expect(
+      redact({ note: 'Mijoz $5 so‘radi', phone: '+998901234567', ref: 'INV-2026-000001' }),
+    ).toEqual({
+      note: 'Mijoz $5 so‘radi',
+      phone: '+998901234567',
+      ref: 'INV-2026-000001',
+    });
+  });
 });

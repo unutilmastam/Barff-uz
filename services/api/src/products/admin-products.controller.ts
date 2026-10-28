@@ -104,8 +104,13 @@ export class AdminProductsController {
   @Permissions('products.manage')
   @ApiOperation({ summary: 'Variant qo‘shish' })
   @ApiZodBody(ProductVariantCreateDto)
-  addVariant(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ProductVariantCreateDto) {
-    return this.products.addVariant(id, defined(dto));
+  addVariant(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ProductVariantCreateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.products.addVariant(id, defined(dto), actor(user), context(req));
   }
 
   @Patch('variants/:variantId')
@@ -115,8 +120,10 @@ export class AdminProductsController {
   updateVariant(
     @Param('variantId', ParseUUIDPipe) variantId: string,
     @Body() dto: ProductVariantUpdateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
   ) {
-    return this.products.updateVariant(variantId, defined(dto));
+    return this.products.updateVariant(variantId, defined(dto), actor(user), context(req));
   }
 
   @Post(':id/images')
@@ -165,8 +172,10 @@ export class AdminProductsController {
   addPrice(
     @Param('variantId', ParseUUIDPipe) variantId: string,
     @Body() dto: ProductPriceCreateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
   ) {
-    return this.products.addPrice(variantId, defined(dto));
+    return this.products.addPrice(variantId, defined(dto), actor(user), context(req));
   }
 }
 
