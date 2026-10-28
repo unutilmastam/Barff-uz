@@ -25,6 +25,8 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import {
   ProductCreateDto,
+  ProductImageCreateDto,
+  ProductImageUpdateDto,
   ProductPriceCreateDto,
   ProductUpdateDto,
   ProductVariantCreateDto,
@@ -115,6 +117,45 @@ export class AdminProductsController {
     @Body() dto: ProductVariantUpdateDto,
   ) {
     return this.products.updateVariant(variantId, defined(dto));
+  }
+
+  @Post(':id/images')
+  @Permissions('products.manage')
+  @ApiOperation({ summary: 'Mahsulotga rasm biriktirish (media kutubxonasidan)' })
+  @ApiZodBody(ProductImageCreateDto)
+  @ApiResponse({ status: 409, type: ApiErrorDto, description: 'Ommaviy rasm emas yoki band' })
+  addImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ProductImageCreateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.products.addImage(id, dto, actor(user), context(req));
+  }
+
+  @Patch('images/:imageId')
+  @Permissions('products.manage')
+  @ApiOperation({ summary: 'Rasmni asosiy qilish yoki tartibini almashtirish' })
+  @ApiZodBody(ProductImageUpdateDto)
+  updateImage(
+    @Param('imageId', ParseUUIDPipe) imageId: string,
+    @Body() dto: ProductImageUpdateDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.products.updateImage(imageId, defined(dto), actor(user), context(req));
+  }
+
+  @Delete('images/:imageId')
+  @Permissions('products.manage')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Rasmni mahsulotdan ajratish (fayl kutubxonada qoladi)' })
+  async removeImage(
+    @Param('imageId', ParseUUIDPipe) imageId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithUser,
+  ): Promise<void> {
+    await this.products.removeImage(imageId, actor(user), context(req));
   }
 
   @Post('variants/:variantId/prices')

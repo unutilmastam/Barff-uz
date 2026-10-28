@@ -21,7 +21,7 @@ const routes = [
   '/uz',
   '/uz/company',
   '/uz/products',
-  '/uz/products/mock-olma-sharbati',
+  '/uz/products/olma-sharbati-350',
   '/uz/production',
   '/uz/quality',
   '/uz/partners',

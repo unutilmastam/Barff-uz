@@ -20,7 +20,7 @@ export const en: Messages = {
     heroTitle: 'A drop of nature',
     heroSubtitle: 'Modern production, strict quality control.',
     heroCta: 'View products',
-    heroBottleAlt: 'BARFF bottle — placeholder mock-up',
+    heroBottleAlt: 'BARFF juice bottles',
     heroSecondaryCta: 'Become a partner',
 
     statsEyebrow: 'In numbers',
@@ -75,6 +75,7 @@ export const en: Messages = {
     empty: 'No products have been added yet.',
     volume: 'Volume',
     volumeUnit: 'ml',
+    volumeUnitLiter: 'L',
     perPack: 'Per pack',
     sku: 'SKU',
     ingredients: 'Ingredients',

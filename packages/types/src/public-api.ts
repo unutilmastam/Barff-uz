@@ -22,6 +22,8 @@ export interface PublicImage {
   height: number | null;
   /** Rasm yuklangunicha ko'rsatiladigan kichik o'rindosh. */
   blurDataUrl: string | null;
+  /** Ko'p tilli alt matn; admin kiritmagan bo'lsa `null` (sahifa mahsulot nomini ishlatadi). */
+  alt: Localized | null;
   sources: PublicImageSource[];
 }
 

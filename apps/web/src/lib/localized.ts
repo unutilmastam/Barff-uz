@@ -50,3 +50,21 @@ export function formatDate(iso: string | null, locale: Locale): string {
   const tag = locale === 'uz' ? 'uz-UZ' : locale === 'ru' ? 'ru-RU' : 'en-US';
   return new Intl.DateTimeFormat(tag, { dateStyle: 'long' }).format(new Date(iso));
 }
+
+/**
+ * Hajmni ko'rsatish: 350 -> "350 ml", 1000 -> "1 L", 1500 -> "1,5 L".
+ *
+ * Bazada hajm millilitrda butun son sifatida turadi (aniq va
+ * solishtirishga qulay); litrga aylantirish faqat ko'rinish uchun.
+ */
+export function formatVolume(
+  volumeMl: number,
+  units: { volumeUnit: string; volumeUnitLiter: string },
+): string {
+  if (volumeMl >= 1000) {
+    const liters = String(volumeMl / 1000).replace('.', ',');
+    return `${liters} ${units.volumeUnitLiter}`;
+  }
+
+  return `${volumeMl} ${units.volumeUnit}`;
+}

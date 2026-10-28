@@ -1,5 +1,5 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@barff/db';
+import { MediaKind, MediaVisibility, Prisma } from '@barff/db';
 import { AUDIT_ACTIONS } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { type RequestContext } from '../auth/auth.service';
@@ -43,6 +43,7 @@ const PUBLIC_INCLUDE = {
           width: true,
           height: true,
           blurDataUrl: true,
+          altText: true,
           variants: true,
         },
       },
@@ -317,6 +318,157 @@ export class ProductsService {
     // Narx o'zgarishi eng sezgir holat: eski narx ko'rinib turishi mumkin emas.
     await this.cache.invalidate('products');
     return price;
+  }
+
+  // --- Rasmlar ----------------------------------------------------------------
+
+  /**
+   * Mahsulotga rasm biriktiradi.
+   *
+   * Faqat OMMAVIY RASM qabul qilinadi: maxfiy fayl saytda ko'rinmaydi
+   * (havolasi muddatli), PDF esa rasm emas. Xatoni biriktirish paytida
+   * aytgan ma'qul — aks holda mahsulot sahifasida jim "bo'sh ramka" chiqadi.
+   *
+   * Birinchi biriktirilgan rasm o'zi asosiy bo'ladi: aks holda yangi
+   * mahsulot ro'yxatda rasmsiz turardi.
+   */
+  async addImage(
+    productId: string,
+    data: { mediaAssetId: string; isPrimary: boolean; displayOrder: number },
+    actor: Actor | undefined,
+    ctx: RequestContext,
+  ) {
+    await this.findByIdAdmin(productId);
+
+    const asset = await this.prisma.mediaAsset.findFirst({
+      where: { id: data.mediaAssetId, deletedAt: null },
+      select: { id: true, kind: true, visibility: true },
+    });
+
+    if (asset === null) {
+      throw new NotFoundException({ message: 'Fayl topilmadi', code: 'MEDIA_NOT_FOUND' });
+    }
+
+    if (asset.kind !== MediaKind.IMAGE || asset.visibility !== MediaVisibility.PUBLIC) {
+      throw new ConflictException({
+        message: 'Mahsulotga faqat ommaviy rasm biriktiriladi',
+        code: 'MEDIA_NOT_PUBLIC_IMAGE',
+      });
+    }
+
+    const image = await this.runUnique(() =>
+      this.prisma.$transaction(async (tx) => {
+        const hasPrimary =
+          (await tx.productImage.count({ where: { productId, isPrimary: true } })) > 0;
+        const isPrimary = data.isPrimary || !hasPrimary;
+
+        if (isPrimary) {
+          await tx.productImage.updateMany({ where: { productId }, data: { isPrimary: false } });
+        }
+
+        return tx.productImage.create({
+          data: {
+            productId,
+            mediaAssetId: data.mediaAssetId,
+            isPrimary,
+            displayOrder: data.displayOrder,
+          },
+        });
+      }),
+    );
+
+    await this.cache.invalidate('products');
+    await this.recordImage(AUDIT_ACTIONS.PRODUCT_IMAGE_ADDED, image, actor, ctx);
+
+    return image;
+  }
+
+  async updateImage(
+    imageId: string,
+    data: { isPrimary?: boolean; displayOrder?: number },
+    actor: Actor | undefined,
+    ctx: RequestContext,
+  ) {
+    const current = await this.findImage(imageId);
+
+    // Asosiy rasmni "olib tashlash" mumkin emas — mahsulotda har doim
+    // bittasi asosiy bo'lishi kerak. Boshqa rasmni asosiy qilish eskisini
+    // o'zi tushiradi.
+    if (data.isPrimary === false && current.isPrimary) {
+      throw new ConflictException({
+        message: 'Asosiy rasmni olib tashlab bo‘lmaydi — boshqa rasmni asosiy qiling',
+        code: 'PRIMARY_IMAGE_REQUIRED',
+      });
+    }
+
+    const image = await this.prisma.$transaction(async (tx) => {
+      if (data.isPrimary === true) {
+        await tx.productImage.updateMany({
+          where: { productId: current.productId },
+          data: { isPrimary: false },
+        });
+      }
+
+      return tx.productImage.update({ where: { id: imageId }, data });
+    });
+
+    await this.cache.invalidate('products');
+    await this.recordImage(AUDIT_ACTIONS.PRODUCT_IMAGE_UPDATED, image, actor, ctx);
+
+    return image;
+  }
+
+  async removeImage(imageId: string, actor: Actor | undefined, ctx: RequestContext) {
+    const current = await this.findImage(imageId);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productImage.delete({ where: { id: imageId } });
+
+      // Asosiy rasm o'chsa, qolganidan birinchisi o'rnini egallaydi.
+      if (current.isPrimary) {
+        const next = await tx.productImage.findFirst({
+          where: { productId: current.productId },
+          orderBy: { displayOrder: 'asc' },
+        });
+
+        if (next !== null) {
+          await tx.productImage.update({ where: { id: next.id }, data: { isPrimary: true } });
+        }
+      }
+    });
+
+    await this.cache.invalidate('products');
+    await this.recordImage(AUDIT_ACTIONS.PRODUCT_IMAGE_REMOVED, current, actor, ctx);
+  }
+
+  private async findImage(imageId: string) {
+    const image = await this.prisma.productImage.findUnique({ where: { id: imageId } });
+
+    if (image === null) {
+      throw new NotFoundException({ message: 'Rasm topilmadi', code: 'PRODUCT_IMAGE_NOT_FOUND' });
+    }
+
+    return image;
+  }
+
+  private async recordImage(
+    action: string,
+    image: { id: string; productId: string; mediaAssetId: string; isPrimary: boolean },
+    actor: Actor | undefined,
+    ctx: RequestContext,
+  ): Promise<void> {
+    await this.audit.record({
+      action,
+      entity: 'ProductImage',
+      entityId: image.id,
+      ...(actor !== undefined ? { actorId: actor.id, actorEmail: actor.email } : {}),
+      after: {
+        productId: image.productId,
+        mediaAssetId: image.mediaAssetId,
+        isPrimary: image.isPrimary,
+      },
+      ...ctx,
+    });
   }
 
   // --- Yordamchilar -----------------------------------------------------------

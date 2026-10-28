@@ -1,6 +1,7 @@
 import { type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@barff/db';
 import { AppModule } from '../src/app.module';
@@ -312,6 +313,139 @@ describe('Products (e2e)', () => {
     it('kategoriyalar royxati ochiq', async () => {
       const res = await request(app.getHttpServer()).get(`${base}/products/categories`).expect(200);
       expect(Array.isArray(res.body)).toBe(true);
+    });
+  });
+  describe('mahsulot rasmlari', () => {
+    const createdAssetIds: string[] = [];
+
+    const png = () =>
+      sharp({ create: { width: 320, height: 480, channels: 3, background: '#2a7' } })
+        .png()
+        .toBuffer();
+
+    const uploadAsset = async (visibility: 'PUBLIC' | 'PRIVATE') => {
+      const res = await request(app.getHttpServer())
+        .post(`${base}/media`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .field('visibility', visibility)
+        .attach('file', await png(), 'shisha.png')
+        .expect(201);
+      createdAssetIds.push(res.body.id);
+      return res.body.id as string;
+    };
+
+    const attach = (productId: string, body: Record<string, unknown>, token = adminToken) =>
+      request(app.getHttpServer())
+        .post(`${base}/admin/products/${productId}/images`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(body);
+
+    const publicImages = async (slug: string) => {
+      const res = await request(app.getHttpServer()).get(`${base}/products/${slug}`).expect(200);
+      return res.body.images as { id: string }[];
+    };
+
+    afterAll(async () => {
+      await prisma.auditLog.deleteMany({ where: { entityId: { in: createdAssetIds } } });
+      await prisma.mediaAsset.deleteMany({ where: { id: { in: createdAssetIds } } });
+    });
+
+    it('birinchi rasm o‘zi asosiy bo‘ladi va saytga chiqadi', async () => {
+      const product = await createProduct(adminToken, validBody('rasm1')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const first = await attach(product.body.id, {
+        mediaAssetId: await uploadAsset('PUBLIC'),
+      }).expect(201);
+      expect(first.body.isPrimary).toBe(true);
+
+      expect(await publicImages(product.body.slug)).toHaveLength(1);
+    });
+
+    it('ikkinchi rasm asosiy bo‘lmaydi; asosiy qilinsa eskisi tushadi', async () => {
+      const product = await createProduct(adminToken, validBody('rasm2')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const a = await attach(product.body.id, { mediaAssetId: await uploadAsset('PUBLIC') });
+      const b = await attach(product.body.id, { mediaAssetId: await uploadAsset('PUBLIC') });
+      expect(b.body.isPrimary).toBe(false);
+
+      await request(app.getHttpServer())
+        .patch(`${base}/admin/products/images/${b.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ isPrimary: true })
+        .expect(200);
+
+      const rows = await prisma.productImage.findMany({ where: { productId: product.body.id } });
+      expect(rows.filter((row) => row.isPrimary).map((row) => row.id)).toEqual([b.body.id]);
+      expect(rows).toHaveLength(2);
+      expect(a.body.id).toBeDefined();
+    });
+
+    it('asosiy rasmni "olib tashlab" bo‘lmaydi', async () => {
+      const product = await createProduct(adminToken, validBody('rasm3')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const image = await attach(product.body.id, { mediaAssetId: await uploadAsset('PUBLIC') });
+
+      const res = await request(app.getHttpServer())
+        .patch(`${base}/admin/products/images/${image.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ isPrimary: false })
+        .expect(409);
+      expect(res.body.code).toBe('PRIMARY_IMAGE_REQUIRED');
+    });
+
+    it('asosiy rasm o‘chsa, qolganidan biri asosiy bo‘ladi', async () => {
+      const product = await createProduct(adminToken, validBody('rasm4')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const a = await attach(product.body.id, { mediaAssetId: await uploadAsset('PUBLIC') });
+      const b = await attach(product.body.id, { mediaAssetId: await uploadAsset('PUBLIC') });
+
+      await request(app.getHttpServer())
+        .delete(`${base}/admin/products/images/${a.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(204);
+
+      const rows = await prisma.productImage.findMany({ where: { productId: product.body.id } });
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.id).toBe(b.body.id);
+      expect(rows[0]?.isPrimary).toBe(true);
+    });
+
+    it('maxfiy faylni biriktirib bo‘lmaydi (saytda ko‘rinmaydi)', async () => {
+      const product = await createProduct(adminToken, validBody('rasm5')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const res = await attach(product.body.id, {
+        mediaAssetId: await uploadAsset('PRIVATE'),
+      }).expect(409);
+      expect(res.body.code).toBe('MEDIA_NOT_PUBLIC_IMAGE');
+    });
+
+    it('mavjud bo‘lmagan fayl 404, takroriy biriktirish 409', async () => {
+      const product = await createProduct(adminToken, validBody('rasm6')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      await attach(product.body.id, {
+        mediaAssetId: '00000000-0000-4000-8000-000000000000',
+      }).expect(404);
+
+      const assetId = await uploadAsset('PUBLIC');
+      await attach(product.body.id, { mediaAssetId: assetId }).expect(201);
+      await attach(product.body.id, { mediaAssetId: assetId }).expect(409);
+    });
+
+    it('products.manage ruxsatisiz rol 403 oladi', async () => {
+      const product = await createProduct(adminToken, validBody('rasm7')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      await attach(
+        product.body.id,
+        { mediaAssetId: await uploadAsset('PUBLIC') },
+        driverToken,
+      ).expect(403);
     });
   });
 });

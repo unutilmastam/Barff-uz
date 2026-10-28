@@ -107,6 +107,30 @@ export const productVariantCreateSchema = z.object({
 export const productVariantUpdateSchema = toUpdateSchema(productVariantCreateSchema);
 
 /**
+ * Mahsulot rasmi: media kutubxonasidagi tayyor faylga bog'lanadi.
+ *
+ * Fayl alohida yuklanadi (`POST /media`) — u yerda tur imzo bo'yicha
+ * tekshiriladi va AVIF/WebP variantlari tayyorlanadi. Shu sababli bu
+ * yerda faqat bog'lanish ma'lumoti turadi.
+ */
+export const productImageCreateSchema = z.object({
+  mediaAssetId: z.string().uuid(),
+  /** Asosiy rasm ro'yxatlarda ko'rsatiladi; mahsulotda bittasi bo'ladi. */
+  isPrimary: z.boolean().default(false),
+  displayOrder: z.number().int().min(0).max(10_000).default(0),
+});
+
+export const productImageUpdateSchema = z
+  .object({
+    isPrimary: z.boolean(),
+    displayOrder: z.number().int().min(0).max(10_000),
+  })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Kamida bitta maydon o'zgartirilishi kerak",
+  });
+
+/**
  * Narx.
  *
  * `amount` — BUTUN son, eng kichik birlikda (tiyin). Suzuvchi nuqta
@@ -132,5 +156,6 @@ export const productListQuerySchema = paginationQuerySchema.extend({
 
 export type ProductCreateInput = z.input<typeof productCreateSchema>;
 export type ProductCreateOutput = z.output<typeof productCreateSchema>;
+export type ProductImageCreateInput = z.input<typeof productImageCreateSchema>;
 export type ProductVariantCreateInput = z.input<typeof productVariantCreateSchema>;
 export type ProductCategoryCreateInput = z.input<typeof productCategoryCreateSchema>;

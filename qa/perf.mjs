@@ -25,13 +25,7 @@ function launchOptions() {
 }
 
 const BASE = 'http://127.0.0.1:3001';
-const ROUTES = [
-  '/uz',
-  '/uz/products',
-  '/uz/products/mock-olma-sharbati',
-  '/uz/news',
-  '/uz/contact',
-];
+const ROUTES = ['/uz', '/uz/products', '/uz/products/olma-sharbati-350', '/uz/news', '/uz/contact'];
 
 const browser = await chromium.launch({ ...launchOptions(), args: ['--no-sandbox'] });
 

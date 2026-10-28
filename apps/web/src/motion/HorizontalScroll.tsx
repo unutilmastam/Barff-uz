@@ -19,9 +19,14 @@ export interface HorizontalScrollProps {
  * (CLAUDE.md §17: animatsiya kontentni tushunishning yagona yo'li
  * bo'lmasligi kerak).
  *
- * Shu sababli `overflow-x-auto` HAR DOIM qo'yiladi: desktopda GSAP
- * `x` ni boshqaradi va skroll ishlatilmaydi, mobilda esa u yagona
- * yo'l bo'lib qoladi.
+ * `overflow-x-auto` desktopda FAQAT animatsiya ishlaganda olib
+ * tashlanadi (GSAP `x` ni boshqaradi). Harakat o'chiq bo'lsa lenta
+ * desktopda ham oddiy skrollga ega bo'lib qoladi.
+ *
+ * Tashqi o'ram `overflow-x-clip` bilan kesadi: lenta ekrandan keng
+ * (mahsulotlar ko'p) bo'lganda sahifaning O'ZI yon tomonga siljib
+ * qolmasligi uchun. `clip` skroll konteyneri YARATMAYDI, shuning
+ * uchun yopishtirish (pin) buzilmaydi.
  */
 export function HorizontalScroll({ children, className, trackClassName }: HorizontalScrollProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -54,10 +59,10 @@ export function HorizontalScroll({ children, className, trackClassName }: Horizo
   }, [enabled]);
 
   return (
-    <div ref={sectionRef} className={className}>
+    <div ref={sectionRef} className={`overflow-x-clip ${className ?? ''}`}>
       <div
         ref={trackRef}
-        className={`overflow-x-auto md:overflow-x-visible ${trackClassName ?? ''}`}
+        className={`overflow-x-auto ${enabled ? 'md:overflow-x-visible' : ''} ${trackClassName ?? ''}`}
       >
         {children}
       </div>

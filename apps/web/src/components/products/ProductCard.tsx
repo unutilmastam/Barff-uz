@@ -3,7 +3,7 @@ import { type Locale, type PublicProduct } from '@barff/types';
 import { GlassCard, MediaFrame } from '@barff/ui';
 import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
-import { formatMoney, text } from '@/lib/localized';
+import { formatMoney, formatVolume, text } from '@/lib/localized';
 import { ImageReveal } from '@/motion/ImageReveal';
 
 /**
@@ -41,7 +41,7 @@ export function ProductCard({
           <ImageReveal className="h-full w-full">
             <ApiImage
               image={image}
-              alt={name}
+              alt={text(image.alt, locale, name)}
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
               className="h-full w-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-barff)] group-hover:scale-[1.04]"
             />
@@ -71,7 +71,7 @@ export function ProductCard({
           {variant !== undefined
             ? variant.price !== null
               ? formatMoney(variant.price.amount, variant.price.currency, locale)
-              : `${variant.volumeMl} ${messages.products.volumeUnit}`
+              : formatVolume(variant.volumeMl, messages.products)
             : messages.products.priceOnRequest}
         </p>
       </div>
