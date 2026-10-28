@@ -18,6 +18,14 @@
 */
 import { chromium } from 'playwright';
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@barff.uz';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (ADMIN_PASSWORD === undefined) {
+  console.error('XATO: `ADMIN_PASSWORD` berilishi shart. Parol kodda saqlanmaydi (CLAUDE.md §12).');
+  process.exit(2);
+}
+
 /**
  * Brauzer yo'li.
  *
@@ -98,8 +106,8 @@ const adminCtx = await browser.newContext({ viewport: { width: 1440, height: 900
 const admin = await adminCtx.newPage();
 {
   await admin.goto(`${ADMIN}/login`, { waitUntil: 'domcontentloaded' });
-  await admin.locator('input[type="email"]').fill('admin@barff.uz');
-  await admin.locator('input[type="password"]').fill('Admin-Lokal-Parol-2026');
+  await admin.locator('input[type="email"]').fill(ADMIN_EMAIL);
+  await admin.locator('input[type="password"]').fill(ADMIN_PASSWORD);
   await admin.getByRole('button', { name: 'Kirish' }).click();
   await admin.waitForURL(`${ADMIN}/`, { timeout: 15000 });
   check(true, 'admin panelga kirdi');

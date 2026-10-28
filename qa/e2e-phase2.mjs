@@ -39,7 +39,12 @@ const ADMIN = process.env.ADMIN_URL ?? 'http://localhost:3002';
 const API = process.env.API_URL ?? 'http://localhost:3000/api/v1';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@barff.uz';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'Admin-Lokal-Parol-2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (ADMIN_PASSWORD === undefined) {
+  console.error('XATO: `ADMIN_PASSWORD` berilishi shart. Parol kodda saqlanmaydi (CLAUDE.md §12).');
+  process.exit(2);
+}
 
 const browser = await chromium.launch({ ...launchOptions(), args: ['--no-sandbox'] });
 

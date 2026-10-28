@@ -23,7 +23,9 @@
     "e2e:p3": "node e2e-phase3.mjs",
     "reconcile:p3": "node reconcile-phase3.mjs",
     "billing": "node billing-check.mjs",
-    "reports": "node reports-check.mjs"
+    "reports": "node reports-check.mjs",
+    "e2e:p4": "node e2e-phase4.mjs",
+    "reconcile:p4": "node reconcile-phase4.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

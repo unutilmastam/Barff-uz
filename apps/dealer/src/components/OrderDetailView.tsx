@@ -9,6 +9,7 @@ import { ApiRequestError } from '@/lib/api-client';
 import { CART_KEY, ORDERS_KEY, addToCart, cancelOrder, getOrder } from '@/lib/cart-api';
 import { formatMoney } from '@/lib/money';
 import { formatDate, statusLabel, statusTone } from '@/lib/order-labels';
+import { formatVolumeMl } from '@barff/utils';
 
 /**
  * Buyurtma tafsiloti: pozitsiyalar, manzil va HOLAT VAQT CHIZIG'I.
@@ -129,7 +130,7 @@ export function OrderDetailView({ id, justCreated }: { id: string; justCreated: 
               <div className="min-w-0">
                 <p className="font-medium">{item.productName?.uz ?? item.sku}</p>
                 <p className="text-sm text-[var(--color-fg-muted)]">
-                  {item.volumeMl} ml · {item.quantity} dona
+                  {formatVolumeMl(item.volumeMl)} · {item.quantity} dona
                 </p>
                 {item.appliedRuleName !== null && (
                   <p className="text-xs text-[var(--color-accent-text)]">{item.appliedRuleName}</p>

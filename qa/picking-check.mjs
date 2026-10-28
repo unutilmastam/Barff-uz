@@ -10,6 +10,13 @@
 */
 import { chromium } from 'playwright';
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (ADMIN_PASSWORD === undefined) {
+  console.error('XATO: `ADMIN_PASSWORD` berilishi shart. Parol kodda saqlanmaydi (CLAUDE.md §12).');
+  process.exit(2);
+}
+
 const ADMIN = process.env.ADMIN_URL ?? 'http://localhost:3002';
 const API = process.env.API_URL ?? 'http://localhost:3000/api/v1';
 const path = process.env.CHROMIUM_PATH;
@@ -33,7 +40,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 
 await page.goto(`${ADMIN}/login`, { waitUntil: 'domcontentloaded' });
 await page.locator('input[type="email"]').fill('admin@barff.uz');
-await page.locator('input[type="password"]').fill('Admin-Lokal-Parol-2026');
+await page.locator('input[type="password"]').fill(ADMIN_PASSWORD);
 await page.getByRole('button', { name: 'Kirish' }).click();
 await page.waitForURL(`${ADMIN}/`, { timeout: 15000 });
 check(true, 'admin panelga kirdi');
@@ -174,7 +181,7 @@ const small = await mobile.newPage();
 small.on('pageerror', (e) => errors.push(`mobil: ${e.message}`));
 await small.goto(`${ADMIN}/login`, { waitUntil: 'domcontentloaded' });
 await small.locator('input[type="email"]').fill('admin@barff.uz');
-await small.locator('input[type="password"]').fill('Admin-Lokal-Parol-2026');
+await small.locator('input[type="password"]').fill(ADMIN_PASSWORD);
 await small.getByRole('button', { name: 'Kirish' }).click();
 await small.waitForURL(`${ADMIN}/`, { timeout: 15000 });
 await small.goto(`${ADMIN}/warehouse/picking`, { waitUntil: 'networkidle' });

@@ -19,6 +19,7 @@ import {
   setPromoCode,
 } from '@/lib/cart-api';
 import { formatMoney, formatPercent } from '@/lib/money';
+import { formatVolumeMl } from '@barff/utils';
 
 const text = (value: Localized | null | undefined, fallback = '—'): string =>
   value?.uz ?? value?.ru ?? value?.en ?? fallback;
@@ -120,7 +121,7 @@ export function CartView() {
                 <div className="min-w-0">
                   <p className="font-medium">{text(line.productName, line.sku)}</p>
                   <p className="text-sm text-[var(--color-fg-muted)]">
-                    {line.volumeMl} ml
+                    {formatVolumeMl(line.volumeMl)}
                     {line.unitsPerPack !== null && ` · ${line.unitsPerPack} dona/blok`}
                   </p>
                 </div>

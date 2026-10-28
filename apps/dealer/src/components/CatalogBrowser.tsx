@@ -8,6 +8,7 @@ import { ApiImage } from '@/components/ApiImage';
 import { QuantityStepper } from '@/components/QuantityStepper';
 import { ApiRequestError, apiFetch } from '@/lib/api-client';
 import { CART_KEY, addToCart } from '@/lib/cart-api';
+import { formatVolumeMl } from '@barff/utils';
 import { formatMoney, formatPercent } from '@/lib/money';
 
 interface CatalogVariant {
@@ -125,7 +126,7 @@ export function CatalogBrowser() {
           placeholder="Hammasi"
           options={[
             { value: '', label: 'Hammasi' },
-            ...(volumes.data ?? []).map((ml) => ({ value: String(ml), label: `${ml} ml` })),
+            ...(volumes.data ?? []).map((ml) => ({ value: String(ml), label: formatVolumeMl(ml) })),
           ]}
         />
       </GlassCard>
@@ -190,7 +191,7 @@ export function CatalogBrowser() {
                   >
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <span className="text-sm font-medium">
-                        {variant.volumeMl} ml
+                        {formatVolumeMl(variant.volumeMl)}
                         {variant.unitsPerPack !== null && (
                           <span className="ml-2 text-xs font-normal text-[var(--color-fg-muted)]">
                             {variant.unitsPerPack} dona/blok
@@ -231,13 +232,20 @@ export function CatalogBrowser() {
                       </p>
                     )}
 
-                    <AddToCart
-                      variantId={variant.id}
-                      initial={variant.minOrderQuantity ?? 1}
-                      pending={add.isPending}
-                      justAdded={added === variant.id}
-                      onAdd={(quantity) => add.mutate({ variantId: variant.id, quantity })}
-                    />
+                    {/*
+                      NARXSIZ VARIANT SAVATGA TUSHMAYDI (S25: server 400 qaytaradi).
+                      Tugmani ko'rsatib, bosilganda xato berish dilerni chalg'itardi:
+                      haqiqiy katalogda narxlar BARFF admin panelda kiritmaguncha yo'q.
+                    */}
+                    {variant.price !== null && (
+                      <AddToCart
+                        variantId={variant.id}
+                        initial={variant.minOrderQuantity ?? 1}
+                        pending={add.isPending}
+                        justAdded={added === variant.id}
+                        onAdd={(quantity) => add.mutate({ variantId: variant.id, quantity })}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>

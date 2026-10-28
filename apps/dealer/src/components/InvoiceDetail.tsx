@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge, Button, GlassCard, Skeleton } from '@barff/ui';
 import { apiFetch } from '@/lib/api-client';
 import { formatMoney } from '@/lib/money';
+import { formatVolumeMl } from '@barff/utils';
 
 interface Localized {
   uz?: string;
@@ -159,7 +160,7 @@ export function InvoiceDetail({ id }: { id: string }) {
                   {name(item.productName)}
                   <span className="block text-xs text-[var(--color-fg-subtle)]">
                     {item.sku}
-                    {item.volumeMl !== null && ` · ${item.volumeMl} ml`}
+                    {item.volumeMl !== null && ` · ${formatVolumeMl(item.volumeMl)}`}
                   </span>
                 </td>
                 <td className="py-2.5 text-right tabular-nums">{item.quantity}</td>
