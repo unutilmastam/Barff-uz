@@ -119,7 +119,7 @@ Claude Code updates this list. `[x]` = done and merged.
 
 **Phase 5**
 - [x] S40 AWS infrastructure + production deploy (cPanel/VPS uchun moslashtirildi — `docs/BACKUP-RESTORE.md`)
-- [ ] S41 Security hardening + observability
+- [x] S41 Security hardening + observability
 - [ ] S42 Optional extras (GPS, routes, CRM/ERP)
 
 ---

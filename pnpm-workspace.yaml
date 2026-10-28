@@ -20,3 +20,15 @@ onlyBuiltDependencies:
   - unrs-resolver
   # sharp — rasm qayta ishlash uchun native modul.
   - sharp
+
+# Xavfsizlik: tranzit bog'liqliklarning tuzatilgan versiyalari (S41, `pnpm audit --prod`).
+# Har biri qaysi zaiflik uchun ekani `docs/SECURITY.md` §3 da.
+overrides:
+  multer: ^2.5.0
+  body-parser: ^2.4.0
+  qs: ^6.17.0
+  js-yaml@>=5.0.0 <5.5.0: ^5.5.0
+  source-map-js: ^1.2.2
+  fast-uri@<3.1.9: ^3.1.9
+  postcss@<8.5.23: ^8.5.32
+  deepmerge-ts@<8.0.0: ^8.0.2

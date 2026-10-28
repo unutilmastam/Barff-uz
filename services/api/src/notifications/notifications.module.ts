@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { SystemAlertService } from './system-alert.service';
 import { LogProvider } from './providers/log.provider';
 import {
   NOTIFICATION_PROVIDERS,
@@ -32,7 +33,8 @@ import { TelegramProvider } from './providers/telegram.provider';
       inject: [TelegramProvider, LogProvider],
     },
     NotificationsService,
+    SystemAlertService,
   ],
-  exports: [NotificationsService, NOTIFICATION_PROVIDERS],
+  exports: [NotificationsService, SystemAlertService, NOTIFICATION_PROVIDERS],
 })
 export class NotificationsModule {}

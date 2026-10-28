@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BadRequestException } from '@nestjs/common';
 import { ApiErrorDto } from '../common/dto/api-error';
@@ -126,6 +127,14 @@ export class MediaController {
    */
   @Get('public/:id/:file')
   @Public()
+  /*
+    LIMITDAN CHIQARILGAN. Umumiy limit (daqiqasiga 120) har bir rasmni
+    ham sanardi: bitta katalog sahifasida o'nlab rasm bor va 130 ketma-ket
+    so'rovdan 10 tasi `429` bergan (S41 o'lchadi) — ya'ni ko'p rasmli
+    sahifada rasmlar sinib qolardi. Bu yo'l faqat diskdan o'qiydi, qat'iy
+    shaklga tekshiriladi va brauzer uni bir yil keshlaydi.
+  */
+  @SkipThrottle()
   @ApiOperation({ summary: 'Ommaviy rasm varianti (AVIF/WebP)' })
   async servePublic(
     @Param('id') id: string,

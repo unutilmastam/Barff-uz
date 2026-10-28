@@ -19,6 +19,34 @@ env:
   NODE_VERSION: '22'
 
 jobs:
+  # Xavfsizlik: sirlar tarixi va zaif bog'liqliklar (S41, `docs/SECURITY.md`).
+  # Asosiy tekshiruvdan ALOHIDA: tez, va uning yiqilishi "kod buzildi" emas,
+  # "yangi zaiflik e'lon qilindi" yoki "sir tushib qoldi" degani.
+  security:
+    name: Secrets and dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Butun tarix: sir keyin o'chirilgan bo'lsa ham tarixda qoladi.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Secret scan (working tree + full history)
+        run: node scripts/check-secrets.mjs --history
+
+      # Faqat PRODUCTION bog'liqliklar va faqat yuqori/kritik daraja:
+      # dev vositalaridagi past darajali topilma deploy'ni to'xtatmasligi kerak.
+      - name: Dependency audit (production, high and above)
+        run: pnpm audit --prod --audit-level=high
+
   verify:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-latest

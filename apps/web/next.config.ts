@@ -1,5 +1,6 @@
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 import type { NextConfig } from 'next';
+import { securityHeaders } from '../../packages/config/src/security-headers';
 
 /**
  * `NODE_ENV` EMAS, `phase` bo'yicha qaror qilinadi.
@@ -45,5 +46,21 @@ export default function config(phase: string): NextConfig {
     outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
 
     poweredByHeader: false,
+
+    /**
+     * Xavfsizlik sarlavhalari. Ommaviy saytda `Referrer-Policy` yumshoqroq:
+     * tashqi havolaga o'tganda faqat domen ketadi (to'liq yo'l emas).
+     */
+    async headers() {
+      return [
+        {
+          source: '/:path*',
+          headers: securityHeaders({
+            isDevServer,
+            referrer: 'strict-origin-when-cross-origin',
+          }),
+        },
+      ];
+    },
   };
 }

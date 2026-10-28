@@ -1,5 +1,6 @@
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 import type { NextConfig } from 'next';
+import { securityHeaders } from '../../packages/config/src/security-headers';
 
 /**
  * Admin CMS.
@@ -35,10 +36,7 @@ export default function config(phase: string): NextConfig {
           source: '/:path*',
           headers: [
             { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
-            // Admin sahifasi hech qachon `<iframe>` ichiga solinmasligi
-            // kerak — clickjacking'ning eng oddiy yo'li.
-            { key: 'X-Frame-Options', value: 'DENY' },
-            { key: 'Referrer-Policy', value: 'no-referrer' },
+            ...securityHeaders({ isDevServer }),
           ],
         },
       ];

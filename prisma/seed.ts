@@ -181,6 +181,15 @@ async function seedSettings(): Promise<void> {
       isPublic: false,
     },
     {
+      key: 'notifications.system',
+      value: {
+        telegramChatId: 'REPLACE_WITH_REAL_DATA',
+        email: 'REPLACE_WITH_REAL_DATA',
+      },
+      description: 'Tizim xatosi (500) haqida kimga xabar qilinadi (MOCK — Q26)',
+      isPublic: false,
+    },
+    {
       key: 'site.defaultLocale',
       value: { locale: 'uz' },
       description: 'Standart til',

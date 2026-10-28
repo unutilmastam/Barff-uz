@@ -1,5 +1,6 @@
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 import type { NextConfig } from 'next';
+import { securityHeaders } from '../../packages/config/src/security-headers';
 
 /**
  * Haydovchi PWA'si (`delivery.barff.uz`).
@@ -33,8 +34,8 @@ export default function config(phase: string): NextConfig {
           source: '/:path*',
           headers: [
             { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
-            { key: 'X-Frame-Options', value: 'DENY' },
-            { key: 'Referrer-Policy', value: 'no-referrer' },
+            // Kamera — topshirish isboti surati uchun (CLAUDE.md §6).
+            ...securityHeaders({ isDevServer, camera: true }),
           ],
         },
         {

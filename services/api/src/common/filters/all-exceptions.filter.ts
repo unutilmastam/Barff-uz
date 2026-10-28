@@ -5,8 +5,10 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { type Response } from 'express';
+import { SystemAlertService } from '../../notifications/system-alert.service';
 import { type ApiErrorBody } from '../dto/api-error';
 import { type RequestWithId } from '../middleware/request-id.middleware';
 
@@ -21,6 +23,12 @@ import { type RequestWithId } from '../middleware/request-id.middleware';
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
+  /**
+   * `@Optional()`: ba'zi testlar filtrni bildirishnoma modulisiz ulaydi
+   * (`throttler.e2e-spec.ts`); u yerda ogohlantirish shunchaki o'tkazib yuboriladi.
+   */
+  constructor(@Optional() private readonly alerts?: SystemAlertService) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
@@ -34,6 +42,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
         `${req.method} ${req.originalUrl} -> ${status} [${requestId}]`,
         exception instanceof Error ? exception.stack : String(exception),
       );
+
+      // Egasi 500 ni birinchi bo'lib o'zi bilsin (§21). Javobni kutdirmaydi va xato bermaydi.
+      void this.alerts?.reportError({
+        method: req.method,
+        url: req.originalUrl,
+        status,
+        requestId,
+        errorName: exception instanceof Error ? exception.name : typeof exception,
+      });
     }
 
     const body: ApiErrorBody = { statusCode: status, message, code, requestId };

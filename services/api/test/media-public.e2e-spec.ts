@@ -107,4 +107,18 @@ describe('Ommaviy rasm (fayl tizimi) (e2e)', () => {
       expect(res.text, path).not.toContain('root:');
     }
   });
+
+  /**
+   * Umumiy limit (daqiqasiga 120) bu yo'lga TEGMASLIGI kerak: katalog
+   * sahifasida o'nlab rasm bor. Avval 130 so'rovdan 10 tasi `429` bergan.
+   */
+  it('rasm so‘rovlari umumiy limitga tushmaydi', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 140; i += 1) {
+      statuses.push((await get(`/${ID}/640w.avif`)).status);
+    }
+
+    expect(statuses.filter((status) => status === 429)).toHaveLength(0);
+    expect(new Set(statuses)).toEqual(new Set([200]));
+  });
 });

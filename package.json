@@ -22,7 +22,9 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "package:cpanel": "node scripts/package-cpanel.mjs"
+    "package:cpanel": "node scripts/package-cpanel.mjs",
+    "security:secrets": "node scripts/check-secrets.mjs --history",
+    "security:audit": "pnpm audit --prod --audit-level=high"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
