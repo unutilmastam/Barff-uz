@@ -11,12 +11,12 @@ Sana: 2026-10-28. Muhit: lokal (PostgreSQL 16, Redis, hamma 5 ilova
 | Tekshiruv                                              | Natija                       |
 | ------------------------------------------------------ | ---------------------------- |
 | `format:check`, `lint`, `typecheck`                    | ✅                           |
-| Birlik va e2e testlar                                  | ✅ 594 (API) + 260 (qolgani) |
+| Birlik va e2e testlar                                  | ✅ 594 (API) + 300 (qolgani) |
 | `pnpm build` (9 ta vazifa)                             | ✅                           |
 | Faza 1 darvozasi (`e2e-phase1.mjs`): ommaviy ariza     | ✅                           |
 | Faza 2 darvozasi (`e2e-phase2.mjs`): diler → buyurtma  | ✅                           |
 | Faza 3 darvozasi (`e2e-phase3.mjs`): ombor → yetkazish | ✅ (buyurtma YETKAZILDI)     |
-| **Faza 4 darvozasi (`e2e-phase4.mjs`)**                | ✅ 40+ tekshiruv, 0 muammo   |
+| **Faza 4 darvozasi (`e2e-phase4.mjs`)**                | ✅ 33 tekshiruv, 0 muammo    |
 | **Yarashtirish (`reconcile-phase4.mjs`)**              | ✅ 9 invariant               |
 | axe (WCAG 2 A/AA): 6 ta sahifa, desktop va mobil       | ✅ 0 buzilish                |
 | Brauzer konsoli / tarmoq xatolari                      | ✅ 0                         |
