@@ -113,6 +113,33 @@ export class MediaController {
    * holda Nest `file` so'zini `:id` deb qabul qiladi (S20 da xuddi
    * shunday xato bo'lgan).
    */
+  /**
+   * Ommaviy rasm varianti (fayl tizimi adapteri).
+   *
+   * `Cross-Origin-Resource-Policy: cross-origin` SHART: `helmet` uni
+   * standart `same-origin` qiladi va `barff.uz` sahifasidagi
+   * `<img src="https://api.barff.uz/...">` brauzer tomonidan bloklanardi.
+   * Fayl nomida UUID bor, ya'ni u o'zgarmaydi — shuning uchun bir yil
+   * `immutable` keshlanadi.
+   *
+   * MARSHRUT TARTIBI: `@Get(':id')` dan OLDIN (S20 dagi xato).
+   */
+  @Get('public/:id/:file')
+  @Public()
+  @ApiOperation({ summary: 'Ommaviy rasm varianti (AVIF/WebP)' })
+  async servePublic(
+    @Param('id') id: string,
+    @Param('file') file: string,
+    @Res() response: Response,
+  ): Promise<void> {
+    const found = await this.media.readPublic(id, file);
+
+    response.setHeader('Content-Type', found.contentType);
+    response.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    response.send(found.body);
+  }
+
   @Get('file')
   @Public()
   @ApiOperation({ summary: "Imzolangan havola bo'yicha fayl" })

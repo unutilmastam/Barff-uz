@@ -143,7 +143,7 @@ Yaratgandan keyin har biri uchun `Run NPM Install` tugmasini bosing.
 | `COOKIE_DOMAIN`        | `.barff.uz`                                |
 | `COOKIE_SECURE`        | `true`                                     |
 | `MEDIA_ROOT`           | `/home/FOYDALANUVCHI/barff/media`          |
-| `MEDIA_PUBLIC_URL`     | `https://api.barff.uz/api/v1/media/file`   |
+| `MEDIA_PUBLIC_URL`     | `https://api.barff.uz/api/v1/media`        |
 | `MEDIA_SIGNING_SECRET` | tasodifiy, ≥32 belgi                       |
 | `SWAGGER_ENABLED`      | `false`                                    |
 
@@ -173,6 +173,13 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 refresh token'lar va kirish urinishlari PostgreSQL da saqlanadi
 (`docs/OPEN-QUESTIONS.md` Q18). O'zgaruvchini bo'sh qoldirish ham
 xavfsiz — bo'sh qiymat "berilmagan" deb qaraladi.
+
+**`MEDIA_PUBLIC_URL` — `/media`, `/media/file` EMAS.** Ommaviy rasmlar
+`<MEDIA_PUBLIC_URL>/public/<id>/<variant>` manzilida API'ning o'zidan
+beriladi; alohida veb-server sozlash kerak emas. Avval bu yerda
+`…/media/file` yozilgan edi va u bilan HAMMA mahsulot rasmi `404`
+berardi (S40 buni brauzerda tekshirib topdi). Maxfiy fayllar esa
+`/media/file?…` imzolangan havola bilan beriladi.
 
 **S3 o'zgaruvchilari ham KIRITILMAYDI.** `MEDIA_ROOT` uchligi berilgani
 uchun fayl tizimi adapteri tanlanadi va rasmlar diskda saqlanadi.

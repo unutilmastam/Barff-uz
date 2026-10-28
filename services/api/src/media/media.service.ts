@@ -309,6 +309,42 @@ export class MediaService {
    * Kengaytma ham aniqlangan turdan olinadi.
    */
   /**
+   * OMMAVIY rasm varianti — veb-server sozlamasisiz.
+   *
+   * Fayl tizimi adapterida ommaviy fayllar `MEDIA_ROOT/public/...` da
+   * turadi. Ularni alohida veb-server (Apache/nginx) bermasa, URL
+   * 404 qaytaradi — cPanel'da esa bunday sozlama yo'q (Q18). Shuning
+   * uchun API ularni o'zi beradi: `MEDIA_PUBLIC_URL` = `<API>/media` va
+   * `publicUrl(key)` = `<API>/media/public/<id>/<variant>`.
+   *
+   * FAQAT variantlar (`640w.avif`, `1024w.webp`), `original.*` EMAS:
+   * original yuklangan faylning o'zi — unda EXIF (geolokatsiya,
+   * qurilma) bo'lishi mumkin; variantlarda metadata olib tashlangan
+   * (`image-processor.ts`). Maxfiy fayllar bu yo'ldan UMUMAN berilmaydi:
+   * yo'l `public/` bilan qat'iy cheklangan.
+   *
+   * Parametrlar qat'iy shaklga tekshiriladi, shuning uchun `..` yoki
+   * boshqa katalogga chiqish bu yerga yetib kelmaydi.
+   */
+  async readPublic(id: string, file: string): Promise<{ body: Buffer; contentType: string }> {
+    const notFound = () => new NotFoundException({ message: 'Topilmadi', code: 'NOT_FOUND' });
+
+    const match = /^(\d{2,5}w)\.(avif|webp)$/.exec(file);
+    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (!isId || match === null || !(this.storage instanceof FilesystemStorage)) {
+      throw notFound();
+    }
+
+    try {
+      const body = await this.storage.get(`public/${id}/${file}`);
+      return { body, contentType: match[2] === 'avif' ? 'image/avif' : 'image/webp' };
+    } catch {
+      throw notFound();
+    }
+  }
+
+  /**
    * Imzolangan havola bo'yicha faylni o'qiydi.
    *
    * Imzo FAYL TIZIMI adapteri tomonidan tekshiriladi — faqat o'sha

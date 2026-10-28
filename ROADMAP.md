@@ -118,7 +118,7 @@ Claude Code updates this list. `[x]` = done and merged.
 - [x] S39 Phase 4 QA — **PHASE 4 GATE**
 
 **Phase 5**
-- [ ] S40 AWS infrastructure + production deploy
+- [x] S40 AWS infrastructure + production deploy (cPanel/VPS uchun moslashtirildi — `docs/BACKUP-RESTORE.md`)
 - [ ] S41 Security hardening + observability
 - [ ] S42 Optional extras (GPS, routes, CRM/ERP)
 

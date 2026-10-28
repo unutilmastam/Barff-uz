@@ -167,6 +167,12 @@ async function packApi() {
   await cp(join(from, 'dist'), join(target, 'dist'), { recursive: true });
   await cp(join(root, 'prisma'), join(target, 'prisma'), { recursive: true });
 
+  // Zaxira va tiklash tekshiruvi skriptlari (`docs/BACKUP-RESTORE.md`).
+  await mkdir(join(target, 'scripts'), { recursive: true });
+  for (const name of ['db-backup.sh', 'db-restore-check.sh']) {
+    await cp(join(root, 'scripts', name), join(target, 'scripts', name));
+  }
+
   // Katalog (nomlar + mahsulot suratlari) `npm run catalog:import` uchun.
   await cp(join(root, 'assets', 'product-photos'), join(target, 'catalog'), { recursive: true });
 
@@ -229,6 +235,7 @@ async function main() {
   await packNextApp('web');
   await packNextApp('admin');
   await packNextApp('dealer');
+  await packNextApp('delivery');
 
   await writeFile(
     join(out, 'README.txt'),
