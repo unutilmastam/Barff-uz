@@ -65,6 +65,7 @@ describe('admin navigatsiyasi', () => {
       '/content/pages',
       '/media',
       '/products',
+      '/products/categories',
       '/leads',
       '/orders',
       '/pricing',

@@ -17,6 +17,7 @@ export const AUDIT_ACTIONS = {
   PRODUCT_IMAGE_REMOVED: 'product.image.removed',
   CATEGORY_CREATED: 'product.category.created',
   CATEGORY_UPDATED: 'product.category.updated',
+  CATEGORY_DELETED: 'product.category.deleted',
   CONTENT_CREATED: 'content.created',
   CONTENT_UPDATED: 'content.updated',
   CONTENT_DELETED: 'content.deleted',

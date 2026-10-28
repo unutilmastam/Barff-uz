@@ -7,7 +7,8 @@ import { paginate, toPageRequest } from '../common/dto/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { STORAGE_ADAPTER, type StorageAdapter } from '../media/storage/storage.adapter';
 import { CacheService } from '../public/cache/cache.service';
-import { toPublicProduct } from '../public/public.mappers';
+import { runUnique } from './run-unique';
+import { toPublicImage, toPublicProduct } from '../public/public.mappers';
 
 /**
  * Ommaviy API uchun shart.
@@ -52,6 +53,39 @@ const PUBLIC_INCLUDE = {
   documents: {
     orderBy: { displayOrder: 'asc' },
     include: { mediaAsset: { select: { id: true, key: true, mimeType: true, byteSize: true } } },
+  },
+} satisfies Prisma.ProductInclude;
+
+/**
+ * Admin muharriri uchun bog'liqliklar.
+ *
+ * Ommaviy `PUBLIC_INCLUDE` dan farqi: faol bo'lmagan variantlar ham
+ * keladi (muharrir ularni ko'rib, qayta yoqa olishi kerak) va narxlar
+ * tarixi (so'nggi 10 ta) beriladi.
+ */
+const ADMIN_INCLUDE = {
+  category: { select: { id: true, slug: true, name: true } },
+  variants: {
+    where: { deletedAt: null },
+    orderBy: { displayOrder: 'asc' },
+    include: { prices: { orderBy: { validFrom: 'desc' }, take: 10 } },
+  },
+  images: {
+    orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+    include: {
+      mediaAsset: {
+        select: {
+          id: true,
+          key: true,
+          originalName: true,
+          width: true,
+          height: true,
+          blurDataUrl: true,
+          altText: true,
+          variants: true,
+        },
+      },
+    },
   },
 } satisfies Prisma.ProductInclude;
 
@@ -181,7 +215,22 @@ export class ProductsService {
     const [items, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        include: { category: { select: { id: true, slug: true, name: true } }, variants: true },
+        include: {
+          category: { select: { id: true, slug: true, name: true } },
+          variants: {
+            where: { deletedAt: null },
+            select: {
+              id: true,
+              isActive: true,
+              prices: { orderBy: { validFrom: 'desc' }, take: 1 },
+            },
+          },
+          images: {
+            orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+            take: 1,
+            include: { mediaAsset: ADMIN_INCLUDE.images.include.mediaAsset },
+          },
+        },
         orderBy: [{ displayOrder: 'asc' }, { createdAt: request.sortOrder }],
         skip: request.skip,
         take: request.take,
@@ -189,7 +238,61 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return paginate(items, total, request);
+    return paginate(
+      items.map((item) => {
+        const amounts = item.variants
+          .map((variant) => variant.prices[0]?.amount)
+          .filter((amount): amount is number => amount !== undefined);
+
+        return {
+          id: item.id,
+          slug: item.slug,
+          sku: item.sku,
+          name: item.name,
+          isActive: item.isActive,
+          category: item.category,
+          variantCount: item.variants.length,
+          priceFrom: amounts.length > 0 ? Math.min(...amounts) : null,
+          priceTo: amounts.length > 0 ? Math.max(...amounts) : null,
+          thumbnail: toPublicImage(item.images[0]?.mediaAsset, this.url),
+        };
+      }),
+      total,
+      request,
+    );
+  }
+
+  /**
+   * Muharrir uchun to'liq mahsulot: HAMMA variantlar, narxlar tarixi va
+   * rasmlar (media `id` bilan — o'chirish/asosiy qilish uchun kerak).
+   */
+  async findDetailAdmin(id: string) {
+    const product = await this.prisma.product.findFirst({
+      where: { id, deletedAt: null },
+      include: ADMIN_INCLUDE,
+    });
+
+    if (product === null) {
+      throw new NotFoundException({ message: 'Mahsulot topilmadi', code: 'PRODUCT_NOT_FOUND' });
+    }
+
+    const { variants, images, ...rest } = product;
+
+    return {
+      ...rest,
+      variants: variants.map((variant) => ({
+        ...variant,
+        currentPrice: variant.prices[0] ?? null,
+      })),
+      images: images.map((image) => ({
+        id: image.id,
+        isPrimary: image.isPrimary,
+        displayOrder: image.displayOrder,
+        mediaAssetId: image.mediaAssetId,
+        originalName: image.mediaAsset.originalName,
+        image: toPublicImage(image.mediaAsset, this.url),
+      })),
+    };
   }
 
   async findByIdAdmin(id: string) {
@@ -558,28 +661,8 @@ export class ProductsService {
     return variant;
   }
 
-  /**
-   * Unikallik xatosini tushunarli javobga aylantiradi.
-   *
-   * Prisma `P2002` ni qaytaradi; uni ushlamasak, mijoz `500` olardi va
-   * qaysi maydon takrorlanganini bilmasdi.
-   */
-  private async runUnique<T>(operation: () => Promise<T>): Promise<T> {
-    try {
-      return await operation();
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        const target = error.meta?.['target'];
-        const fields = Array.isArray(target) ? target.join(', ') : String(target ?? 'maydon');
-
-        throw new ConflictException({
-          message: `Bu qiymat allaqachon band: ${fields}`,
-          code: 'DUPLICATE_VALUE',
-          details: { [fields]: ['Bu qiymat allaqachon ishlatilgan'] },
-        });
-      }
-      throw error;
-    }
+  private runUnique<T>(operation: () => Promise<T>): Promise<T> {
+    return runUnique(operation);
   }
 }
 

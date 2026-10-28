@@ -3,7 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Dialog, MediaFrame } from '@barff/ui';
 import { useState } from 'react';
-import { adminList, toRows } from '@/lib/admin-api';
+import { type Paginated } from '@barff/types';
+import { toRows } from '@/lib/admin-api';
 import { apiFetch } from '@/lib/api-client';
 
 /**
@@ -21,6 +22,7 @@ export interface MediaAsset {
   originalName: string;
   mimeType: string;
   kind: string;
+  visibility?: 'PUBLIC' | 'PRIVATE';
   width: number | null;
   height: number | null;
   variants?: { label: string; key: string; width: number; format: string }[] | null;
@@ -42,7 +44,9 @@ export function MediaPicker({
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['media'],
-    queryFn: () => adminList<MediaAsset>('/media', { limit: 50 }),
+    // Faqat OMMAVIY fayllar: maxfiy fayl saytda ochilmaydi (404), ya'ni
+    // uni tanlash sahifada buzuq rasm bo'lib chiqardi.
+    queryFn: () => apiFetch<Paginated<MediaAsset>>('/media?limit=50&visibility=PUBLIC'),
     // Oyna ochilmaguncha ro'yxat kerak emas.
     enabled: open,
   });
@@ -50,6 +54,8 @@ export function MediaPicker({
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const form = new FormData();
+      // Tanlagich sayt kontenti uchun — yuklangan fayl OMMAVIY bo'ladi.
+      form.append('visibility', 'PUBLIC');
       form.append('file', file);
 
       // `FormData` uchun `Content-Type` QO'YILMAYDI: brauzer uni

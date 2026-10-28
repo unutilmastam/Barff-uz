@@ -66,7 +66,7 @@ const GROUPS: AdminNavGroup[] = [
         href: '/products/categories',
         label: 'Kategoriyalar',
         permission: 'products.view',
-        ready: false,
+        ready: true,
       },
     ],
   },

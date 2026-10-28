@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, GlassCard } from '@barff/ui';
+import { Button, Checkbox, GlassCard } from '@barff/ui';
 import { useState } from 'react';
 import { DataTable } from '@/components/DataTable';
 import { type MediaAsset } from '@/components/fields/MediaPicker';
@@ -19,6 +19,9 @@ export default function MediaPage() {
   const client = useQueryClient();
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  // Standart OMMAVIY: bu kutubxona asosan sayt rasmlari uchun. Maxfiy fayl
+  // (masalan shartnoma) saytda ochilmaydi va faqat imzolangan havola bilan beriladi.
+  const [isPublic, setIsPublic] = useState(true);
 
   const list = useQuery({
     queryKey: ['media', page],
@@ -28,6 +31,7 @@ export default function MediaPage() {
   const upload = useMutation({
     mutationFn: (file: File) => {
       const form = new FormData();
+      form.append('visibility', isPublic ? 'PUBLIC' : 'PRIVATE');
       form.append('file', file);
 
       return apiFetch<MediaAsset>('/media', { method: 'POST', body: form });
@@ -61,6 +65,13 @@ export default function MediaPage() {
       </div>
 
       <GlassCard className="flex flex-col gap-4 p-4">
+        <Checkbox
+          label="Ommaviy (saytda ko‘rinadi)"
+          hint="Rasmlar uchun belgilang. Maxfiy fayl saytda ochilmaydi."
+          checked={isPublic}
+          onCheckedChange={(checked) => setIsPublic(checked === true)}
+        />
+
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium">Yangi fayl yuklash</span>
           <input
@@ -97,6 +108,11 @@ export default function MediaPage() {
           columns={[
             { key: 'name', header: 'Fayl', cell: (row) => row.originalName },
             { key: 'mimeType', header: 'Turi', cell: (row) => row.mimeType },
+            {
+              key: 'visibility',
+              header: 'Ko‘rinish',
+              cell: (row) => (row.visibility === 'PRIVATE' ? 'Maxfiy' : 'Ommaviy'),
+            },
             {
               key: 'size',
               header: "O'lcham",

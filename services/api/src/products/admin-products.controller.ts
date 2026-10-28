@@ -59,7 +59,7 @@ export class AdminProductsController {
   @ApiOperation({ summary: "Mahsulot ma'lumotlari" })
   @ApiResponse({ status: 404, type: ApiErrorDto, description: 'Topilmadi' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.products.findByIdAdmin(id);
+    return this.products.findDetailAdmin(id);
   }
 
   @Post()

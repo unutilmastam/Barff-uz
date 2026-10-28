@@ -448,4 +448,176 @@ describe('Products (e2e)', () => {
       ).expect(403);
     });
   });
+
+  describe('admin muharriri uchun detal va royxat', () => {
+    it('detal HAMMA variantni (nofaollarni ham), joriy narx va rasmni qaytaradi', async () => {
+      const product = await createProduct(adminToken, validBody('detal')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      const variant = await request(app.getHttpServer())
+        .post(`${base}/admin/products/${product.body.id}/variants`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ sku: `E2E-DET-${Date.now()}`, volumeMl: 330, isActive: false })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`${base}/admin/products/variants/${variant.body.id}/prices`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ amount: 500_000 })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`${base}/admin/products/variants/${variant.body.id}/prices`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ amount: 600_000 })
+        .expect(201);
+
+      const detail = await request(app.getHttpServer())
+        .get(`${base}/admin/products/${product.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(detail.body.variants).toHaveLength(1);
+      expect(detail.body.variants[0].isActive).toBe(false);
+      expect(detail.body.variants[0].currentPrice.amount).toBe(600_000);
+      expect(detail.body.variants[0].prices.map((p: { amount: number }) => p.amount)).toEqual([
+        600_000, 500_000,
+      ]);
+      expect(detail.body.images).toEqual([]);
+
+      // Ommaviy javobda esa nofaol variant YO'Q.
+      await request(app.getHttpServer())
+        .patch(`${base}/admin/products/${product.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ isActive: true })
+        .expect(200);
+      const pub = await request(app.getHttpServer())
+        .get(`${base}/products/${validBody('detal').slug}`)
+        .expect(200);
+      expect(pub.body.variants).toHaveLength(0);
+    });
+
+    it('royxat narx oraligi va kategoriyani beradi', async () => {
+      const product = await createProduct(adminToken, validBody('oraliq')).expect(201);
+      createdProductIds.push(product.body.id);
+
+      for (const [i, amount] of [300_000, 900_000].entries()) {
+        const variant = await request(app.getHttpServer())
+          .post(`${base}/admin/products/${product.body.id}/variants`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ sku: `E2E-ORA-${Date.now()}-${i}`, volumeMl: 250 + i })
+          .expect(201);
+        await request(app.getHttpServer())
+          .post(`${base}/admin/products/variants/${variant.body.id}/prices`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ amount })
+          .expect(201);
+      }
+
+      const list = await request(app.getHttpServer())
+        .get(`${base}/admin/products?limit=100`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+      const row = list.body.items.find((item: { id: string }) => item.id === product.body.id);
+
+      expect(row.variantCount).toBe(2);
+      expect(row.priceFrom).toBe(300_000);
+      expect(row.priceTo).toBe(900_000);
+      expect(row.category.id).toBe(categoryId);
+      expect(row.thumbnail).toBeNull();
+    });
+  });
+
+  describe('admin kategoriyalar', () => {
+    const createdCategoryIds: string[] = [];
+    const cat = (token: string) => ({
+      post: (body: Record<string, unknown>) =>
+        request(app.getHttpServer())
+          .post(`${base}/admin/categories`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(body),
+    });
+
+    afterAll(async () => {
+      await prisma.auditLog.deleteMany({ where: { entityId: { in: createdCategoryIds } } });
+      await prisma.productCategory.deleteMany({ where: { id: { in: createdCategoryIds } } });
+    });
+
+    it('ruxsatsiz rol yarata olmaydi (403), tokensiz 401', async () => {
+      await cat(driverToken)
+        .post({ slug: `${slugPrefix}-x`, name: L('X') })
+        .expect(403);
+      await request(app.getHttpServer()).get(`${base}/admin/categories`).expect(401);
+    });
+
+    it('yaratadi, slug takrorini 409 bilan rad etadi, audit yoziladi', async () => {
+      const res = await cat(adminToken)
+        .post({ slug: `${slugPrefix}-a`, name: L('A kategoriya') })
+        .expect(201);
+      createdCategoryIds.push(res.body.id);
+
+      const dup = await cat(adminToken)
+        .post({ slug: `${slugPrefix}-a`, name: L('Boshqa') })
+        .expect(409);
+      expect(dup.body.code).toBe('DUPLICATE_VALUE');
+
+      const audit = await prisma.auditLog.findFirst({
+        where: { entityId: res.body.id, action: 'product.category.created' },
+      });
+      expect(audit).not.toBeNull();
+    });
+
+    it('tsikl hosil qiluvchi ota kategoriyani rad etadi', async () => {
+      const parent = await cat(adminToken)
+        .post({ slug: `${slugPrefix}-p`, name: L('Ota') })
+        .expect(201);
+      createdCategoryIds.push(parent.body.id);
+      const child = await cat(adminToken)
+        .post({ slug: `${slugPrefix}-c`, name: L('Bola'), parentId: parent.body.id })
+        .expect(201);
+      createdCategoryIds.push(child.body.id);
+
+      const res = await request(app.getHttpServer())
+        .patch(`${base}/admin/categories/${parent.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ parentId: child.body.id })
+        .expect(409);
+      expect(res.body.code).toBe('CATEGORY_CYCLE');
+
+      await request(app.getHttpServer())
+        .patch(`${base}/admin/categories/${parent.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ parentId: parent.body.id })
+        .expect(409);
+    });
+
+    it("mahsuloti yoki ichki kategoriyasi bor kategoriyani o'chirib bo'lmaydi", async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`${base}/admin/categories/${categoryId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      // Ushbu fayldagi kategoriyada mahsulotlar bor.
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe('CATEGORY_NOT_EMPTY');
+    });
+
+    it("bo'sh kategoriyani o'chiradi va ro'yxatdan yo'qoladi", async () => {
+      const created = await cat(adminToken)
+        .post({ slug: `${slugPrefix}-del`, name: L("O'chadi") })
+        .expect(201);
+      createdCategoryIds.push(created.body.id);
+
+      await request(app.getHttpServer())
+        .delete(`${base}/admin/categories/${created.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(204);
+
+      const list = await request(app.getHttpServer())
+        .get(`${base}/admin/categories?limit=100`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+      expect(list.body.items.some((c: { id: string }) => c.id === created.body.id)).toBe(false);
+      expect(
+        list.body.items.find((c: { id: string }) => c.id === categoryId).productCount,
+      ).toBeGreaterThan(0);
+    });
+  });
 });
