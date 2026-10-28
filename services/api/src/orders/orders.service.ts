@@ -93,6 +93,14 @@ export class OrdersService {
     private readonly billing: PaymentsService,
   ) {}
 
+  /** Dilerning shu kalit bilan yaratilgan buyurtmasi (takror aniqlash uchun). */
+  private findByKey(dealerId: string, idempotencyKey: string) {
+    return this.prisma.order.findFirst({
+      where: { dealerId, idempotencyKey },
+      select: ORDER_SELECT,
+    });
+  }
+
   // ===========================================================================
   // YUBORISH
   // ===========================================================================
@@ -112,10 +120,7 @@ export class OrdersService {
       — mijoz uchun bu "yuborildi" bilan bir xil ko'rinadi.
     */
     if (input.idempotencyKey !== undefined) {
-      const existing = await this.prisma.order.findFirst({
-        where: { dealerId, idempotencyKey: input.idempotencyKey },
-        select: ORDER_SELECT,
-      });
+      const existing = await this.findByKey(dealerId, input.idempotencyKey);
 
       if (existing !== null) {
         this.logger.log(`Takroriy yuborish e'tiborsiz qoldirildi: ${existing.number}`);
@@ -127,6 +132,26 @@ export class OrdersService {
     const cart = await this.cart.view(dealerId);
 
     if (cart.lines.length === 0) {
+      /*
+        BO'SH SAVAT — poyganing ikkinchi yuzi.
+
+        Ikki so'rov bir vaqtda kelsa, g'olib buyurtmani yaratib savatni
+        BO'SHATADI; yutqazgan so'rov esa takror tekshiruvdan keyin, lekin
+        savatni o'qishdan OLDIN yoki keyin kelib qolishi mumkin va bo'sh
+        savat ko'radi. Kalit berilgan bo'lsa, g'olib buyurtma shu paytga
+        kelib ko'rinadi — uni qaytaramiz. Aks holda diler 201 o'rniga 400
+        olardi va buyurtma yaratilganini bilmay QAYTA yuborardi.
+      */
+      if (input.idempotencyKey !== undefined) {
+        const winner = await this.findByKey(dealerId, input.idempotencyKey);
+
+        if (winner !== null) {
+          this.logger.log(`Poyga (bo'sh savat): mavjud buyurtma qaytarildi ${winner.number}`);
+
+          return { ...winner, duplicate: true };
+        }
+      }
+
       throw new BadRequestException({ message: "Savat bo'sh", code: 'CART_EMPTY' });
     }
 
@@ -280,10 +305,7 @@ export class OrdersService {
 
         if (!isDuplicate || key === undefined) throw error;
 
-        const existing = await this.prisma.order.findFirst({
-          where: { dealerId, idempotencyKey: key },
-          select: ORDER_SELECT,
-        });
+        const existing = await this.findByKey(dealerId, key);
 
         /* c8 ignore next -- P2002 aynan shu indeksdan keladi */
         if (existing === null) throw error;
