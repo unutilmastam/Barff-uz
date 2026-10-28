@@ -187,3 +187,34 @@
     top: 1rem;
   }
 }
+
+/*
+ * 3D qiyalik va suzish (S-D01).
+ *
+ * `[data-tilt-lift]` — kartochkadan "ko'tarilib" turadigan element
+ * (shisha). `--tilt-lift` ni `Tilt3D` hover paytida qo'yadi; CSS
+ * o'tishi uni silliq qiladi.
+ *
+ * SUZISH faqat harakat so'ralmagan bo'lsa: `prefers-reduced-motion`
+ * da shisha joyida turadi (CLAUDE.md §17).
+ */
+[data-tilt-lift] {
+  transform: translateZ(var(--tilt-lift, 0px));
+  transition: transform var(--duration-base, 550ms) var(--ease-barff, ease-out);
+}
+
+@keyframes barff-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(0.6deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .barff-float {
+    animation: barff-float 6.5s ease-in-out infinite;
+  }
+}

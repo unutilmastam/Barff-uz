@@ -1,14 +1,15 @@
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Badge, GlassCard, MediaFrame, Section } from '@barff/ui';
+import { Badge, GlassCard, Section } from '@barff/ui';
 import { JsonLd } from '@/components/common/JsonLd';
 import { Container } from '@/components/layout/Container';
-import { ApiImage } from '@/components/media/ApiImage';
+import { ProductGallery } from '@/components/products/ProductGallery';
 import { isLocale } from '@/i18n/config';
 import { getMessages } from '@/i18n/dictionary';
 import { getAllProductSlugs, getProduct } from '@/lib/content';
 import { formatMoney, formatVolume, text } from '@/lib/localized';
+import { getCutout } from '@/lib/cutouts';
 import { buildMetadata } from '@/lib/seo';
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/structured-data';
 
@@ -90,7 +91,6 @@ export default async function ProductPage({
   if (product === null) notFound();
 
   const name = text(product.name, locale, product.sku);
-  const cover = product.images[0];
   const description = text(product.description, locale);
 
   const facts = [
@@ -126,41 +126,19 @@ export default async function ProductPage({
         </Link>
 
         <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:items-start">
-          <div>
-            <MediaFrame ratio="portrait">
-              {cover !== undefined ? (
-                <ApiImage
-                  image={cover}
-                  alt={text(cover.alt, locale, name)}
-                  sizes="(max-width: 1024px) 90vw, 560px"
-                  // Sahifaning eng katta rasmi — LCP nomzodi.
-                  priority
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[var(--color-fg-subtle)]">
-                  {messages.common.empty}
-                </div>
-              )}
-            </MediaFrame>
-
-            {product.images.length > 1 && (
-              <ul className="mt-4 grid grid-cols-4 gap-3">
-                {product.images.slice(1, 5).map((image) => (
-                  <li key={image.id}>
-                    <MediaFrame ratio="square">
-                      <ApiImage
-                        image={image}
-                        alt={text(image.alt, locale, name)}
-                        sizes="120px"
-                        className="h-full w-full object-cover"
-                      />
-                    </MediaFrame>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <ProductGallery
+            name={name}
+            cutout={getCutout(product.slug)}
+            photos={product.images.map((image) => ({
+              image,
+              alt: text(image.alt, locale, name),
+            }))}
+            labels={{
+              main: messages.products.galleryMain,
+              photo: messages.products.galleryPhoto,
+              region: messages.products.galleryRegion,
+            }}
+          />
 
           <div>
             {product.category !== null && (

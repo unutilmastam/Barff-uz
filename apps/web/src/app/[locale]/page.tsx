@@ -70,7 +70,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // kelmasa, qolganlari baribir ko'rsatiladi.
   const [sections, products, steps, certificates, news] = await Promise.all([
     getHomepageSections(locale),
-    getProducts(locale, { limit: 8 }),
+    getProducts(locale, { limit: 12 }),
     getProductionSteps(locale),
     getCertificates(locale),
     getLatestNews(locale, 3),
@@ -83,7 +83,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Kompaniya ma'lumoti — faqat bosh sahifada, bir marta. */}
       <JsonLd data={organizationJsonLd(locale, messages.meta.description)} />
 
-      <HeroSection locale={locale} messages={messages} section={section('hero')} />
+      <HeroSection
+        locale={locale}
+        messages={messages}
+        section={section('hero')}
+        products={products === null ? null : products.items}
+      />
 
       {/* Hero va raqamlar orasida ritm — bezak lenta. */}
       <MarqueeSection />

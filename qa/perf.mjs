@@ -153,7 +153,14 @@ console.log('\n=== Ogir kod kechiktirilganmi ===');
       kechiktirish KODI, kutubxonaning o'zi emas. Ikkalasi ham
       yolg'on ishora bergani o'lchab aniqlangan.
     */
-    if (/WebGLRenderer|isMesh\s*=/.test(body)) three = src;
+    /*
+      `WebGLRenderer` so'zi ham ISHLATILMAYDI: u HeroField'ning o'z
+      kodida (`new THREE.WebGLRenderer`, dinamik import'dan KEYIN)
+      turadi va boshlang'ich chunk'da bo'lishi to'g'ri. S-D01 da shu
+      sabab yolg'on `XATO` berdi, kutubxonaning o'zi (387 KB) esa
+      boshlang'ichda emas edi. Kutubxonaning ICHKI belgisi: `isMesh=`.
+    */
+    if (/isMesh\s*=/.test(body)) three = src;
     if (/gsap\.core|_gsap\b|CSSPlugin/.test(body)) gsap = src;
   }
 

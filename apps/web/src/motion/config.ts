@@ -170,3 +170,35 @@ export const HERO_TIMELINE = {
   cta: 1.2,
   float: 1.5,
 } as const;
+
+/**
+ * 3D shisha sahnasi (hero) — `BottleStage3D`.
+ *
+ * Tezlik va sezgirlik BIR JOYDA: sahna ham sichqoncha, ham barmoq, ham
+ * avtomatik aylanish bilan boshqariladi va ularning "og'irligi" bir xil
+ * bo'lishi kerak.
+ */
+export const STAGE = {
+  /** Avtomatik aylanish: har necha soniyada bir shisha. */
+  autoplaySeconds: 4.2,
+  /** Sudrash: bir shishaga o'tish uchun necha piksel. */
+  dragPixelsPerItem: 150,
+  /** Yaqinlashish tezligi (0..1, kadrga). Katta — tez to'xtaydi. */
+  follow: 0.12,
+  /** Sichqoncha ortidan sahna qiyaligi (gradus). */
+  pointerTilt: 5,
+  /** Perspektiva (px). Kichik — kuchliroq 3D, lekin buziladi. */
+  perspective: 1400,
+  /** Kirishda necha shishaga aylanib keladi (musbat butun emas — to'xtash joyi silliq bo'lsin). */
+  entranceTurns: 3.2,
+} as const;
+
+/** Mahsulot kartochkasi qiyaligi (`Tilt3D`). */
+export const TILT = {
+  /** Eng katta burilish (gradus). */
+  maxDegrees: 9,
+  /** Shisha kartochkadan qancha "ko'tariladi" (px). */
+  lift: 38,
+  /** Yaqinlashish tezligi (0..1, kadrga). */
+  follow: 0.16,
+} as const;

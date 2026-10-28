@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { type Locale, type PublicHomepageSection } from '@barff/types';
+import { type Locale, type PublicHomepageSection, type PublicProduct } from '@barff/types';
 import { Button } from '@barff/ui';
 import { Container } from '@/components/layout/Container';
 import { ApiImage } from '@/components/media/ApiImage';
 import { type Messages } from '@/i18n/dictionary';
+import { stageItems } from '@/lib/stage';
 import { text } from '@/lib/localized';
 import { routeReady } from '@/lib/routes';
+import { BottleStage3D } from '@/motion/BottleStage3D';
 import { HeroComposition } from '@/motion/HeroComposition';
 import { HeroField } from '@/motion/HeroField';
 import { Magnetic } from '@/motion/Magnetic';
@@ -27,11 +29,16 @@ export function HeroSection({
   locale,
   messages,
   section,
+  products,
 }: {
   locale: Locale;
   messages: Messages;
   section: PublicHomepageSection | undefined;
+  /** Sahna uchun mahsulotlar; `null` — API javob bermadi. */
+  products: PublicProduct[] | null;
 }) {
+  // Kamida 3 ta shisha bo'lsa 3D sahna, aks holda oddiy kompozitsiya.
+  const stage = products === null ? [] : stageItems(products, locale);
   const title = text(section?.heading, locale, messages.home.heroTitle);
   const subtitle = text(section?.subheading, locale, messages.home.heroSubtitle);
   const ctaLabel = text(section?.ctaLabel, locale, messages.home.heroCta);
@@ -62,7 +69,10 @@ export function HeroSection({
 
       <Container
         as="div"
-        className="relative grid min-h-[86vh] items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16"
+        // `minmax(0, 1fr)`: ustun ichidagi (masalan, uzun shisha nomi) kontent
+        // uni kengaytirib yubormasin — aks holda nom almashganda sarlavha
+        // qayta joylashadi (S-D01 da mobilda CLS 0,21 berdi).
+        className="relative grid min-h-[86vh] grid-cols-[minmax(0,1fr)] items-center gap-10 py-16 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-12"
       >
         <div>
           <p className="eyebrow text-[var(--color-fg-subtle)]">BARFF</p>
@@ -91,7 +101,20 @@ export function HeroSection({
           </div>
         </div>
 
-        <HeroComposition bottleAlt={messages.home.heroBottleAlt} />
+        {stage.length >= 3 ? (
+          <BottleStage3D
+            items={stage}
+            labels={{
+              region: messages.home.stageRegion,
+              prev: messages.home.stagePrev,
+              next: messages.home.stageNext,
+              open: messages.home.stageOpen,
+              counter: messages.home.stageCounter,
+            }}
+          />
+        ) : (
+          <HeroComposition bottleAlt={messages.home.heroBottleAlt} />
+        )}
       </Container>
     </section>
   );

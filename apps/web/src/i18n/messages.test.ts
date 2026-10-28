@@ -58,6 +58,8 @@ describe('tarjimalar', () => {
       // `ml` — o'lchov birligi qisqartmasi, o'zbekcha va inglizcha bir xil.
       'products.volumeUnit',
       'products.volumeUnitLiter',
+      // Hisoblagich shabloni — til bo'yicha farq qilmaydi.
+      'home.stageCounter',
     ]);
 
     const uz = await getMessages('uz');

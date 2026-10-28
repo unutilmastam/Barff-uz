@@ -31,8 +31,9 @@ when needed
 Visual: - GSAP (+ ScrollTrigger, SplitText) - Lenis - Three.js for an
 ambient WebGL layer - respect `prefers-reduced-motion`
 
-The hero product is a flat illustrated composition; WebGL adds depth
-behind it but never draws the product itself (§17).
+The hero product is BARFF's real photography (background-removed
+cutouts) staged in 3D; WebGL adds ambient depth behind it but never
+draws a product shape invented in code (§17).
 
 Backend: - NestJS + TypeScript - REST API - Swagger/OpenAPI - modular
 monolith first; do NOT start with unnecessary microservices
@@ -302,6 +303,17 @@ the reasons.
 
 When the real model arrives (Q24), that layer is where a true product
 scene goes.
+
+**Real photography in 3D is allowed (client request, 2026-10-28:
+"3D animations and rich effects").** BARFF's real product photographs,
+background removed and otherwise UNALTERED (`scripts/make-cutouts.py`,
+`apps/web/public/cutouts/`), may be placed in 3D — CSS 3D transforms,
+tilt, parallax, a rotating carousel (`motion/BottleStage3D.tsx`,
+`motion/Tilt3D.tsx`), or textured planes in WebGL. The rule above
+forbids INVENTED shapes, not the real product. Constraints stay:
+shape, label and colours are never edited; the product colour is
+decoration only (§16); everything works without motion and without
+JavaScript; images are real `<img>` with alt text.
 
 The WebGL layer runs only when motion is enabled, WebGL is present and
 the viewport is wide; `three` is dynamically imported. Everywhere else

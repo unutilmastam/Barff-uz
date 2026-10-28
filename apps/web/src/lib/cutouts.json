@@ -1,0 +1,74 @@
+{
+  "anor-sharbati-350": {
+    "src": "/cutouts/anor-sharbati-350.webp",
+    "width": 389,
+    "height": 1100,
+    "glow": "#8b2f36"
+  },
+  "apelsin-sharbati-350": {
+    "src": "/cutouts/apelsin-sharbati-350.webp",
+    "width": 379,
+    "height": 1100,
+    "glow": "#bb4424"
+  },
+  "mango-sharbati-1l": {
+    "src": "/cutouts/mango-sharbati-1l.webp",
+    "width": 317,
+    "height": 1100,
+    "glow": "#d9772a"
+  },
+  "mango-sharbati-350": {
+    "src": "/cutouts/mango-sharbati-350.webp",
+    "width": 379,
+    "height": 1100,
+    "glow": "#ce7944"
+  },
+  "multifrukt-sharbati-1l": {
+    "src": "/cutouts/multifrukt-sharbati-1l.webp",
+    "width": 326,
+    "height": 1100,
+    "glow": "#7e5d2d"
+  },
+  "multifrukt-sharbati-350": {
+    "src": "/cutouts/multifrukt-sharbati-350.webp",
+    "width": 375,
+    "height": 1100,
+    "glow": "#67753a"
+  },
+  "olcha-sharbati-1l": {
+    "src": "/cutouts/olcha-sharbati-1l.webp",
+    "width": 460,
+    "height": 1100,
+    "glow": "#791916"
+  },
+  "olcha-sharbati-350": {
+    "src": "/cutouts/olcha-sharbati-350.webp",
+    "width": 379,
+    "height": 1100,
+    "glow": "#691b1f"
+  },
+  "olma-sharbati-350": {
+    "src": "/cutouts/olma-sharbati-350.webp",
+    "width": 377,
+    "height": 1100,
+    "glow": "#47813f"
+  },
+  "qulupnay-ananas-sharbati-1l": {
+    "src": "/cutouts/qulupnay-ananas-sharbati-1l.webp",
+    "width": 333,
+    "height": 1100,
+    "glow": "#c41917"
+  },
+  "qulupnay-ananas-sharbati-350": {
+    "src": "/cutouts/qulupnay-ananas-sharbati-350.webp",
+    "width": 379,
+    "height": 1100,
+    "glow": "#c64d38"
+  },
+  "shaftoli-sharbati-350": {
+    "src": "/cutouts/shaftoli-sharbati-350.webp",
+    "width": 378,
+    "height": 1100,
+    "glow": "#c63930"
+  }
+}
