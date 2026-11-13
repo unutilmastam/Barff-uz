@@ -235,10 +235,195 @@ async function setup(argv) {
   console.log('   (cPanel → Setup Node.js App → api → RESTART)');
 }
 
+/*
+  `preflight` — hosting BARFF uchun yetarlimi (zip'ni ochgach, `npm install` DAN OLDIN).
+
+  Limitlar o'lchab aniqlangan (F04): 5 ta Node jarayoni yengil yuklamada
+  ~650 MB (api 153, web 124, admin 131, dealer 124, delivery 111), ilovalar
+  ~1,75 GB va ~58 000 fayl; `npm install` yoki `catalog:import` paytida
+  qo'shimcha ~500 MB.
+*/
+const NEEDS = {
+  nodeMajor: 20,
+  memoryMb: 2048,
+  memoryMinMb: 1280,
+  diskGb: 5,
+  inodes: 150000,
+  nproc: 200,
+};
+
+/** `facts` dan hukm chiqaradi: [{ level: 'ok'|'warn'|'fail', text }]. */
+function evaluate(facts) {
+  const out = [];
+  const add = (level, text) => out.push({ level, text });
+
+  const major = Number(String(facts.node).replace(/^v/, '').split('.')[0]);
+  if (major >= NEEDS.nodeMajor) add('ok', `Node ${facts.node}`);
+  else
+    add(
+      'fail',
+      `Node ${facts.node}: kamida ${NEEDS.nodeMajor} kerak (Setup Node.js App da 20/22 ni tanlang)`,
+    );
+
+  if (facts.arch !== 'x64' || facts.platform !== 'linux') {
+    add('warn', `${facts.platform}/${facts.arch}: sinov faqat linux/x64 da o'tgan`);
+  }
+  if (facts.glibc !== null && Number(facts.glibc) < 2.28) {
+    add('fail', `glibc ${facts.glibc}: 2.28+ kerak (eski OS — argon2/sharp o'rnatilmaydi)`);
+  } else if (facts.glibc !== null) {
+    add('ok', `glibc ${facts.glibc}`);
+  }
+
+  if (facts.memoryMb === null)
+    add('warn', 'Xotira limiti aniqlanmadi — cPanel: Metrics → Resource Usage ga qarang');
+  else if (facts.memoryMb >= NEEDS.memoryMb) add('ok', `Xotira limiti ${facts.memoryMb} MB`);
+  else if (facts.memoryMb >= NEEDS.memoryMinMb) {
+    add(
+      'warn',
+      `Xotira ${facts.memoryMb} MB: ${NEEDS.memoryMb} MB tavsiya (5 jarayon ~650 MB + npm/katalog import ~500 MB). admin/dealer/delivery ni keyinga qoldiring`,
+    );
+  } else
+    add(
+      'fail',
+      `Xotira ${facts.memoryMb} MB: kamida ${NEEDS.memoryMinMb} MB, tavsiya ${NEEDS.memoryMb} MB`,
+    );
+
+  if (facts.diskFreeGb === null) add('warn', "Bo'sh disk aniqlanmadi");
+  else if (facts.diskFreeGb >= NEEDS.diskGb)
+    add('ok', `Bo'sh disk ${facts.diskFreeGb.toFixed(1)} GB`);
+  else
+    add(
+      'fail',
+      `Bo'sh disk ${facts.diskFreeGb.toFixed(1)} GB: kamida ${NEEDS.diskGb} GB (ilovalar ~1,75 GB + npm keshi + rasmlar + zaxira)`,
+    );
+
+  if (facts.inodesFree === null)
+    add('warn', 'Fayllar soni (inode) chegarasi aniqlanmadi — cPanel: Disk Usage');
+  else if (facts.inodesFree >= NEEDS.inodes) add('ok', `Bo'sh inode ${facts.inodesFree}`);
+  else
+    add(
+      'fail',
+      `Bo'sh inode ${facts.inodesFree}: kamida ${NEEDS.inodes} (ilovalar ~58 000 fayl + npm keshi)`,
+    );
+
+  if (facts.nproc !== null && facts.nproc < NEEDS.nproc) {
+    add(
+      'warn',
+      `Jarayonlar limiti ${facts.nproc}: ${NEEDS.nproc}+ tavsiya (Node oqimlari ham sanaladi)`,
+    );
+  }
+
+  for (const [name, ok] of Object.entries(facts.tools)) {
+    add(
+      ok ? 'ok' : 'warn',
+      ok ? `${name} bor` : `${name} yo'q${name === 'pg_dump' ? ' (zaxira nusxa ishlamaydi)' : ''}`,
+    );
+  }
+  for (const [host, ok] of Object.entries(facts.network)) {
+    add(
+      ok ? 'ok' : 'fail',
+      ok
+        ? `${host} ochiq`
+        : `${host} ga ulanib bo'lmadi (npm install / prisma generate ishlamaydi)`,
+    );
+  }
+
+  return out;
+}
+
+async function collectFacts() {
+  const { execSync } = require('node:child_process');
+  const run = (cmd) => {
+    try {
+      return execSync(cmd, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        timeout: 10000,
+      }).trim();
+    } catch {
+      return null;
+    }
+  };
+
+  const readNumber = (file) => {
+    try {
+      const raw = fs.readFileSync(file, 'utf8').trim();
+      const value = Number(raw);
+      // `max` yoki ulkan son — cheklov yo'q.
+      return Number.isFinite(value) && value < 2 ** 50 ? value : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const cgroupBytes =
+    readNumber('/sys/fs/cgroup/memory.max') ??
+    readNumber('/sys/fs/cgroup/memory/memory.limit_in_bytes');
+  const memoryMb = Math.round((cgroupBytes ?? os.totalmem()) / 1048576);
+
+  const home = os.homedir();
+  const df = run(`df -Pk "${home}" | tail -1`);
+  const dfi = run(`df -Pi "${home}" | tail -1`);
+  const nprocRaw = run('ulimit -u');
+  const nproc = nprocRaw !== null && /^\d+$/.test(nprocRaw) ? Number(nprocRaw) : null;
+
+  const glibc = (() => {
+    try {
+      return process.report.getReport().header.glibcVersionRuntime ?? null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const reach = async (url) => {
+    try {
+      await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  return {
+    node: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    glibc,
+    memoryMb,
+    diskFreeGb: df ? Number(df.split(/\s+/)[3]) / 1048576 : null,
+    inodesFree: dfi ? Number(dfi.split(/\s+/)[3]) : null,
+    nproc,
+    tools: { pg_dump: run('command -v pg_dump') !== null, psql: run('command -v psql') !== null },
+    network: {
+      'registry.npmjs.org': await reach('https://registry.npmjs.org/'),
+      'binaries.prisma.sh': await reach('https://binaries.prisma.sh/'),
+    },
+  };
+}
+
+async function preflight() {
+  console.log('BARFF — hosting tekshiruvi\n');
+  const verdicts = evaluate(await collectFacts());
+  const icon = { ok: '  ✓', warn: '  !', fail: '  ✗' };
+  for (const { level, text } of verdicts) console.log(`${icon[level]} ${text}`);
+
+  const fails = verdicts.filter((v) => v.level === 'fail').length;
+  const warns = verdicts.filter((v) => v.level === 'warn').length;
+  console.log(
+    fails > 0
+      ? `\n${fails} ta JIDDIY muammo — joylashdan oldin hal qiling.`
+      : warns > 0
+        ? `\nJoylash mumkin; ${warns} ta ogohlantirishni o'qing.`
+        : '\nHamma narsa joyida.',
+  );
+  process.exit(fails > 0 ? 1 : 0);
+}
+
 function main() {
   const [command = 'setup', ...rest] = process.argv.slice(2);
 
   if (command === 'setup') return setup(rest);
+  if (command === 'preflight') return preflight();
 
   if (!fs.existsSync(ENV_FILE)) {
     console.error(`XATO: ${ENV_FILE} yo'q. Avval \`npm run setup\`.`);
@@ -265,10 +450,10 @@ function main() {
     return;
   }
 
-  console.error(`Noma'lum buyruq: ${command} (setup | check | scrub)`);
+  console.error(`Noma'lum buyruq: ${command} (setup | preflight | check | scrub)`);
   process.exit(2);
 }
 
-module.exports = { buildEnv, check, parseEnv, password };
+module.exports = { buildEnv, check, parseEnv, password, evaluate, NEEDS };
 
 if (require.main === module) void main();

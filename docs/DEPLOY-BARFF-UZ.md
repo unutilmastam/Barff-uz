@@ -2,26 +2,58 @@
 
 Bu qo'llanma **barff.uz** uchun yozilgan va hammasi sinab ko'rilgan: zip'larni
 ochish → `npm install` → `npm run setup` → baza → ishga tushirish → tekshiruv
-(toza katalogda, haqiqiy PostgreSQL bilan, 5 ta ilovaning hammasi).
+(toza katalogda, haqiqiy PostgreSQL bilan, 5 ta ilovaning hammasi) — lekin dasturchining
+serverida; hostingning o'zida birinchi marta ishga tushiriladi (shuning uchun `preflight` bor).
 Batafsil izohlar va muammolar — `docs/DEPLOY-CPANEL.md`.
 
 > **Sir hech qayerga yozilmaydi.** Parollar va JWT sirlari serverning o'zida
 > yaratiladi; chatga, e-pochtaga yoki repoga yubormang.
 
-## 0. Nima kerak
+## 0. Hosting buyurtma qilish (o'lchangan talablar)
 
-| Narsa            | Izoh                                                                                          |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| cPanel hosting   | Node.js **20+**, **PostgreSQL** (MySQL emas), SSH, 5 ta Node ilova, ≥2 GB RAM, ≥10 GB disk    |
-| Domen `barff.uz` | DNS hostingga qaratilgan (nameserver yoki A yozuvlari)                                        |
-| 5 ta zip         | `barff-api.zip`, `barff-web.zip`, `barff-admin.zip`, `barff-dealer.zip`, `barff-delivery.zip` |
+Hostmaster.uz cPanel (Setup Node.js App + PostgreSQL + Terminal bor) bizga mos.
+**Yangi hosting ochayotganda `barff.uz` ni BIRLAMCHI (main) domen qilib bering** — addon domen
+kerak bo'lmaydi va `public_html` to'g'ridan-to'g'ri barff.uz ga tegishli bo'ladi.
+
+5 ta ilovani tayyor to'plamdan ishga tushirib o'lchadim:
+
+| Narsa                                    | O'lchov                                                                                                                              | Hostingda KERAK                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Xotira (RAM)                             | 5 jarayon birga ~650 MB (api 153, web 124, admin 131, dealer 124, delivery 111); `npm install` yoki katalog importi paytida +~500 MB | **2 GB** (1,3 GB — eng kami, dealer/delivery ni keyinga qoldirasiz) |
+| Disk                                     | ilovalar ~1,75 GB + npm keshi + rasmlar + zaxira                                                                                     | **10 GB** (5 GB eng kami)                                           |
+| Fayllar soni (inode)                     | ilovalar ~58 000 + npm keshi                                                                                                         | **250 000+** (150 000 eng kami)                                     |
+| Jarayonlar / oqimlar (NPROC)             | Node oqimlari ham sanaladi                                                                                                           | **200+**; Entry Processes **20+**                                   |
+| CPU                                      | oddiy yuklama                                                                                                                        | **2 yadro (200%)**; 1 yadro ham ishlaydi, lekin `npm install` sekin |
+| Node.js                                  | `Setup Node.js App` ro'yxatida                                                                                                       | **20 yoki 22**, **5 ta ilova** yaratish ruxsati                     |
+| PostgreSQL                               | MySQL emas                                                                                                                           | **bor** (1 baza yetadi)                                             |
+| Subdomenlar, AutoSSL, SSH/Terminal, Cron | —                                                                                                                                    | **kerak**                                                           |
+| Chiqish ulanishi                         | `npm install`, `prisma generate`                                                                                                     | npmjs.org va binaries.prisma.sh ochiq                               |
+
+Buyurtma matni (provayderga): _"cPanel hosting: 2 GB RAM, 10 GB SSD, 250 000 inode, 2 CPU, Node.js 20/22
+(Setup Node.js App, 5 ta ilova), PostgreSQL, SSH, AutoSSL, 5+ subdomen. Birlamchi domen barff.uz."_
+
+**Hostingni olgach, joylashdan OLDIN** (zip'ni ochib, `npm install` qilmasdan) tekshiring:
+
+```bash
+cd ~/barff/api && node tools/setup.cjs preflight
+```
+
+U Node versiyasi, xotira, disk, inode, jarayonlar, `pg_dump` va tashqi ulanishni tekshirib,
+yetmaydigan joyini aniq aytadi.
+
+## Tayyor bo'lgach nima bor
+
+| Narsa    | Izoh                                                                                          |
+| -------- | --------------------------------------------------------------------------------------------- |
+| 5 ta zip | `barff-api.zip`, `barff-web.zip`, `barff-admin.zip`, `barff-dealer.zip`, `barff-delivery.zip` |
+| Domen    | barff.uz birlamchi, DNS hostingga qaratilgan (nameserver yoki A yozuvlari)                    |
 
 Zip'lar dasturchidan keladi yoki o'zingiz: `pnpm install && pnpm release:cpanel`
 (natija — `dist-cpanel/upload/`). `release.env` da manzillar allaqachon `barff.uz` uchun.
 
 ## 1. Domenlar va SSL
 
-`Domains` → `barff.uz` ni qo'shing (addon domain), so'ng 4 ta subdomen:
+`barff.uz` birlamchi domen bo'lsa, faqat subdomenlarni yarating (`Domains` → Create A New Domain):
 
 | Subdomen            | Vazifasi          |
 | ------------------- | ----------------- |
@@ -46,6 +78,10 @@ foydalanuvchini bazaga **All Privileges** bilan ulang. Uchala nomni (cPanel ular
 **Extract** qiling (zip tarkibi to'g'ridan-to'g'ri papka ichiga ochilishi kerak).
 
 > Papkalar `public_html` ichida **bo'lmasin**.
+>
+> **Muhim:** `public_html` ichida eski `index.html` ("tez orada" sahifasi) bo'lsa, Apache uni
+> Node ilovadan OLDIN beradi va yangi sayt ko'rinmaydi. Uni o'chiring yoki nomini o'zgartiring
+> (`index.html.eski`). Subdomenlarning papkalarida ham bo'sh `index.html` qolmasin.
 
 ## 4. Node ilovalarini yaratish
 
@@ -65,6 +101,11 @@ Next.js o'rnatiladi, api uchun Prisma klienti ham yaratiladi).
 
 Frontend ilovalarga (web/admin/dealer/delivery) hech qanday o'zgaruvchi **kiritilmaydi**:
 manzillar qurish paytida ichiga yozilgan.
+
+**Xotira cheklangan bo'lsa — navbat bilan:** avval `api` + `web` (~280 MB), ishlaganini ko'rgach `admin`,
+oxirida `dealer` va `delivery`. Ular ichki foydalanish uchun; ommaviy sayt ulardan mustaqil.
+
+**Disk/inode tejash:** o'rnatgach `npm cache clean --force` (npm keshini tozalaydi).
 
 ## 5. API ni sozlash (SSH)
 

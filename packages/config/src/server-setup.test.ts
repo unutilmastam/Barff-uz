@@ -111,3 +111,50 @@ describe('server-setup: parol va .env o‘qish', () => {
     });
   });
 });
+
+describe('server-setup: preflight hukmlari', () => {
+  const { evaluate } = setup as {
+    evaluate: (facts: Record<string, unknown>) => { level: string; text: string }[];
+  };
+
+  const good = {
+    node: 'v22.1.0',
+    platform: 'linux',
+    arch: 'x64',
+    glibc: '2.34',
+    memoryMb: 2048,
+    diskFreeGb: 9,
+    inodesFree: 300000,
+    nproc: 500,
+    tools: { pg_dump: true, psql: true },
+    network: { 'registry.npmjs.org': true, 'binaries.prisma.sh': true },
+  };
+  const levels = (facts: Record<string, unknown>) =>
+    evaluate({ ...good, ...facts }).map((v) => v.level);
+
+  it('yetarli hosting — hammasi ok', () => {
+    expect(new Set(levels({}))).toEqual(new Set(['ok']));
+  });
+
+  it.each([
+    ['eski Node', { node: 'v18.19.0' }],
+    ['eski glibc', { glibc: '2.17' }],
+    ['xotira 1 GB dan kam', { memoryMb: 1024 }],
+    ['disk 5 GB dan kam', { diskFreeGb: 3 }],
+    ['inode kam', { inodesFree: 80000 }],
+    ['npm yopiq', { network: { 'registry.npmjs.org': false, 'binaries.prisma.sh': true } }],
+  ])('%s — JIDDIY', (_name, patch) => {
+    expect(levels(patch)).toContain('fail');
+  });
+
+  it('xotira 1,3–2 GB oralig‘i — faqat ogohlantirish', () => {
+    const result = levels({ memoryMb: 1500 });
+    expect(result).toContain('warn');
+    expect(result).not.toContain('fail');
+  });
+
+  it('pg_dump yo‘qligi — ogohlantirish (zaxira ishlamaydi)', () => {
+    const result = evaluate({ ...good, tools: { pg_dump: false, psql: true } });
+    expect(result.find((v) => /pg_dump/.test(v.text))?.level).toBe('warn');
+  });
+});

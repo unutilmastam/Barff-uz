@@ -291,6 +291,7 @@ async function packApi() {
           start: 'node dist/main.js',
           postinstall: 'prisma generate --schema prisma/schema.prisma',
           'db:deploy': 'prisma migrate deploy --schema prisma/schema.prisma',
+          preflight: 'node tools/setup.cjs preflight',
           setup: 'node tools/setup.cjs setup',
           'env:check': 'node tools/setup.cjs check',
           'env:scrub': 'node tools/setup.cjs scrub',
