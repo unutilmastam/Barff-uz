@@ -100,15 +100,18 @@ async function packNextApp(app) {
     [
       '// cPanel `Setup Node.js App` uchun kirish nuqtasi.',
       "// Haqiqiy server ichkarida — bu faqat ko'rsatkich.",
-      "process.chdir(new URL('./apps/" + app + "/', import.meta.url).pathname);",
-      "await import('./apps/" + app + "/server.js');",
+      '// CommonJS: Passenger kirish faylini `require` bilan yuklaydi; ESM va',
+      "// top-level `await` ba'zi cPanel versiyalarida yiqiladi (F03).",
+      "const path = require('node:path');",
+      "process.chdir(path.join(__dirname, 'apps', '" + app + "'));",
+      "require('./apps/" + app + "/server.js');",
       '',
     ].join('\n'),
   );
 
   /*
-   * `type: module` bo'lmasa yuqoridagi `import` ishlamaydi. Bog'liqliklar
-   * ANIQ versiya bilan: qurilgan kod aynan shu `next`/`react` bilan sinalgan.
+   * `type` YO'Q (CommonJS): yuqoridagi kirish fayli `require` ishlatadi.
+   * Bog'liqliklar ANIQ versiya bilan: qurilgan kod aynan shu `next`/`react` bilan sinalgan.
    */
   const versionOf = async (name) =>
     (await readJson(join(from, 'node_modules', name, 'package.json'))).version;
@@ -119,7 +122,6 @@ async function packNextApp(app) {
       {
         name: `barff-${app}`,
         private: true,
-        type: 'module',
         scripts: { start: 'node server.js' },
         dependencies: {
           next: await versionOf('next'),
